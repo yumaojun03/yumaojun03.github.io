@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="summary," />
+  <meta name="keywords" content="swagger," />
 
 
 
@@ -84,19 +84,19 @@
 
 
 
-<meta name="description" content="孔子曰:”吾日三省吾身”, 平时很少会静下心来反省和总结一段时间的功与过, 2016马上就要过去了，在这一年将要结束之时, 还是想回过一下这一年来的得与失, 顺便安排下来年的计划。
-记录下这一年来自己的变化, 同时也为来年再战作准备, 而且我这人记性不好, 留个底,照亮自己需要走的路。">
+<meta name="description" content="按照现在的趋势，前后端分离几乎已经是业界对开发和部署方式所达成的一种共识, 后台只负责数据的提供和计算，而完全不处理展现。而前端则负责拿到数据，组织数据并展现的工作。这样结构清晰，关注点分离，前后端会变得相对独立并松耦合。而前段和后端对待的契约就是API设计文档, 有了API的设计文档过后, 后端依据设计文件开发后端程序, 前段根据API设计文档模拟服务器,开发前段页面。而Swagger就是其中一">
 <meta property="og:type" content="article">
-<meta property="og:title" content="2016总结与2017计划">
-<meta property="og:url" content="https://blog.yumaojun.net/2016/12/31/2016-summary/index.html">
+<meta property="og:title" content="如何使用swagger设计出漂亮的RESTful API">
+<meta property="og:url" content="https://blog.yumaojun.net/2017/01/05/api-design-swagger/index.html">
 <meta property="og:site_name" content="紫川秀的博客">
-<meta property="og:description" content="孔子曰:”吾日三省吾身”, 平时很少会静下心来反省和总结一段时间的功与过, 2016马上就要过去了，在这一年将要结束之时, 还是想回过一下这一年来的得与失, 顺便安排下来年的计划。
-记录下这一年来自己的变化, 同时也为来年再战作准备, 而且我这人记性不好, 留个底,照亮自己需要走的路。">
-<meta property="og:updated_time" content="2017-01-02T15:32:52.000Z">
+<meta property="og:description" content="按照现在的趋势，前后端分离几乎已经是业界对开发和部署方式所达成的一种共识, 后台只负责数据的提供和计算，而完全不处理展现。而前端则负责拿到数据，组织数据并展现的工作。这样结构清晰，关注点分离，前后端会变得相对独立并松耦合。而前段和后端对待的契约就是API设计文档, 有了API的设计文档过后, 后端依据设计文件开发后端程序, 前段根据API设计文档模拟服务器,开发前段页面。而Swagger就是其中一">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/swagger_gen_server_code.png">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/swagger_gen_client_code.png">
+<meta property="og:updated_time" content="2017-01-06T02:43:20.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="2016总结与2017计划">
-<meta name="twitter:description" content="孔子曰:”吾日三省吾身”, 平时很少会静下心来反省和总结一段时间的功与过, 2016马上就要过去了，在这一年将要结束之时, 还是想回过一下这一年来的得与失, 顺便安排下来年的计划。
-记录下这一年来自己的变化, 同时也为来年再战作准备, 而且我这人记性不好, 留个底,照亮自己需要走的路。">
+<meta name="twitter:title" content="如何使用swagger设计出漂亮的RESTful API">
+<meta name="twitter:description" content="按照现在的趋势，前后端分离几乎已经是业界对开发和部署方式所达成的一种共识, 后台只负责数据的提供和计算，而完全不处理展现。而前端则负责拿到数据，组织数据并展现的工作。这样结构清晰，关注点分离，前后端会变得相对独立并松耦合。而前段和后端对待的契约就是API设计文档, 有了API的设计文档过后, 后端依据设计文件开发后端程序, 前段根据API设计文档模拟服务器,开发前段页面。而Swagger就是其中一">
+<meta name="twitter:image" content="http://oiw1gzfww.bkt.clouddn.com/swagger_gen_server_code.png">
 
 
 
@@ -124,13 +124,13 @@
 
 
 
-  <link rel="canonical" href="https://blog.yumaojun.net/2016/12/31/2016-summary/"/>
+  <link rel="canonical" href="https://blog.yumaojun.net/2017/01/05/api-design-swagger/"/>
 
 
 
 
 
-  <title> 2016总结与2017计划 | 紫川秀的博客 </title>
+  <title> 如何使用swagger设计出漂亮的RESTful API | 紫川秀的博客 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -296,7 +296,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-  <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2016/12/31/2016-summary/">
+  <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/01/05/api-design-swagger/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
     <meta itemprop="name" content="紫川秀">
@@ -320,7 +320,7 @@
             
             
               
-                2016总结与2017计划
+                如何使用swagger设计出漂亮的RESTful API
               
             
           </h1>
@@ -335,8 +335,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-12-31T20:03:29+08:00">
-                2016-12-31
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-01-05T13:18:16+08:00">
+                2017-01-05
               </time>
             
 
@@ -358,8 +358,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/杂谈/" itemprop="url" rel="index">
-                    <span itemprop="name">杂谈</span>
+                  <a href="/categories/程序设计/" itemprop="url" rel="index">
+                    <span itemprop="name">程序设计</span>
                   </a>
                 </span>
 
@@ -369,8 +369,8 @@
                 
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/杂谈/年终总结/" itemprop="url" rel="index">
-                    <span itemprop="name">年终总结</span>
+                  <a href="/categories/程序设计/RESTful-API/" itemprop="url" rel="index">
+                    <span itemprop="name">RESTful API</span>
                   </a>
                 </span>
 
@@ -387,8 +387,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2016/12/31/2016-summary/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/12/31/2016-summary/" itemprop="commentCount"></span>
+                <a href="/2017/01/05/api-design-swagger/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/01/05/api-design-swagger/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -398,7 +398,7 @@
 
           
           
-             <span id="/2016/12/31/2016-summary/" class="leancloud_visitors" data-flag-title="2016总结与2017计划">
+             <span id="/2017/01/05/api-design-swagger/" class="leancloud_visitors" data-flag-title="如何使用swagger设计出漂亮的RESTful API">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -425,69 +425,220 @@
       
 
       
-        <p>孔子曰:”吾日三省吾身”, 平时很少会静下心来反省和总结一段时间的功与过, 2016马上就要过去了，在这一年将要结束之时, 还是想回过一下这一年来的得与失, 顺便安排下来年的计划。</p>
-<p>记录下这一年来自己的变化, 同时也为来年再战作准备, 而且我这人记性不好, 留个底,照亮自己需要走的路。</p>
+        <p>按照现在的趋势，前后端分离几乎已经是业界对开发和部署方式所达成的一种共识, 后台只负责数据的提供和计算，而完全不处理展现。而前端则负责拿到数据，组织数据并展现的工作。这样结构清晰，关注点分离，前后端会变得相对独立并松耦合。而前段和后端对待的契约就是API设计文档, 有了API的设计文档过后, 后端依据设计文件开发后端程序, 前段根据API设计文档模拟服务器,开发前段页面。而<code>Swagger</code>就是其中一种比较优秀的 <code>RESTful API</code>设计工具。</p>
 <a id="more"></a>
-<h2 id="转瞬即逝的2016"><a href="#转瞬即逝的2016" class="headerlink" title="转瞬即逝的2016"></a>转瞬即逝的2016</h2><p>2016是繁忙的一年，工作上处处充满挑战，有些挑战是自己喜欢的，有些挑战也是自己比较抵触的，我喜欢开发，从运维开发转而参与大型系统开发，这的确是一个不小的挑战，我是一个对技术有点激情的人，因此这个挑战对我而言还是比较喜欢的。后来同时做起了产品设计, 每天扣脑袋, 看别人的产品，画产品设计图， 这些在当时的我是很抵触的, 当时我还处于单纯的想积累技术的阶段。现在看来这段经历也是我宝贵的财富, 毕竟产品决定东西的价值，用再牛叉的技术,做一个没有价值的东西, 这是一件愚蠢的行为，我这里说的价值是长远价值，而不是当下看起来有价值, 这个说起来很悬，以后有机会深入讨论这个。</p>
-<p>2016这一年也在和JumpServer一同成长的一年，感触也蛮多的，首先是技术的成长，一个开源产品的技术的迭代，我们致力于设计NB的产品和写出漂亮的代码。其次为有可能的融资谈判而兴奋过，然而最后还是平静下来, 慢慢做一个自己认可的能力范围之内的产品。</p>
-<p>工作上的事儿, 总是有那么点紧绷, 其实生活上也有很多值得高兴的事儿，我们有了自己的房子，并且搬进去了，告别了租房的日子，这一切多谢我的老婆打理，我基本是啥心都没操过。其次，我女儿和我关系也很不错，虽然她生气的时候只找她妈妈，但是我在她心中的地位也仅次于她妈妈，我也心有愧疚，作为一个父亲我陪伴她的时候是有点少了。还有我的好搭档，在我最需要钱的时候, 一身不吭的直接转我支付宝上,人生中能交到一个这样的朋友，是我的莫大的荣幸。</p>
-<p>还有一个事儿，我终于用上Mac了，虽然是一个二手的MBP，但是这对满足一个屌丝的虚荣心完全受用了, 说岔了, 我再也不用在Windows上装Ubuntu开发了。</p>
-<h2 id="瞬息万变的2017"><a href="#瞬息万变的2017" class="headerlink" title="瞬息万变的2017"></a>瞬息万变的2017</h2><p>变化和革新是很快的, 比如OpenStack没有那么热了, 容器技术也基本成了开发的必备技能, 无论你作为一个前端开发还是后端开发JavaScript都快成为一门必备语言了。前后端的完全分离也愈演愈烈, 各种前段框架的变化。<br>伴随而来的是微服务+容器技术的紧密结合。在最后DDD也随着微服务的出现，对开发人员提出了更高的需求, 以后那种只会写代码的人将愈来愈少了。</p>
-<p>我Hold不住这些，因此在技术方面我仅能列出我需要提升的书单:</p>
-<h3 id="Python提升书单-今年主力"><a href="#Python提升书单-今年主力" class="headerlink" title="Python提升书单(今年主力)"></a>Python提升书单(今年主力)</h3><ol>
-<li>基础回过<ul>
-<li><a href="http://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000" target="_blank" rel="external">廖雪峰官网</a></li>
-<li>Think Python 2ed 中译版精校  PDF 电子书</li>
-</ul>
+<h2 id="swagger-工具简介"><a href="#swagger-工具简介" class="headerlink" title="swagger 工具简介"></a>swagger 工具简介</h2><p>swagger是一个RESTful API 的设计工具，官方提供3种工具：</p>
+<ol>
+<li><code>swagger-editor</code> 在线编辑器，同时提供编辑-展现-客户端-服务端代码的生成</li>
+<li><code>swagger-ui</code> 展示工具，将编辑器定义好的json描述文件友好展示的工具。</li>
+<li><code>swagger-codegen</code> 生成服务端和客户端的代码。</li>
+</ol>
+<p>因为swagger-editor集成了swagger-codegen功能，因此我们仅需要使用swagger-editor和swagger-ui就够了。</p>
+<h2 id="编辑器-editor"><a href="#编辑器-editor" class="headerlink" title="编辑器(editor)"></a>编辑器(editor)</h2><p>可以使用在线编辑器，而由于网络原因, 往往不能很好的使用swagger提供的在线编辑器，然而这个在线编辑器也可以本地部署，其次有很多编辑器也有swagger的插件, 通过按照swagger插件，我们也可以配置出一个swagger的编辑器。有了编辑器后，我们需要熟悉使用swagger来设计API的一些语法。</p>
+<h3 id="部署本地编辑器"><a href="#部署本地编辑器" class="headerlink" title="部署本地编辑器"></a>部署本地编辑器</h3><p>安装docker，配置镜像加速，然后拉去镜像到本地运行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">docker pull swaggerapi/swagger-editor</div><div class="line">docker run -p 80:8080 swaggerapi/swagger-editor</div></pre></td></tr></table></figure></p>
+<h3 id="使用本地编辑器"><a href="#使用本地编辑器" class="headerlink" title="使用本地编辑器"></a>使用本地编辑器</h3><p>推荐使用<code>vscode</code>作为编辑器, 安装vscode的<code>Swagger View</code>插件 就可以打造一个 swagger的编辑器了采用yaml编写，然后使用Swagger Preview 查看预览。</p>
+<h3 id="swagger2-0语法"><a href="#swagger2-0语法" class="headerlink" title="swagger2.0语法"></a>swagger2.0语法</h3><p>详情参考<a href="http://swagger.io/specification/" target="_blank" rel="external">swagger2.0官方规范</a></p>
+<ul>
+<li><p>格式<br>采用json， 因为yaml是json的一个超集，因此也可以使用。通常情况我们通过yaml来完成编辑，最后通过编辑器导出为json文件。</p>
 </li>
-<li>进阶深<ul>
-<li><a href="http://python3-cookbook.readthedocs.io/zh_CN/latest/preface.html" target="_blank" rel="external">python3-cookbook</a></li>
-<li>电子书Python高手之路</li>
-</ul>
+<li><p>文件结构<br>为一个单独的文件，但是其中definitions部分可以被抽出来为一个独立文件，通过$ref进行引用，按照惯例，这个文件应该被命名为 swagger.json</p>
 </li>
-<li>常见的一些代码实现<ul>
-<li><a href="https://github.com/liquanzhou/ops_doc/blob/master/python%E5%AE%9E%E4%BE%8B%E6%89%8B%E5%86%8C.py" target="_blank" rel="external">python实例手册</a>  </li>
-<li><a href="https://segmentfault.com/t/python/blogs" target="_blank" rel="external">网站上的文章</a></li>
-</ul>
+<li><p>数据类型<br>用于描述一个数据的数据类型，对象定义时使用。</p>
 </li>
-<li>设计模式<ul>
-<li><a href="http://www.cnblogs.com/wuyuegb2312/archive/2013/04/09/3008320.html" target="_blank" rel="external">快速版大话设计模式</a></li>
-<li><a href="https://github.com/faif/python-patterns" target="_blank" rel="external">一些最新的例子</a></li>
-<li><a href="http://www.ituring.com.cn/book/1715" target="_blank" rel="external">精通Python设计模式</a></li>
 </ul>
+<table>
+<thead>
+<tr>
+<th>Common Name</th>
+<th style="text-align:center">type</th>
+<th style="text-align:center">format</th>
+<th style="text-align:right">Comments</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>integer</td>
+<td style="text-align:center">integer</td>
+<td style="text-align:center">int32</td>
+<td style="text-align:right">signed 32 bits</td>
+</tr>
+<tr>
+<td>long</td>
+<td style="text-align:center">integer</td>
+<td style="text-align:center">int64</td>
+<td style="text-align:right">signed 64 bits</td>
+</tr>
+<tr>
+<td>float</td>
+<td style="text-align:center">number</td>
+<td style="text-align:center">float</td>
+<td style="text-align:right"></td>
+</tr>
+<tr>
+<td>double</td>
+<td style="text-align:center">number</td>
+<td style="text-align:center">double</td>
+<td style="text-align:right"></td>
+</tr>
+<tr>
+<td>string</td>
+<td style="text-align:center">string</td>
+<td style="text-align:center"></td>
+<td style="text-align:right"></td>
+</tr>
+<tr>
+<td>byte</td>
+<td style="text-align:center">string</td>
+<td style="text-align:center">byte</td>
+<td style="text-align:right">base64 encoded characters</td>
+</tr>
+<tr>
+<td>binary</td>
+<td style="text-align:center">string</td>
+<td style="text-align:center">binary</td>
+<td style="text-align:right">any sequence of octets</td>
+</tr>
+<tr>
+<td>boolean</td>
+<td style="text-align:center">boolean</td>
+<td style="text-align:center"></td>
+<td style="text-align:right"></td>
+</tr>
+<tr>
+<td>date</td>
+<td style="text-align:center">string</td>
+<td style="text-align:center">date</td>
+<td style="text-align:right">As defined by full-date - RFC3339</td>
+</tr>
+<tr>
+<td>dateTime</td>
+<td style="text-align:center">string</td>
+<td style="text-align:center">date-time</td>
+<td style="text-align:right">As defined by date-time - RFC3339</td>
+</tr>
+<tr>
+<td>password</td>
+<td style="text-align:center">string</td>
+<td style="text-align:center">password</td>
+<td style="text-align:right">Used to hint UIs the input needs to be obscured.</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>规范<br>规范也就是语法，会安装此规范来编写API设计文档。以下列出了所有需要的关键字段</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>字段名</th>
+<th style="text-align:center">类型</th>
+<th style="text-align:right">描述    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>swagger</td>
+<td style="text-align:center">string</td>
+<td style="text-align:right">必填项。表示使用的swagger的版本，必须为2.0</td>
+</tr>
+<tr>
+<td>info</td>
+<td style="text-align:center"><a href="http://swagger.io/specification/#infoObject" target="_blank" rel="external">Info Object</a></td>
+<td style="text-align:right">必填项。提供API的一些元数据描述</td>
+</tr>
+<tr>
+<td>host</td>
+<td style="text-align:center">string</td>
+<td style="text-align:right">提供该API服务的主机名称或者IP，测试时 使用该地址进程测试。</td>
+</tr>
+<tr>
+<td>basePath</td>
+<td style="text-align:center">string</td>
+<td style="text-align:right">API的基本路径,这是相对的host。 如果不包括,API是直属host。 必须以”/“开头</td>
+</tr>
+<tr>
+<td>schemes</td>
+<td style="text-align:center">[string]</td>
+<td style="text-align:right">API的传输协议的列表。 在”http”,”https”,”ws”,”wss”其中选择</td>
+</tr>
+<tr>
+<td>consumes</td>
+<td style="text-align:center">[string]</td>
+<td style="text-align:right">一个MIME类型的api可以使用列表。 值必须是所描述的Mime类型</td>
+</tr>
+<tr>
+<td>produces</td>
+<td style="text-align:center">[string]</td>
+<td style="text-align:right">MIME类型的api可以产生的列表。   值必须是所描述的Mime类型</td>
+</tr>
+<tr>
+<td>paths</td>
+<td style="text-align:center"><a href="http://swagger.io/specification/#pathsObject" target="_blank" rel="external">路径对象</a></td>
+<td style="text-align:right">必填项。可用的路径和操作的API</td>
+</tr>
+<tr>
+<td>definitions</td>
+<td style="text-align:center"><a href="http://swagger.io/specification/#definitionsObject" target="_blank" rel="external">定义对象</a></td>
+<td style="text-align:right">一个对象数据类型定义</td>
+</tr>
+<tr>
+<td>parameters</td>
+<td style="text-align:center"><a href="http://swagger.io/specification/#parametersDefinitionsObject" target="_blank" rel="external">参数定义对象</a></td>
+<td style="text-align:right">定义请求参数的对象</td>
+</tr>
+<tr>
+<td>responses</td>
+<td style="text-align:center"><a href="http://swagger.io/specification/#responsesDefinitionsObject" target="_blank" rel="external">反应定义对象</a></td>
+<td style="text-align:right">定义请求响应对象</td>
+</tr>
+<tr>
+<td>securityDefinitions</td>
+<td style="text-align:center"><a href="http://swagger.io/specification/#securityDefinitionsObject" target="_blank" rel="external">安全定义对象</a></td>
+<td style="text-align:right">安全方案定义规范,比如认证</td>
+</tr>
+<tr>
+<td>security</td>
+<td style="text-align:center"><a href="http://swagger.io/specification/#securityRequirementObject" target="_blank" rel="external">安全需求对象</a></td>
+<td style="text-align:right">这里主要指使用哪种认证手段</td>
+</tr>
+<tr>
+<td>tags</td>
+<td style="text-align:center"><a href="http://swagger.io/specification/#tagObject" target="_blank" rel="external">标签对象</a></td>
+<td style="text-align:right">没个RESTful中资源的标签，列表中的每个标记名称必须是唯一的</td>
+</tr>
+<tr>
+<td>externalDocs</td>
+<td style="text-align:center"><a href="http://swagger.io/specification/#externalDocumentationObject" target="_blank" rel="external">外部文档对象</a></td>
+<td style="text-align:right">额外的外部文档, 指向外部url</td>
+</tr>
+</tbody>
+</table>
+<h2 id="渲染器-ui"><a href="#渲染器-ui" class="headerlink" title="渲染器(ui)"></a>渲染器(ui)</h2><p>swagger-ui的使用很简单<a href="http://swagger.io/docs/" target="_blank" rel="external">swager-ui官方文档</a></p>
+<h3 id="HTML文档渲染"><a href="#HTML文档渲染" class="headerlink" title="HTML文档渲染"></a>HTML文档渲染</h3><p>渲染器使用官方的swagger-ui，这里我们需要一个web服务器，用来渲染我们刚才编辑完成的api 设计文档。这里一般使用node 的 express为web框架来做这个简单的web服务器</p>
+<h3 id="PDF文档渲染"><a href="#PDF文档渲染" class="headerlink" title="PDF文档渲染"></a>PDF文档渲染</h3><p>将API设计文档渲染成PDF, 流程是这样: swagger.yaml —&gt; asciiDoc—&gt; pdf</p>
+<ul>
+<li><p>使用<a href="https://github.com/Swagger2Markup/swagger2markup" target="_blank" rel="external">swagger2markup</a>来生成asciiDoc格式的文档<br>下载swagger2markup工具,<a href="http://repo.springsource.org/libs-release-remote/io/github/swagger2markup/swagger2markup-cli/" target="_blank" rel="external">下载地址</a>,选择你想要的版本下载<br>使用工具生成asciiDoc, -i指定swagger.yaml的位置, -f指定输出文件名称：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java -jar swagger2markup-cli-1.1.0.jar convert -i ~/PycharmProjects/doc/api_design/swagger.yaml <span class="_">-f</span> asiidoc/swagger</div></pre></td></tr></table></figure>
 </li>
-<li>数据结构与算法<ul>
-<li><a href="http://top.jobbole.com/4681/" target="_blank" rel="external">快速阅读总结</a></li>
-<li>电子书：Data Structures and Algorithms with Python-2015</li>
-</ul>
+<li><p>使用<a href="http://asciidoctor.org/docs/convert-asciidoc-to-pdf/" target="_blank" rel="external">asciidoctor</a>来将asciiDoc换换成PDF<br>这是一个ruby写的工具，我本地不打算部署ruby环境，因此在找一个docker镜像：<code>madduci/docker-asciidoctor-pdf</code><br>由于访问dockerhub的镜像速度非常慢，因此我将该工具的使用说明复制了下来，<a href="https://store.docker.com/community/images/madduci/docker-asciidoctor-pdf" target="_blank" rel="external">镜像使用说明</a></p>
+<blockquote>
+<p>Docker Image exposing asciidoctor-pdf as entrypoint and /document as mounted volume where to build the file<br>To build your own documents as PDF, simply run the container as:<br>docker run –rm -v /path/to/your/document/folder/:/document/ madduci/docker-asciidoctor-pdf /document/your_document.adoc<br>If you want to use some custom styles, just run it as<br>docker run –rm -v /path/to/your/document/folder/:/document/ madduci/docker-asciidoctor-pdf -a pdf-stylesdir=/document/resources/themes -a pdf-style=your_style -a pdf-fontsdir=/document/resources/fonts /document/your_document.adoc<br>and it will generate the pdf in the mounted volume /document</p>
+</blockquote>
+<p>这工具在生成含有中文的pdf文档时有字体问题，因此我修改了字体为微软雅黑字体，以下是修改方法：</p>
+<ol>
+<li><p>添加雅黑字体到当前的Fonts文件夹下面,这里需要标准字体和粗体, 而默认提供的字体只有这些<a href="https://github.com/asciidoctor/asciidoctor-pdf/tree/master/data/fonts" target="_blank" rel="external">默认提供的字体</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">➜  asiidoc ls Fonts |grep -i &apos;yahei&apos;</div><div class="line">Microsoft Yahei.ttf</div><div class="line">yahei.ttf</div><div class="line">yahei_bold.ttf</div></pre></td></tr></table></figure>
 </li>
-<li>源码阅读<ul>
-<li>Django Class Based View </li>
-<li>Flask 源码阅读</li>
-<li>Openstack KeyStone 源码阅读</li>
-</ul>
-</li>
-<li>理解Python解释器<ul>
-<li><a href="http://mt.sohu.com/20161030/n471778650.shtml" target="_blank" rel="external">用Python实现一个Python解释器</a></li>
-</ul>
+<li><p>修改主题配置<code>default-theme.yml</code>的<code>Noto Serif</code>字段，使用该字体:<br>配置文件下载地址<a href="https://github.com/asciidoctor/asciidoctor-pdf/tree/master/data/themes" target="_blank" rel="external">默认配置文件下载地址</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Noto Serif:</div><div class="line">normal: yahei.ttf</div><div class="line">bold: yahei_bold.ttf</div><div class="line">italic: yahei.ttf</div><div class="line">bold_italic: yahei_bold.tt</div></pre></td></tr></table></figure>
 </li>
 </ol>
-<h3 id="Golang提升书单"><a href="#Golang提升书单" class="headerlink" title="Golang提升书单"></a>Golang提升书单</h3><ol>
-<li>回过基础：<ul>
-<li><a href="http://mt.sohu.com/20161030/n471778650.shtml" target="_blank" rel="external">Go Web 编程</a></li>
-<li><a href="https://hotsnow.gitbooks.io/the-way-to-go_zh_cn/content/" target="_blank" rel="external">Go入门指南</a></li>
-</ul>
+<p>最后把我们生成好的swagger.adoc, 主题配置文件,字体 放在一个目录下，挂载到docker里面去:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">➜  Downloads ls asiidoc</div><div class="line">Fonts  swagger.adoc themes</div><div class="line">docker run --rm -v $(<span class="built_in">pwd</span>)/asiidoc/:/document/ madduci/docker-asciidoctor-pdf  <span class="_">-a</span> pdf-fontsdir=/document/Fonts <span class="_">-a</span> pdf-stylesdir=/document/themes /document/swagger.adoc</div></pre></td></tr></table></figure>
+<p>最后查看asiidoc下面就会有生成的pdf文件</p>
 </li>
-</ol>
-<h3 id="JavaScript提升书单"><a href="#JavaScript提升书单" class="headerlink" title="JavaScript提升书单"></a>JavaScript提升书单</h3><ol>
-<li>回过基础：<ul>
-<li><a href="http://www.liaoxuefeng.com/wiki/001434446689867b27157e896e74d51a89c25cc8b43bdb3000" target="_blank" rel="external">廖雪峰官网</a></li>
-<li><a href="http://javascript.ruanyifeng.com/#nodejs" target="_blank" rel="external">阮一峰的javascript教程 </a></li>
-<li><a href="http://es6.ruanyifeng.com/" target="_blank" rel="external">ECMAScript 6 入门</a></li>
 </ul>
-</li>
-</ol>
-<p>除了技术, 还应该有生活。而生活就是: <strong><em>赶紧把账还完</em></strong></p>
+<h2 id="代码生成器-codegen"><a href="#代码生成器-codegen" class="headerlink" title="代码生成器(codegen)"></a>代码生成器(codegen)</h2><p>swagger能提供服务端和客户端的代码生成功能,这个功能在swagger-editor上已经集成<br>生成server端代码：<br><img src="http://oiw1gzfww.bkt.clouddn.com/swagger_gen_server_code.png" alt=""><br>生成客户端代码：<br><img src="http://oiw1gzfww.bkt.clouddn.com/swagger_gen_client_code.png" alt=""></p>
 
       
     </div>
@@ -527,7 +678,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/summary/" rel="tag"># summary</a>
+            <a href="/tags/swagger/" rel="tag"># swagger</a>
           
         </div>
       
@@ -536,8 +687,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/12/30/go-cobra/" rel="next" title="如何使用golang编写漂亮的命令行工具">
-                <i class="fa fa-chevron-left"></i> 如何使用golang编写漂亮的命令行工具
+              <a href="/2017/01/02/python-bestpractice/" rel="next" title="如何使用Python写出优雅而安全的代码">
+                <i class="fa fa-chevron-left"></i> 如何使用Python写出优雅而安全的代码
               </a>
             
           </div>
@@ -545,10 +696,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/01/01/nodejs-vscode/" rel="prev" title="使用VSCode快速搭建NodeJS开发环境">
-                使用VSCode快速搭建NodeJS开发环境 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -574,8 +721,8 @@
           
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/12/31/2016-summary/"
-           data-title="2016总结与2017计划" data-url="https://blog.yumaojun.net/2016/12/31/2016-summary/">
+      <div class="ds-thread" data-thread-key="2017/01/05/api-design-swagger/"
+           data-title="如何使用swagger设计出漂亮的RESTful API" data-url="https://blog.yumaojun.net/2017/01/05/api-design-swagger/">
       </div>
     
   </div>
@@ -722,7 +869,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#转瞬即逝的2016"><span class="nav-number">1.</span> <span class="nav-text">转瞬即逝的2016</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#瞬息万变的2017"><span class="nav-number">2.</span> <span class="nav-text">瞬息万变的2017</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Python提升书单-今年主力"><span class="nav-number">2.1.</span> <span class="nav-text">Python提升书单(今年主力)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Golang提升书单"><span class="nav-number">2.2.</span> <span class="nav-text">Golang提升书单</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JavaScript提升书单"><span class="nav-number">2.3.</span> <span class="nav-text">JavaScript提升书单</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#swagger-工具简介"><span class="nav-number">1.</span> <span class="nav-text">swagger 工具简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编辑器-editor"><span class="nav-number">2.</span> <span class="nav-text">编辑器(editor)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#部署本地编辑器"><span class="nav-number">2.1.</span> <span class="nav-text">部署本地编辑器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用本地编辑器"><span class="nav-number">2.2.</span> <span class="nav-text">使用本地编辑器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#swagger2-0语法"><span class="nav-number">2.3.</span> <span class="nav-text">swagger2.0语法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#渲染器-ui"><span class="nav-number">3.</span> <span class="nav-text">渲染器(ui)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#HTML文档渲染"><span class="nav-number">3.1.</span> <span class="nav-text">HTML文档渲染</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PDF文档渲染"><span class="nav-number">3.2.</span> <span class="nav-text">PDF文档渲染</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#代码生成器-codegen"><span class="nav-number">4.</span> <span class="nav-text">代码生成器(codegen)</span></a></li></ol></div>
             
 
           </div>
