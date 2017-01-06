@@ -1,0 +1,622 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>紫川秀的博客</title>
+  <subtitle>Stay Hungry, Stay Foolish.</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="https://blog.yumaojun.net/"/>
+  <updated>2017-01-06T04:38:40.000Z</updated>
+  <id>https://blog.yumaojun.net/</id>
+  
+  <author>
+    <name>紫川秀</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>RESTful API 设计规范</title>
+    <link href="https://blog.yumaojun.net/2017/01/06/rest-api-design/"/>
+    <id>https://blog.yumaojun.net/2017/01/06/rest-api-design/</id>
+    <published>2017-01-06T04:32:55.000Z</published>
+    <updated>2017-01-06T04:38:40.000Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="http://oiw1gzfww.bkt.clouddn.com/rest_api.jpg" alt=""></p>
+<a id="more"></a>
+<p>做出一个好的API设计很难。API表达的是你的数据和你的数据使用者之间的契约，因此API的设计往往是站在使用者的角度进行的，而关于RESTful的介绍可以参考阮一峰的博客<a href="http://www.ruanyifeng.com/blog/2011/09/restful.html" target="_blank" rel="external">理解RESTful架构
+</a>, 这里同时也参考了他的另一篇博客<a href="http://www.ruanyifeng.com/blog/2014/05/restful_api.html" target="_blank" rel="external">RESTful API 设计指南</a>在这方面有一篇很出名的文章，这里需要你自己解决翻墙问题<a href="https://codeplanet.io/principles-good-restful-api-design/" target="_blank" rel="external">Principles of good RESTful API Design</a></p>
+<h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>   这里有一些非常重要的术语，我将在本文里面一直用到它们</p>
+<ul>
+<li>资源(Resource)：一个对象的单独实例，如一只动物</li>
+<li>集合(Collection)：一群同种对象，如动物</li>
+<li>HTTP：跨网络的通信协议</li>
+<li>客户端(Consumer)：可以创建HTTP请求的客户端应用程序</li>
+<li>第三方开发者(Third Party Developer)：这个开发者不属于你的项目但是有想使用你的数据</li>
+<li>服务器(Server)：一个HTTP服务器或者应用程序，客户端可以跨网络访问它</li>
+<li>端点(Endpoint)：这个API在服务器上的URL用于表达一个资源或者一个集合</li>
+<li>幂等(Idempotent)：无边际效应，多次操作得到相同的结果</li>
+<li>URL段(Segment)：在URL里面已斜杠分隔的内容</li>
+</ul>
+<h2 id="数据设计与抽象"><a href="#数据设计与抽象" class="headerlink" title="数据设计与抽象"></a>数据设计与抽象</h2><ul>
+<li><p>理清业务数据流程</p>
+<p>  规划好你的API的外观要先于开发它实际的功能。首先你要知道数据该如何设计和核心服务/应用程序会如何工作, 这部分的工作<br>  往往就是需要写好 PRD和DRD这些功能文档</p>
+</li>
+<li><p>站在使用者的角度进行合理抽象</p>
+<p>  有时候一个集合可以表达一个数据库表，而一个资源可以表达成里面的一行记录，但是这并不是常态。事实上，你的API应该尽可能<br>  通过抽象来分离数据与业务逻辑。这点非常重要，只有这样做你才不会打击到那些拥有复杂业务的第三方开发者，<br>  否则他们是不会使用你的API的。</p>
+</li>
+<li><p>如何开放API</p>
+<p>  当然你的服务可能很多部分是不应该通过API暴露出去的。比较常见的例子就是很多API是不允许第三方来创建用户的。</p>
+</li>
+</ul>
+<h2 id="HTTP-动词"><a href="#HTTP-动词" class="headerlink" title="HTTP 动词"></a>HTTP 动词</h2><p>一个好的RESTful API只允许第三方调用者使用这四个半HTTP动词进行数据交互，并且在URL段里面不出现任何其他的动词。<br>一般来说，GET请求可以被浏览器缓存（通常也是这样的）。例如，缓存请求头用于第二次用户的POST请求。<br>HEAD请求是基于一个无响应体的GET请求，并且也可以被缓存的。</p>
+<ul>
+<li>GET (选择)：从服务器上获取一个具体的资源或者一个资源列表。</li>
+<li>POST （创建）： 在服务器上创建一个新的资源。</li>
+<li>PUT （更新）：以整体的方式更新服务器上的一个资源。</li>
+<li>PATCH （更新）：只更新服务器上一个资源的一个属性。</li>
+<li>DELETE （删除）：删除服务器上的一个资源。</li>
+<li>HEAD ： 获取一个资源的元数据，如数据的哈希值或最后的更新时间。</li>
+<li>OPTIONS：获取客户端能对资源做什么操作的信息。</li>
+</ul>
+<h2 id="域名"><a href="#域名" class="headerlink" title="域名"></a>域名</h2><p>  域名是用于访问你的API服务的第一步，因此如何在域名上表现自己提供的API 服务喃，以下有2种方法</p>
+<ul>
+<li><p>应该尽量将API部署在专用域名之下。</p>
+</li>
+<li><p>如果确定API很简单，不会有进一步扩展，可以考虑放在主域名下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">https://api.example.com   # 专业域名</div><div class="line">https://example.org/api/  # URI中明确说明</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="版本化"><a href="#版本化" class="headerlink" title="版本化"></a>版本化</h2><p>  API是服务器与客户端之间的一个公共契约。如果你对服务器上的API做了一个更改，并且这些更改无法向后兼容，<br>  那么你就打破了这个契约，客户端又会要求你重新支持它。为了避免这样的事情，你既要确保应用程序逐步的演变，<br>  又要让客户端满意。那么你必须在引入新版本API的同时保持旧版本API仍然可用。</p>
+<p>  随着时间的推移，你可能声明不再支持某些旧版本的API。申明不支持一个特性并不意味着关闭或者破坏它。<br>  而是告诉客户端旧版本的API将在某个特定的时间被删除，并且建议他们使用新版本的API。</p>
+<p>  如果你只是简单的增加一个新的特性到API上，如资源上的一个新属性或者增加一个新的端点，你不需要增加API的版本。<br>  因为这些并不会造成向后兼容性的问题，你只需要修改文档即可。</p>
+<p>  这里实现方式有2种：</p>
+<ul>
+<li><p>应该将API的版本号放入URL</p>
+</li>
+<li><p>将版本号放在HTTP头信息中，但不如放入URL方便和直观, Github采用的就是这种做法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">https://api.example.com/v1/                       # 在URL中说明</div><div class="line"></div><div class="line">curl -i https://api.github.com/users/octocat/orgs # HTTP头中表示API版本</div><div class="line"></div><div class="line">  HTTP/1.1 200 OK</div><div class="line">  Server: nginx</div><div class="line">  Date: Fri, 12 Oct 2012 23:33:14 GMT</div><div class="line">  Content-Type: application/json; charset=utf-8</div><div class="line">  Connection: keep-alive</div><div class="line">  Status: 200 OK</div><div class="line">  ETag: &quot;a00049ba79152d03380c34652f2cb612&quot;</div><div class="line">  X-GitHub-Media-Type: github.v3</div><div class="line">  </div><div class="line">  X-RateLimit-Limit: 5000</div><div class="line">  X-RateLimit-Remaining: 4987</div><div class="line">  X-RateLimit-Reset: 1350085394</div><div class="line">  </div><div class="line">  Content-Length: 5</div><div class="line">  Cache-Control: max-age=0, private, must-revalidate</div><div class="line">  X-Content-Type-Options: nosniff</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="API-ROOT-URI"><a href="#API-ROOT-URI" class="headerlink" title="API ROOT URI"></a>API ROOT URI</h2><p>  API的根地址很重要。可以通过这个列表快速了解你提供的服务，因此，让你的API根入口点保持尽可能的简单。以github的列</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">maojun@maojun-mbp# curl https://api.github.com</div><div class="line">&#123;</div><div class="line">  &quot;current_user_url&quot;: &quot;https://api.github.com/user&quot;,</div><div class="line">  &quot;current_user_authorizations_html_url&quot;: &quot;https://github.com/settings/connections/applications&#123;/client_id&#125;&quot;,</div><div class="line">  &quot;authorizations_url&quot;: &quot;https://api.github.com/authorizations&quot;,</div><div class="line">  &quot;code_search_url&quot;: &quot;https://api.github.com/search/code?q=&#123;query&#125;&#123;&amp;page,per_page,sort,order&#125;&quot;,</div><div class="line">  &quot;emails_url&quot;: &quot;https://api.github.com/user/emails&quot;,</div><div class="line">  &quot;emojis_url&quot;: &quot;https://api.github.com/emojis&quot;,</div><div class="line">  &quot;events_url&quot;: &quot;https://api.github.com/events&quot;,</div><div class="line">  &quot;feeds_url&quot;: &quot;https://api.github.com/feeds&quot;,</div><div class="line">  &quot;followers_url&quot;: &quot;https://api.github.com/user/followers&quot;,</div><div class="line">  &quot;following_url&quot;: &quot;https://api.github.com/user/following&#123;/target&#125;&quot;,</div><div class="line">  &quot;gists_url&quot;: &quot;https://api.github.com/gists&#123;/gist_id&#125;&quot;,</div><div class="line">  &quot;hub_url&quot;: &quot;https://api.github.com/hub&quot;,</div><div class="line">  &quot;issue_search_url&quot;: &quot;https://api.github.com/search/issues?q=&#123;query&#125;&#123;&amp;page,per_page,sort,order&#125;&quot;,</div><div class="line">  &quot;issues_url&quot;: &quot;https://api.github.com/issues&quot;,</div><div class="line">  &quot;keys_url&quot;: &quot;https://api.github.com/user/keys&quot;,</div><div class="line">  &quot;notifications_url&quot;: &quot;https://api.github.com/notifications&quot;,</div><div class="line">  &quot;organization_repositories_url&quot;: &quot;https://api.github.com/orgs/&#123;org&#125;/repos&#123;?type,page,per_page,sort&#125;&quot;,</div><div class="line">  &quot;organization_url&quot;: &quot;https://api.github.com/orgs/&#123;org&#125;&quot;,</div><div class="line">  &quot;public_gists_url&quot;: &quot;https://api.github.com/gists/public&quot;,</div><div class="line">  &quot;rate_limit_url&quot;: &quot;https://api.github.com/rate_limit&quot;,</div><div class="line">  &quot;repository_url&quot;: &quot;https://api.github.com/repos/&#123;owner&#125;/&#123;repo&#125;&quot;,</div><div class="line">  &quot;repository_search_url&quot;: &quot;https://api.github.com/search/repositories?q=&#123;query&#125;&#123;&amp;page,per_page,sort,order&#125;&quot;,</div><div class="line">  &quot;current_user_repositories_url&quot;: &quot;https://api.github.com/user/repos&#123;?type,page,per_page,sort&#125;&quot;,</div><div class="line">  &quot;starred_url&quot;: &quot;https://api.github.com/user/starred&#123;/owner&#125;&#123;/repo&#125;&quot;,</div><div class="line">  &quot;starred_gists_url&quot;: &quot;https://api.github.com/gists/starred&quot;,</div><div class="line">  &quot;team_url&quot;: &quot;https://api.github.com/teams&quot;,</div><div class="line">  &quot;user_url&quot;: &quot;https://api.github.com/users/&#123;user&#125;&quot;,</div><div class="line">  &quot;user_organizations_url&quot;: &quot;https://api.github.com/user/orgs&quot;,</div><div class="line">  &quot;user_repositories_url&quot;: &quot;https://api.github.com/users/&#123;user&#125;/repos&#123;?type,page,per_page,sort&#125;&quot;,</div><div class="line">  &quot;user_search_url&quot;: &quot;https://api.github.com/search/users?q=&#123;query&#125;&#123;&amp;page,per_page,sort,order&#125;&quot;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="Endpoints"><a href="#Endpoints" class="headerlink" title="Endpoints"></a>Endpoints</h2><p>  一个端点就是指向特定资源或资源集合的URL。针对每一个端点来说，你可能想列出所有可行的HTTP动词和端点的组合。<br>  在RESTful架构中，每个网址代表一种资源（resource），所以网址中不能有动词，只能有名词，<br>  而且所用的名词往往与数据库的表格名对应。一般来说，数据库中的表都是同种记录的<br>  “集合”（collection），所以API中的名词也应该使用复数。</p>
+<p>  请注意如何展示数据之间的关系，特别是雇员与动物园之间的多对多关系。通过添加一个额外的URL段就可以实现更多的交互能力。<br>  当然没有一个HTTP动词能表示正在解雇一个人，但是你可以使用DELETE一个动物园里的雇员来达到相同的效果。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">https://api.example.com/v1/zoos</div><div class="line">https://api.example.com/v1/animals</div><div class="line">https://api.example.com/v1/animal_types</div><div class="line">https://api.example.com/v1/employees</div><div class="line"></div><div class="line">GET /zoos: List all Zoos (ID and Name, not too much detail)</div><div class="line">POST /zoos: Create a new Zoo</div><div class="line">GET /zoos/ZID: Retrieve an entire Zoo object</div><div class="line">PUT /zoos/ZID: Update a Zoo (entire object)</div><div class="line">PATCH /zoos/ZID: Update a Zoo (partial object)</div><div class="line">DELETE /zoos/ZID: Delete a Zoo</div><div class="line">GET /zoos/ZID/animals: Retrieve a listing of Animals (ID and Name).</div><div class="line">GET /animals: List all Animals (ID and Name).</div><div class="line">POST /animals: Create a new Animal</div><div class="line">GET /animals/AID: Retrieve an Animal object</div><div class="line">PUT /animals/AID: Update an Animal (entire object)</div><div class="line">PATCH /animals/AID: Update an Animal (partial object)</div></pre></td></tr></table></figure>
+<h2 id="过滤和排序"><a href="#过滤和排序" class="headerlink" title="过滤和排序"></a>过滤和排序</h2><p>  使用过滤和排序有多种原因，因此API应该提供参数，过滤和排序返回结果，降低客户端的复杂度。</p>
+<ul>
+<li><p>如果记录数量很多，服务器不可能都将它们返回给用户。</p>
+</li>
+<li><p>从客户端的角度来说，最小化网络传输，并让客户端尽可能快的得到查询结果。</p>
+</li>
+<li><p>从服务器角度来说，响应请求越小负载就越小。</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">?limit=10: 减少返回给客户端的结果数量（用于分页）</div><div class="line">?offset=10: 发送一堆信息给客户端（用于分页）</div><div class="line">?animal_type_id=1: 使用条件匹配来过滤记录</div><div class="line">?sortby=name&amp;order=asc:  对结果按特定属性进行排序</div></pre></td></tr></table></figure>
+<h2 id="状态码"><a href="#状态码" class="headerlink" title="状态码"></a>状态码</h2><p>  服务器向用户返回的状态码和提示信息，因为它们是HTTP的标准，所以通用性上有保证，<br>  状态码的完整定义请看<a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html" target="_blank" rel="external">HTTP1.1/rfc Status Code define</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">状态码范围说明：</div><div class="line">1xx：保留给底层HTTP功能使用的，并且估计在你的职业生涯里面也用不着手动发送这样一个状态码出来。</div><div class="line">2xx：保留给成功消息使用的，你尽可能的确保服务器总发送这些状态码给用户。</div><div class="line">3xx：保留给重定向用的。大多数的API不会太常使用这类状态码，但是在新的超媒体样式的API中会使用更多一些。</div><div class="line">4xx：保留给客户端错误用的。例如，客户端提供了一些错误的数据或请求了不存在的内容。这些请求应该是幂等的，不会改变任何服务器的状态。</div><div class="line">5xx：保留给服务器端错误用的。这些错误常常是从底层的函数抛出来的，并且开发人员也通常没法处理。发送这类状态码的目的是确保客户端能得到一些响应。收到5xx响应后，客户端没办法知道服务器端的状态，所以这类状态码是要尽可能的避免。</div><div class="line"></div><div class="line">常见的一些状态码：</div><div class="line">200 OK - [GET]：服务器成功返回用户请求的数据，该操作是幂等的（Idempotent）。</div><div class="line">201 CREATED - [POST/PUT/PATCH]：用户新建或修改数据成功。</div><div class="line">202 Accepted - [*]：表示一个请求已经进入后台排队（异步任务）</div><div class="line">204 NO CONTENT - [DELETE]：用户删除数据成功。</div><div class="line">400 INVALID REQUEST - [POST/PUT/PATCH]：用户发出的请求有错误，服务器没有进行新建或修改数据的操作，该操作是幂等的。</div><div class="line">401 Unauthorized - [*]：表示用户没有权限（令牌、用户名、密码错误）。</div><div class="line">403 Forbidden - [*] 表示用户得到授权（与401错误相对），但是访问是被禁止的。</div><div class="line">404 NOT FOUND - [*]：用户发出的请求针对的是不存在的记录，服务器没有进行操作，该操作是幂等的。</div><div class="line">406 Not Acceptable - [GET]：用户请求的格式不可得（比如用户请求JSON格式，但是只有XML格式）。</div><div class="line">410 Gone -[GET]：用户请求的资源被永久删除，且不会再得到的。</div><div class="line">422 Unprocesable entity - [POST/PUT/PATCH] 当创建一个对象时，发生一个验证错误。</div><div class="line">500 INTERNAL SERVER ERROR - [*]：服务器发生错误，用户将无法判断发出的请求是否成功。</div></pre></td></tr></table></figure>
+<h2 id="错误处理"><a href="#错误处理" class="headerlink" title="错误处理"></a>错误处理</h2><p>如果状态码是4xx，就应该向用户返回出错信息。一般来说，返回的信息中将error作为键名，出错信息作为键值即可。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">    <span class="attr">error</span>: <span class="string">"Invalid API key"</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="返回结果"><a href="#返回结果" class="headerlink" title="返回结果"></a>返回结果</h2><p>  针对不同操作，服务器向用户返回的结果应该符合以下规范。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">GET /collection: 返回一系列资源对象</div><div class="line">GET /collection/resource: 返回单独的资源对象</div><div class="line">POST /collection: 返回新创建的资源对象</div><div class="line">PUT /collection/resource: 返回完整的资源对象</div><div class="line">PATCH /collection/resource: 返回完整的资源对象</div><div class="line">DELETE /collection/resource: 返回一个空文档</div></pre></td></tr></table></figure>
+<h2 id="Hypermedia-API"><a href="#Hypermedia-API" class="headerlink" title="Hypermedia API"></a>Hypermedia API</h2><p>  RESTful API最好做到Hypermedia，即返回结果中提供链接，连向其他API方法，使得用户不查文档，也知道下一步应该做什么<br>  Hypermedia API的设计被称为<a href="https://en.wikipedia.org/wiki/HATEOAS" target="_blank" rel="external">HATEOAS</a></p>
+<ul>
+<li><p>link: 用户读取这个属性就知道下一步该调用什么API了</p>
+</li>
+<li><p>rel: rel表示这个API与当前网址的关系（collection关系，并给出该collection的网址）</p>
+</li>
+<li><p>href: API的绝对路径</p>
+</li>
+<li><p>title: API的标题,用于概述用途</p>
+</li>
+<li><p>type: API 响应的数据类型</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&#123;&quot;link&quot;: &#123;</div><div class="line">  &quot;rel&quot;:   &quot;collection https://www.example.com/zoos&quot;,</div><div class="line">  &quot;href&quot;:  &quot;https://api.example.com/zoos&quot;,</div><div class="line">  &quot;title&quot;: &quot;List of zoos&quot;,</div><div class="line">  &quot;type&quot;:  &quot;application/vnd.yourformat+json&quot;</div><div class="line">&#125;&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"> maojun@maojun-mbp#curl https://api.github.com/user</div><div class="line">&#123;</div><div class="line">  &quot;message&quot;: &quot;Requires authentication&quot;,</div><div class="line">  &quot;documentation_url&quot;: &quot;https://developer.github.com/v3&quot;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="认证"><a href="#认证" class="headerlink" title="认证"></a>认证</h2><p>  认证和授权的用户模型该尽量采用RBAC模型，因为其良好的扩容性。 API认证的手段最好采用OAuth2.0, 简单的可以采用<br>  JWT（Json Web Token）</p>
+<p>  关于OAuth的简介可以参考<a href="http://www.ruanyifeng.com/blog/2014/05/oauth_2_0.html" target="_blank" rel="external">阮一峰OAuth2.0简介</a><br>  关于JWT参考此文<a href="http://www.haomou.net/2014/08/13/2014_web_token/" target="_blank" rel="external">JWT使用</a></p>
+<h2 id="内容类型"><a href="#内容类型" class="headerlink" title="内容类型"></a>内容类型</h2><p>  XML已是过去时了，现代的web统一使用JSON，也就是HTTP头种的Content Type标签采用 application/json</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">请求报文</div><div class="line">POST /v1/animal HTTP/1.1</div><div class="line">Host: api.example.org</div><div class="line">Accept: application/json</div><div class="line">Content-Type: application/json</div><div class="line">Content-Length: 24</div><div class="line"> </div><div class="line">&#123;</div><div class="line">  &quot;name&quot;: &quot;Gir&quot;,</div><div class="line">  &quot;animal_type&quot;: 12</div><div class="line">&#125;</div><div class="line"></div><div class="line">响应报文</div><div class="line">HTTP/1.1 200 OK</div><div class="line">Date: Wed, 18 Dec 2013 06:08:22 GMT</div><div class="line">Content-Type: application/json</div><div class="line">Access-Control-Max-Age: 1728000</div><div class="line">Cache-Control: no-cache</div><div class="line"> </div><div class="line">&#123;</div><div class="line">  &quot;id&quot;: 12,</div><div class="line">  &quot;created&quot;: 1386363036,</div><div class="line">  &quot;modified&quot;: 1386363036,</div><div class="line">  &quot;name&quot;: &quot;Gir&quot;,</div><div class="line">  &quot;animal_type&quot;: 12</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;img src=&quot;http://oiw1gzfww.bkt.clouddn.com/rest_api.jpg&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="程序设计" scheme="https://blog.yumaojun.net/categories/%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/"/>
+    
+      <category term="RESTful API" scheme="https://blog.yumaojun.net/categories/%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/RESTful-API/"/>
+    
+    
+      <category term="restful" scheme="https://blog.yumaojun.net/tags/restful/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>如何使用swagger设计出漂亮的RESTful API</title>
+    <link href="https://blog.yumaojun.net/2017/01/05/api-design-swagger/"/>
+    <id>https://blog.yumaojun.net/2017/01/05/api-design-swagger/</id>
+    <published>2017-01-05T05:19:16.000Z</published>
+    <updated>2017-01-06T06:02:18.000Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="http://oiw1gzfww.bkt.clouddn.com/swagger_example.png" alt=""><br><a id="more"></a></p>
+<p>按照现在的趋势，前后端分离几乎已经是业界对开发和部署方式所达成的一种共识, 后台只负责数据的提供和计算，而完全不处理展现。而前端则负责拿到数据，组织数据并展现的工作。这样结构清晰，关注点分离，前后端会变得相对独立并松耦合。而前段和后端对待的契约就是API设计文档, 有了API的设计文档过后, 后端依据设计文件开发后端程序, 前段根据API设计文档模拟服务器,开发前段页面。而<code>Swagger</code>就是其中一种比较优秀的 <code>RESTful API</code>设计工具。</p>
+<h2 id="swagger-工具简介"><a href="#swagger-工具简介" class="headerlink" title="swagger 工具简介"></a>swagger 工具简介</h2><p>swagger是一个RESTful API 的设计工具，官方提供3种工具：</p>
+<ol>
+<li><code>swagger-editor</code> 在线编辑器，同时提供编辑-展现-客户端-服务端代码的生成</li>
+<li><code>swagger-ui</code> 展示工具，将编辑器定义好的json描述文件友好展示的工具。</li>
+<li><code>swagger-codegen</code> 生成服务端和客户端的代码。</li>
+</ol>
+<p>因为swagger-editor集成了swagger-codegen功能，因此我们仅需要使用swagger-editor和swagger-ui就够了。</p>
+<h2 id="编辑器-editor"><a href="#编辑器-editor" class="headerlink" title="编辑器(editor)"></a>编辑器(editor)</h2><p>可以使用在线编辑器，而由于网络原因, 往往不能很好的使用swagger提供的在线编辑器，然而这个在线编辑器也可以本地部署，其次有很多编辑器也有swagger的插件, 通过按照swagger插件，我们也可以配置出一个swagger的编辑器。有了编辑器后，我们需要熟悉使用swagger来设计API的一些语法。</p>
+<h3 id="部署本地编辑器"><a href="#部署本地编辑器" class="headerlink" title="部署本地编辑器"></a>部署本地编辑器</h3><p>安装docker，配置镜像加速，然后拉去镜像到本地运行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">docker pull swaggerapi/swagger-editor</div><div class="line">docker run -p 80:8080 swaggerapi/swagger-editor</div></pre></td></tr></table></figure></p>
+<h3 id="使用本地编辑器"><a href="#使用本地编辑器" class="headerlink" title="使用本地编辑器"></a>使用本地编辑器</h3><p>推荐使用<code>vscode</code>作为编辑器, 安装vscode的<code>Swagger View</code>插件 就可以打造一个 swagger的编辑器了采用yaml编写，然后使用Swagger Preview 查看预览。</p>
+<h3 id="swagger2-0语法"><a href="#swagger2-0语法" class="headerlink" title="swagger2.0语法"></a>swagger2.0语法</h3><p>详情参考<a href="http://swagger.io/specification/" target="_blank" rel="external">swagger2.0官方规范</a></p>
+<ul>
+<li><p>格式<br>采用json， 因为yaml是json的一个超集，因此也可以使用。通常情况我们通过yaml来完成编辑，最后通过编辑器导出为json文件。</p>
+</li>
+<li><p>文件结构<br>为一个单独的文件，但是其中definitions部分可以被抽出来为一个独立文件，通过$ref进行引用，按照惯例，这个文件应该被命名为 swagger.json</p>
+</li>
+<li><p>数据类型<br>用于描述一个数据的数据类型，对象定义时使用。</p>
+</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Common Name</th>
+<th style="text-align:center">type</th>
+<th style="text-align:center">format</th>
+<th style="text-align:right">Comments</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>integer</td>
+<td style="text-align:center">integer</td>
+<td style="text-align:center">int32</td>
+<td style="text-align:right">signed 32 bits</td>
+</tr>
+<tr>
+<td>long</td>
+<td style="text-align:center">integer</td>
+<td style="text-align:center">int64</td>
+<td style="text-align:right">signed 64 bits</td>
+</tr>
+<tr>
+<td>float</td>
+<td style="text-align:center">number</td>
+<td style="text-align:center">float</td>
+<td style="text-align:right"></td>
+</tr>
+<tr>
+<td>double</td>
+<td style="text-align:center">number</td>
+<td style="text-align:center">double</td>
+<td style="text-align:right"></td>
+</tr>
+<tr>
+<td>string</td>
+<td style="text-align:center">string</td>
+<td style="text-align:center"></td>
+<td style="text-align:right"></td>
+</tr>
+<tr>
+<td>byte</td>
+<td style="text-align:center">string</td>
+<td style="text-align:center">byte</td>
+<td style="text-align:right">base64 encoded characters</td>
+</tr>
+<tr>
+<td>binary</td>
+<td style="text-align:center">string</td>
+<td style="text-align:center">binary</td>
+<td style="text-align:right">any sequence of octets</td>
+</tr>
+<tr>
+<td>boolean</td>
+<td style="text-align:center">boolean</td>
+<td style="text-align:center"></td>
+<td style="text-align:right"></td>
+</tr>
+<tr>
+<td>date</td>
+<td style="text-align:center">string</td>
+<td style="text-align:center">date</td>
+<td style="text-align:right">As defined by full-date - RFC3339</td>
+</tr>
+<tr>
+<td>dateTime</td>
+<td style="text-align:center">string</td>
+<td style="text-align:center">date-time</td>
+<td style="text-align:right">As defined by date-time - RFC3339</td>
+</tr>
+<tr>
+<td>password</td>
+<td style="text-align:center">string</td>
+<td style="text-align:center">password</td>
+<td style="text-align:right">Used to hint UIs the input needs to be obscured.</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>规范<br>规范也就是语法，会安装此规范来编写API设计文档。以下列出了所有需要的关键字段</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>字段名</th>
+<th style="text-align:center">类型</th>
+<th style="text-align:right">描述    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>swagger</td>
+<td style="text-align:center">string</td>
+<td style="text-align:right">必填项。表示使用的swagger的版本，必须为2.0</td>
+</tr>
+<tr>
+<td>info</td>
+<td style="text-align:center"><a href="http://swagger.io/specification/#infoObject" target="_blank" rel="external">Info Object</a></td>
+<td style="text-align:right">必填项。提供API的一些元数据描述</td>
+</tr>
+<tr>
+<td>host</td>
+<td style="text-align:center">string</td>
+<td style="text-align:right">提供该API服务的主机名称或者IP，测试时 使用该地址进程测试。</td>
+</tr>
+<tr>
+<td>basePath</td>
+<td style="text-align:center">string</td>
+<td style="text-align:right">API的基本路径,这是相对的host。 如果不包括,API是直属host。 必须以”/“开头</td>
+</tr>
+<tr>
+<td>schemes</td>
+<td style="text-align:center">[string]</td>
+<td style="text-align:right">API的传输协议的列表。 在”http”,”https”,”ws”,”wss”其中选择</td>
+</tr>
+<tr>
+<td>consumes</td>
+<td style="text-align:center">[string]</td>
+<td style="text-align:right">一个MIME类型的api可以使用列表。 值必须是所描述的Mime类型</td>
+</tr>
+<tr>
+<td>produces</td>
+<td style="text-align:center">[string]</td>
+<td style="text-align:right">MIME类型的api可以产生的列表。   值必须是所描述的Mime类型</td>
+</tr>
+<tr>
+<td>paths</td>
+<td style="text-align:center"><a href="http://swagger.io/specification/#pathsObject" target="_blank" rel="external">路径对象</a></td>
+<td style="text-align:right">必填项。可用的路径和操作的API</td>
+</tr>
+<tr>
+<td>definitions</td>
+<td style="text-align:center"><a href="http://swagger.io/specification/#definitionsObject" target="_blank" rel="external">定义对象</a></td>
+<td style="text-align:right">一个对象数据类型定义</td>
+</tr>
+<tr>
+<td>parameters</td>
+<td style="text-align:center"><a href="http://swagger.io/specification/#parametersDefinitionsObject" target="_blank" rel="external">参数定义对象</a></td>
+<td style="text-align:right">定义请求参数的对象</td>
+</tr>
+<tr>
+<td>responses</td>
+<td style="text-align:center"><a href="http://swagger.io/specification/#responsesDefinitionsObject" target="_blank" rel="external">反应定义对象</a></td>
+<td style="text-align:right">定义请求响应对象</td>
+</tr>
+<tr>
+<td>securityDefinitions</td>
+<td style="text-align:center"><a href="http://swagger.io/specification/#securityDefinitionsObject" target="_blank" rel="external">安全定义对象</a></td>
+<td style="text-align:right">安全方案定义规范,比如认证</td>
+</tr>
+<tr>
+<td>security</td>
+<td style="text-align:center"><a href="http://swagger.io/specification/#securityRequirementObject" target="_blank" rel="external">安全需求对象</a></td>
+<td style="text-align:right">这里主要指使用哪种认证手段</td>
+</tr>
+<tr>
+<td>tags</td>
+<td style="text-align:center"><a href="http://swagger.io/specification/#tagObject" target="_blank" rel="external">标签对象</a></td>
+<td style="text-align:right">没个RESTful中资源的标签，列表中的每个标记名称必须是唯一的</td>
+</tr>
+<tr>
+<td>externalDocs</td>
+<td style="text-align:center"><a href="http://swagger.io/specification/#externalDocumentationObject" target="_blank" rel="external">外部文档对象</a></td>
+<td style="text-align:right">额外的外部文档, 指向外部url</td>
+</tr>
+</tbody>
+</table>
+<h2 id="渲染器-ui"><a href="#渲染器-ui" class="headerlink" title="渲染器(ui)"></a>渲染器(ui)</h2><p>swagger-ui的使用很简单<a href="http://swagger.io/docs/" target="_blank" rel="external">swager-ui官方文档</a></p>
+<h3 id="HTML文档渲染"><a href="#HTML文档渲染" class="headerlink" title="HTML文档渲染"></a>HTML文档渲染</h3><p>渲染器使用官方的swagger-ui，这里我们需要一个web服务器，用来渲染我们刚才编辑完成的api 设计文档。这里一般使用node 的 express为web框架来做这个简单的web服务器</p>
+<h3 id="PDF文档渲染"><a href="#PDF文档渲染" class="headerlink" title="PDF文档渲染"></a>PDF文档渲染</h3><p>将API设计文档渲染成PDF, 流程是这样: swagger.yaml —&gt; asciiDoc—&gt; pdf</p>
+<ul>
+<li><p>使用<a href="https://github.com/Swagger2Markup/swagger2markup" target="_blank" rel="external">swagger2markup</a>来生成asciiDoc格式的文档<br>下载swagger2markup工具,<a href="http://repo.springsource.org/libs-release-remote/io/github/swagger2markup/swagger2markup-cli/" target="_blank" rel="external">下载地址</a>,选择你想要的版本下载<br>使用工具生成asciiDoc, -i指定swagger.yaml的位置, -f指定输出文件名称：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java -jar swagger2markup-cli-1.1.0.jar convert -i ~/PycharmProjects/doc/api_design/swagger.yaml <span class="_">-f</span> asiidoc/swagger</div></pre></td></tr></table></figure>
+</li>
+<li><p>使用<a href="http://asciidoctor.org/docs/convert-asciidoc-to-pdf/" target="_blank" rel="external">asciidoctor</a>来将asciiDoc换换成PDF<br>这是一个ruby写的工具，我本地不打算部署ruby环境，因此在找一个docker镜像：<code>madduci/docker-asciidoctor-pdf</code><br>由于访问dockerhub的镜像速度非常慢，因此我将该工具的使用说明复制了下来，<a href="https://store.docker.com/community/images/madduci/docker-asciidoctor-pdf" target="_blank" rel="external">镜像使用说明</a></p>
+<blockquote>
+<p>Docker Image exposing asciidoctor-pdf as entrypoint and /document as mounted volume where to build the file<br>To build your own documents as PDF, simply run the container as:<br>docker run –rm -v /path/to/your/document/folder/:/document/ madduci/docker-asciidoctor-pdf /document/your_document.adoc<br>If you want to use some custom styles, just run it as<br>docker run –rm -v /path/to/your/document/folder/:/document/ madduci/docker-asciidoctor-pdf -a pdf-stylesdir=/document/resources/themes -a pdf-style=your_style -a pdf-fontsdir=/document/resources/fonts /document/your_document.adoc<br>and it will generate the pdf in the mounted volume /document</p>
+</blockquote>
+<p>这工具在生成含有中文的pdf文档时有字体问题，因此我修改了字体为微软雅黑字体，以下是修改方法：</p>
+<ol>
+<li><p>添加雅黑字体到当前的Fonts文件夹下面,这里需要标准字体和粗体, 而默认提供的字体只有这些<a href="https://github.com/asciidoctor/asciidoctor-pdf/tree/master/data/fonts" target="_blank" rel="external">默认提供的字体</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">➜  asiidoc ls Fonts |grep -i &apos;yahei&apos;</div><div class="line">Microsoft Yahei.ttf</div><div class="line">yahei.ttf</div><div class="line">yahei_bold.ttf</div></pre></td></tr></table></figure>
+</li>
+<li><p>修改主题配置<code>default-theme.yml</code>的<code>Noto Serif</code>字段，使用该字体:<br>配置文件下载地址<a href="https://github.com/asciidoctor/asciidoctor-pdf/tree/master/data/themes" target="_blank" rel="external">默认配置文件下载地址</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Noto Serif:</div><div class="line">normal: yahei.ttf</div><div class="line">bold: yahei_bold.ttf</div><div class="line">italic: yahei.ttf</div><div class="line">bold_italic: yahei_bold.tt</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>最后把我们生成好的swagger.adoc, 主题配置文件,字体 放在一个目录下，挂载到docker里面去:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">➜  Downloads ls asiidoc</div><div class="line">Fonts  swagger.adoc themes</div><div class="line">docker run --rm -v $(<span class="built_in">pwd</span>)/asiidoc/:/document/ madduci/docker-asciidoctor-pdf  <span class="_">-a</span> pdf-fontsdir=/document/Fonts <span class="_">-a</span> pdf-stylesdir=/document/themes /document/swagger.adoc</div></pre></td></tr></table></figure>
+<p>最后查看asiidoc下面就会有生成的pdf文件</p>
+</li>
+</ul>
+<h2 id="代码生成器-codegen"><a href="#代码生成器-codegen" class="headerlink" title="代码生成器(codegen)"></a>代码生成器(codegen)</h2><p>swagger能提供服务端和客户端的代码生成功能,这个功能在swagger-editor上已经集成<br>生成server端代码：<br><img src="http://oiw1gzfww.bkt.clouddn.com/swagger_gen_server_code.png" alt=""><br>生成客户端代码：<br><img src="http://oiw1gzfww.bkt.clouddn.com/swagger_gen_client_code.png" alt=""></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;img src=&quot;http://oiw1gzfww.bkt.clouddn.com/swagger_example.png&quot; alt=&quot;&quot;&gt;&lt;br&gt;
+    
+    </summary>
+    
+      <category term="程序设计" scheme="https://blog.yumaojun.net/categories/%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/"/>
+    
+      <category term="RESTful API" scheme="https://blog.yumaojun.net/categories/%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/RESTful-API/"/>
+    
+    
+      <category term="swagger" scheme="https://blog.yumaojun.net/tags/swagger/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>如何使用Python写出优雅而安全的代码</title>
+    <link href="https://blog.yumaojun.net/2017/01/02/python-bestpractice/"/>
+    <id>https://blog.yumaojun.net/2017/01/02/python-bestpractice/</id>
+    <published>2017-01-02T03:46:29.000Z</published>
+    <updated>2017-01-02T03:58:37.000Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
+    
+      <category term="Python" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Python/"/>
+    
+    
+      <category term="best_practice" scheme="https://blog.yumaojun.net/tags/best-practice/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>使用VSCode快速搭建NodeJS开发环境</title>
+    <link href="https://blog.yumaojun.net/2017/01/01/nodejs-vscode/"/>
+    <id>https://blog.yumaojun.net/2017/01/01/nodejs-vscode/</id>
+    <published>2017-01-01T14:42:02.000Z</published>
+    <updated>2017-01-06T06:18:03.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>文本的目的是快速搭建NodeJS的开发环境，NodeJS的常见的开发方式有2种，一种是编辑器，一种是IDE。编辑器推荐使用微软出品的vscdoe，因为其启动速度快，轻量级，执行简单，调试方便，还有界面漂亮。而IDE 无可厚非的就是WebStorm了。这里使用vscdoe搭建开发环境，因为IDE真的比较耗内存。除非开发大型项目,否则轻易我不开IDE。<br><a id="more"></a></p>
+<h2 id="VSCode简介"><a href="#VSCode简介" class="headerlink" title="VSCode简介"></a>VSCode简介</h2><p>VSCode全称是Visual Studio Code, 由微软出品,但它不是那个大块头的Visual Studio ,它是一个精简版的迷你Visual Studio，并且，Visual Studio Code可以跨！平！台！Windows、Mac和Linux通用。</p>
+<h2 id="安装VSCode"><a href="#安装VSCode" class="headerlink" title="安装VSCode"></a>安装VSCode</h2><p>可以通过<a href="https://code.visualstudio.com/Download" target="_blank" rel="external">官方下载</a>, 由于你我都懂的原因，可能无法访问，因此你可能会需要使用<a href="https://pan.baidu.com/s/1kU5OCOB#list/path=%2Fpub%2Fvscode" target="_blank" rel="external">国内镜像</a>,直接下mac版本的安装包，安装。</p>
+<h2 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h2><p>在VS Code中，我们可以非常方便地运行JavaScript文件。</p>
+<p>VS Code以文件夹作为工程目录（Workspace Dir），所有的JavaScript文件都存放在该目录下。此外，VS Code在工程目录下还需要一个.vscode的配置目录，里面存放里VS Code需要的配置文件。</p>
+<p>假设我们要创建一个hello的工程，因此我需要一个hello的目录作为工程目录，然后在里面编写hello.js文件，则该工程目录的结构如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">hello/ &lt;-- workspace dir</div><div class="line">|</div><div class="line">+- hello.js &lt;-- JavaScript file</div><div class="line">|</div><div class="line">+- .vscode/  &lt;-- VS Code config</div><div class="line">   |</div><div class="line">   +- launch.json &lt;-- VS Code config file <span class="keyword">for</span> JavaScript</div></pre></td></tr></table></figure></p>
+<p>然后切换到debug模式进行运行，关于debug模式后面介绍。对于更细节相关的文档可以参考微软官方提供的<a href="https://code.visualstudio.com/Docs/languages/javascript" target="_blank" rel="external">JavaScript in VS Code</a></p>
+<h2 id="智能提示"><a href="#智能提示" class="headerlink" title="智能提示"></a>智能提示</h2><p>因为之前微软推出了<code>typescript</code>语言，结合tsd文件，用visual studio写typescript代码是相当爽的，智能提示的功能非常nb。</p>
+<p>这个功能理所应当也被<code>vscode</code>继承了，但是现在<a href="https://github.com/DefinitelyTyped/tsd" target="_blank" rel="external">tsd</a>项目已经过期了，接过这个接力棒的是<a href="https://github.com/typings/typings" target="_blank" rel="external">typings</a></p>
+<p>因此我们将通过Typings来实现JavaScript智能提示功</p>
+<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><blockquote>
+<p>安装NPM</p>
+</blockquote>
+<p><code>NPM</code>是和<code>Node.js</code>一起安装的，如果你想使用NPM的话，那么你应该先安装<code>Node.js</code></p>
+<blockquote>
+<p>Typings vs TSD</p>
+</blockquote>
+<p><code>Typings</code>作为<code>TSD</code>的替代者而出现的，如果你已经安装了TSD，那么需要知道现在TSD已经不推荐使用了。如果已经安装TSD请执行下面的命令来移除它<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">npm rm -g tsd</div></pre></td></tr></table></figure></p>
+<blockquote>
+<p>CNPM</p>
+</blockquote>
+<p>在国内由于墙的原因，大部分时候使用NPM安装模块的速度上会很慢，这时候我们其实可以选择国内淘宝的<code>NPM镜像</code>，关于淘宝NPM镜像的使用方法可以参考<a href="https://npm.taobao.org/" target="_blank" rel="external">淘宝 NPM 镜像</a></p>
+<p>使用下面的命令来进行安装和使用<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">npm install -g cnpm --registry=https://registry.npm.taobao.org</div><div class="line">cnpm install koa</div></pre></td></tr></table></figure></p>
+<h3 id="安装Typings"><a href="#安装Typings" class="headerlink" title="安装Typings"></a>安装Typings</h3><p>我们通过cnpm来安装typings<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">maojun@maojun-mbp$ npm install -g typings</div><div class="line"></div><div class="line">maojun@maojun-mbp$ typings -v</div><div class="line">2.0.0</div></pre></td></tr></table></figure></p>
+<h3 id="配置智能提示"><a href="#配置智能提示" class="headerlink" title="配置智能提示"></a>配置智能提示</h3><p>安装完成后，我们需要安装相应的需要提示功能库或者框架的类型信息文件，在这里我们新建一个文件夹 NodeSnippet，为了了解Typings的使用方法，你可能需要简单看看<a href="https://github.com/typings/typings" target="_blank" rel="external">typings github</a></p>
+<p>使用命令行进入到该目录中，分别输入下面两个命令来安装Node和Lodash的类型接口信息文件：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">typings install dt~node --global --save</div><div class="line">typings install lodash --save</div></pre></td></tr></table></figure></p>
+<p>这时候我们可以看到我们的 NodeSnippet目录中多了一些文件：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"> maojun@maojun-mbp$ tree .</div><div class="line">.</div><div class="line">├── typings</div><div class="line">│   ├── globals</div><div class="line">│   │   └── node</div><div class="line">│   │       ├── index.d.ts</div><div class="line">│   │       └── typings.json</div><div class="line">│   ├── index.d.ts</div><div class="line">│   └── modules</div><div class="line">│       └── lodash</div><div class="line">│           ├── index.d.ts</div><div class="line">│           └── typings.json</div><div class="line">└── typings.json</div></pre></td></tr></table></figure></p>
+<p>这些文件就是为我们提供提示信息的类型类型文件(使用TypeScript定义)。查看Typings是否支持某个库或框架的智能提示，我们可以使用下面的命令:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">typings search exampleName</div></pre></td></tr></table></figure></p>
+<h3 id="启动智能提示"><a href="#启动智能提示" class="headerlink" title="启动智能提示"></a>启动智能提示</h3><p>配置好了类型接口后，可以通过两种方式来启动提示功能：</p>
+<ol>
+<li><p>文件头加注释</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/// &lt;reference path="./typings/index.d.ts" /&gt;</span></div></pre></td></tr></table></figure>
+</li>
+<li><p>在目录(在这里是<code>NodeSnippet</code>文件夹中)增加一个名为<code>jsconfig.json</code>的空文件</p>
+</li>
+</ol>
+<p>更多jsconfig.json文件的内容可以参考： <a href="https://code.visualstudio.com/Docs/languages/javascript" target="_blank" rel="external">JavaScript in VS Code</a></p>
+<p>这样我们写代码的时候就有智能提示功能了， 效果如下:<br><img src="http://oiw1gzfww.bkt.clouddn.com/nodejs_vscode.gif" alt=""></p>
+<h2 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h2><p>如何调试写好了的JS程序喃？</p>
+<p>用VS Code快速创建launch.json文件, 主要是修改program这个参数，指明你 可执行文件位置。</p>
+<p>关于Debug的细节，请参考<a href="https://go.microsoft.com/fwlink/?linkid=830387" target="_blank" rel="external">Debugging</a></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">    <span class="comment">// Use IntelliSense to learn about possible Node.js debug attributes.</span></div><div class="line">    <span class="comment">// Hover to view descriptions of existing attributes.</span></div><div class="line">    <span class="comment">// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387</span></div><div class="line">    <span class="string">"version"</span>: <span class="string">"0.2.0"</span>,</div><div class="line">    <span class="string">"configurations"</span>: [</div><div class="line">        &#123;</div><div class="line">            <span class="string">"type"</span>: <span class="string">"node"</span>,</div><div class="line">            <span class="string">"request"</span>: <span class="string">"launch"</span>,</div><div class="line">            <span class="string">"name"</span>: <span class="string">"启动程序"</span>,</div><div class="line">            <span class="string">"program"</span>: <span class="string">"$&#123;workspaceRoot&#125;/app.js"</span>,</div><div class="line">            <span class="string">"cwd"</span>: <span class="string">"$&#123;workspaceRoot&#125;"</span></div><div class="line">        &#125;,</div><div class="line">        &#123;</div><div class="line">            <span class="string">"type"</span>: <span class="string">"node"</span>,</div><div class="line">            <span class="string">"request"</span>: <span class="string">"attach"</span>,</div><div class="line">            <span class="string">"name"</span>: <span class="string">"附加到进程"</span>,</div><div class="line">            <span class="string">"port"</span>: <span class="number">5858</span></div><div class="line">        &#125;</div><div class="line">    ]</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>效果如下:<br><img src="http://oiw1gzfww.bkt.clouddn.com/nodejs_vscode_debug.gif" alt=""></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;文本的目的是快速搭建NodeJS的开发环境，NodeJS的常见的开发方式有2种，一种是编辑器，一种是IDE。编辑器推荐使用微软出品的vscdoe，因为其启动速度快，轻量级，执行简单，调试方便，还有界面漂亮。而IDE 无可厚非的就是WebStorm了。这里使用vscdoe搭建开发环境，因为IDE真的比较耗内存。除非开发大型项目,否则轻易我不开IDE。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
+    
+      <category term="JavaScript" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/JavaScript/"/>
+    
+    
+      <category term="vscode" scheme="https://blog.yumaojun.net/tags/vscode/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>2016总结与2017计划</title>
+    <link href="https://blog.yumaojun.net/2016/12/31/2016-summary/"/>
+    <id>https://blog.yumaojun.net/2016/12/31/2016-summary/</id>
+    <published>2016-12-31T12:03:29.000Z</published>
+    <updated>2017-01-02T15:32:52.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>孔子曰:”吾日三省吾身”, 平时很少会静下心来反省和总结一段时间的功与过, 2016马上就要过去了，在这一年将要结束之时, 还是想回过一下这一年来的得与失, 顺便安排下来年的计划。</p>
+<p>记录下这一年来自己的变化, 同时也为来年再战作准备, 而且我这人记性不好, 留个底,照亮自己需要走的路。</p>
+<a id="more"></a>
+<h2 id="转瞬即逝的2016"><a href="#转瞬即逝的2016" class="headerlink" title="转瞬即逝的2016"></a>转瞬即逝的2016</h2><p>2016是繁忙的一年，工作上处处充满挑战，有些挑战是自己喜欢的，有些挑战也是自己比较抵触的，我喜欢开发，从运维开发转而参与大型系统开发，这的确是一个不小的挑战，我是一个对技术有点激情的人，因此这个挑战对我而言还是比较喜欢的。后来同时做起了产品设计, 每天扣脑袋, 看别人的产品，画产品设计图， 这些在当时的我是很抵触的, 当时我还处于单纯的想积累技术的阶段。现在看来这段经历也是我宝贵的财富, 毕竟产品决定东西的价值，用再牛叉的技术,做一个没有价值的东西, 这是一件愚蠢的行为，我这里说的价值是长远价值，而不是当下看起来有价值, 这个说起来很悬，以后有机会深入讨论这个。</p>
+<p>2016这一年也在和JumpServer一同成长的一年，感触也蛮多的，首先是技术的成长，一个开源产品的技术的迭代，我们致力于设计NB的产品和写出漂亮的代码。其次为有可能的融资谈判而兴奋过，然而最后还是平静下来, 慢慢做一个自己认可的能力范围之内的产品。</p>
+<p>工作上的事儿, 总是有那么点紧绷, 其实生活上也有很多值得高兴的事儿，我们有了自己的房子，并且搬进去了，告别了租房的日子，这一切多谢我的老婆打理，我基本是啥心都没操过。其次，我女儿和我关系也很不错，虽然她生气的时候只找她妈妈，但是我在她心中的地位也仅次于她妈妈，我也心有愧疚，作为一个父亲我陪伴她的时候是有点少了。还有我的好搭档，在我最需要钱的时候, 一身不吭的直接转我支付宝上,人生中能交到一个这样的朋友，是我的莫大的荣幸。</p>
+<p>还有一个事儿，我终于用上Mac了，虽然是一个二手的MBP，但是这对满足一个屌丝的虚荣心完全受用了, 说岔了, 我再也不用在Windows上装Ubuntu开发了。</p>
+<h2 id="瞬息万变的2017"><a href="#瞬息万变的2017" class="headerlink" title="瞬息万变的2017"></a>瞬息万变的2017</h2><p>变化和革新是很快的, 比如OpenStack没有那么热了, 容器技术也基本成了开发的必备技能, 无论你作为一个前端开发还是后端开发JavaScript都快成为一门必备语言了。前后端的完全分离也愈演愈烈, 各种前段框架的变化。<br>伴随而来的是微服务+容器技术的紧密结合。在最后DDD也随着微服务的出现，对开发人员提出了更高的需求, 以后那种只会写代码的人将愈来愈少了。</p>
+<p>我Hold不住这些，因此在技术方面我仅能列出我需要提升的书单:</p>
+<h3 id="Python提升书单-今年主力"><a href="#Python提升书单-今年主力" class="headerlink" title="Python提升书单(今年主力)"></a>Python提升书单(今年主力)</h3><ol>
+<li>基础回过<ul>
+<li><a href="http://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000" target="_blank" rel="external">廖雪峰官网</a></li>
+<li>Think Python 2ed 中译版精校  PDF 电子书</li>
+</ul>
+</li>
+<li>进阶深<ul>
+<li><a href="http://python3-cookbook.readthedocs.io/zh_CN/latest/preface.html" target="_blank" rel="external">python3-cookbook</a></li>
+<li>电子书Python高手之路</li>
+</ul>
+</li>
+<li>常见的一些代码实现<ul>
+<li><a href="https://github.com/liquanzhou/ops_doc/blob/master/python%E5%AE%9E%E4%BE%8B%E6%89%8B%E5%86%8C.py" target="_blank" rel="external">python实例手册</a>  </li>
+<li><a href="https://segmentfault.com/t/python/blogs" target="_blank" rel="external">网站上的文章</a></li>
+</ul>
+</li>
+<li>设计模式<ul>
+<li><a href="http://www.cnblogs.com/wuyuegb2312/archive/2013/04/09/3008320.html" target="_blank" rel="external">快速版大话设计模式</a></li>
+<li><a href="https://github.com/faif/python-patterns" target="_blank" rel="external">一些最新的例子</a></li>
+<li><a href="http://www.ituring.com.cn/book/1715" target="_blank" rel="external">精通Python设计模式</a></li>
+</ul>
+</li>
+<li>数据结构与算法<ul>
+<li><a href="http://top.jobbole.com/4681/" target="_blank" rel="external">快速阅读总结</a></li>
+<li>电子书：Data Structures and Algorithms with Python-2015</li>
+</ul>
+</li>
+<li>源码阅读<ul>
+<li>Django Class Based View </li>
+<li>Flask 源码阅读</li>
+<li>Openstack KeyStone 源码阅读</li>
+</ul>
+</li>
+<li>理解Python解释器<ul>
+<li><a href="http://mt.sohu.com/20161030/n471778650.shtml" target="_blank" rel="external">用Python实现一个Python解释器</a></li>
+</ul>
+</li>
+</ol>
+<h3 id="Golang提升书单"><a href="#Golang提升书单" class="headerlink" title="Golang提升书单"></a>Golang提升书单</h3><ol>
+<li>回过基础：<ul>
+<li><a href="http://mt.sohu.com/20161030/n471778650.shtml" target="_blank" rel="external">Go Web 编程</a></li>
+<li><a href="https://hotsnow.gitbooks.io/the-way-to-go_zh_cn/content/" target="_blank" rel="external">Go入门指南</a></li>
+</ul>
+</li>
+</ol>
+<h3 id="JavaScript提升书单"><a href="#JavaScript提升书单" class="headerlink" title="JavaScript提升书单"></a>JavaScript提升书单</h3><ol>
+<li>回过基础：<ul>
+<li><a href="http://www.liaoxuefeng.com/wiki/001434446689867b27157e896e74d51a89c25cc8b43bdb3000" target="_blank" rel="external">廖雪峰官网</a></li>
+<li><a href="http://javascript.ruanyifeng.com/#nodejs" target="_blank" rel="external">阮一峰的javascript教程 </a></li>
+<li><a href="http://es6.ruanyifeng.com/" target="_blank" rel="external">ECMAScript 6 入门</a></li>
+</ul>
+</li>
+</ol>
+<p>除了技术, 还应该有生活。而生活就是: <strong><em>赶紧把账还完</em></strong></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;孔子曰:”吾日三省吾身”, 平时很少会静下心来反省和总结一段时间的功与过, 2016马上就要过去了，在这一年将要结束之时, 还是想回过一下这一年来的得与失, 顺便安排下来年的计划。&lt;/p&gt;
+&lt;p&gt;记录下这一年来自己的变化, 同时也为来年再战作准备, 而且我这人记性不好, 留个底,照亮自己需要走的路。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="杂谈" scheme="https://blog.yumaojun.net/categories/%E6%9D%82%E8%B0%88/"/>
+    
+      <category term="年终总结" scheme="https://blog.yumaojun.net/categories/%E6%9D%82%E8%B0%88/%E5%B9%B4%E7%BB%88%E6%80%BB%E7%BB%93/"/>
+    
+    
+      <category term="summary" scheme="https://blog.yumaojun.net/tags/summary/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>如何使用golang编写漂亮的命令行工具</title>
+    <link href="https://blog.yumaojun.net/2016/12/30/go-cobra/"/>
+    <id>https://blog.yumaojun.net/2016/12/30/go-cobra/</id>
+    <published>2016-12-30T01:08:22.000Z</published>
+    <updated>2017-01-06T06:18:13.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>无论是Openstack还是Docker都有一个漂亮的命令行工具，Openstack的命令行工具主要使用的是Python的argparse库，至于Docker的CLI的实现还没看，但是今天看到了一个在Golang中 用于构建像Docker命令行风格的一个库:cobra<br><a id="more"></a></p>
+<h2 id="cobra简介"><a href="#cobra简介" class="headerlink" title="cobra简介"></a>cobra简介</h2><p>Cobra既是一个用来创建强大的现代CLI命令行的golang库，也是一个生成程序应用和命令行文件的程序。<br>它提供的功能有：</p>
+<ul>
+<li>简易的子命令行模式，如 app server， app fetch等等</li>
+<li>完全兼容posix命令行模式</li>
+<li>嵌套子命令subcommand</li>
+<li>支持全局，局部，串联flags</li>
+<li>使用Cobra很容易的生成应用程序和命令，使用cobra create appname和cobra add cmdname</li>
+<li>如果命令输入错误，将提供智能建议，如 app srver，将提示srver没有，是否是app server</li>
+<li>自动生成commands和flags的帮助信息</li>
+<li>自动生成详细的help信息，如app help</li>
+<li>自动识别-h，–help帮助flag</li>
+<li>自动生成应用程序在bash下命令自动完成功能</li>
+<li>自动生成应用程序的man手册</li>
+<li>命令行别名</li>
+<li>自定义help和usage信息</li>
+<li>可选的紧密集成的viper apps</li>
+</ul>
+<p>从功能上看完全超越了argparse， 下面将做一个简单的测试，体验下cobra的强大</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>安装cobra需要翻墙，我的环境是Mac，使用ss + polipo来提供https的方向代理。我的代理端口在8123,所以命令行是这样的<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$https_proxy</span>=localhost:8123 go get -v github.com/spf13/cobra/cobra</div></pre></td></tr></table></figure></p>
+<p>安装完成后可以看到cobra的一些帮助信息<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">maojun@maojun-mbp$ cobra -h</div><div class="line">Cobra is a CLI library <span class="keyword">for</span> Go that empowers applications.</div><div class="line">This application is a tool to generate the needed files</div><div class="line">to quickly create a Cobra application.</div><div class="line"></div><div class="line">Usage:</div><div class="line">  cobra [<span class="built_in">command</span>]</div><div class="line"></div><div class="line">Available Commands:</div><div class="line">  add         Add a <span class="built_in">command</span> to a Cobra Application</div><div class="line">  init        Initialize a Cobra Application</div><div class="line"></div><div class="line">Flags:</div><div class="line">  <span class="_">-a</span>, --author string        Author name <span class="keyword">for</span> copyright attribution (default <span class="string">"YOUR NAME"</span>)</div><div class="line">      --config string        config file (default is <span class="variable">$HOME</span>/.cobra.yaml)</div><div class="line">  <span class="_">-l</span>, --license license      Name of license <span class="keyword">for</span> the project (can provide license <span class="keyword">in</span> config)</div><div class="line">  -b, --projectbase string   base project directory, e.g. github.com/spf13/</div><div class="line">      --viper                Use Viper <span class="keyword">for</span> configuration (default <span class="literal">true</span>)</div><div class="line"></div><div class="line">Use <span class="string">"cobra [command] --help"</span> <span class="keyword">for</span> more information about a command.</div></pre></td></tr></table></figure></p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>接下来将使用cobra构建一个不带子命令的CLI和带子命令的CLI</p>
+<h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><p>我们可以通过cobra提供的init命令来生成CLI的框架代码，因此切换到GOPATH/src下面,初始CLI框架<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">maojun@maojun-mbp$ cobra init demo</div><div class="line">Your Cobra application is ready at</div><div class="line">/Users/maojun/GoWorkDir/src/demo</div><div class="line">Give it a try by going there and running `go run main.go`</div><div class="line">Add commands to it by running `cobra add [cmdname]`</div></pre></td></tr></table></figure></p>
+<p>这个命令会帮你生成这样一个框架代码<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"> maojun@maojun-mbp$ tree demo</div><div class="line">demo</div><div class="line">├── LICENSE</div><div class="line">├── cmd</div><div class="line">│   └── root.go</div><div class="line">└── main.go</div></pre></td></tr></table></figure></p>
+<h3 id="简单的CLI"><a href="#简单的CLI" class="headerlink" title="简单的CLI"></a>简单的CLI</h3><p>在写一些简单的CLI的时候我们其实是不需要有子命令的，我们往往需要这样一种简单的CLI<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">demo.exe</div><div class="line">Demo is a <span class="built_in">test</span> appcation <span class="keyword">for</span> <span class="built_in">print</span> things</div><div class="line"></div><div class="line">Usage:</div><div class="line">  demo [flags]</div><div class="line"></div><div class="line">Flags:</div><div class="line">  <span class="_">-a</span>, --age int       person<span class="string">'s age</span></div><div class="line">  -h, --help          help for demo</div><div class="line">  -n, --name string   person's name</div></pre></td></tr></table></figure></p>
+<p>接下来我们就在上面生成的代码的基础上完成一个不带子命令的CLI。首先，我需要编写我的业务逻辑，因此我在demo下面新建一个包，名称为simple。如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">maojun@maojun-mbp$ tree .</div><div class="line">.</div><div class="line">├── LICENSE</div><div class="line">├── cmd</div><div class="line">│   └── root.go</div><div class="line">├── main.go</div><div class="line">└── simple</div><div class="line">    ├── simple.go</div><div class="line">    └── simple_test.go</div></pre></td></tr></table></figure></p>
+<p>这里仅仅实现一个print作为样例,因此simple.go是这样实现的<br><figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> simple</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">    <span class="string">"fmt"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">Show</span><span class="params">(name <span class="keyword">string</span>, age <span class="keyword">int</span>)</span></span> &#123;</div><div class="line">    fmt.Printf(<span class="string">"My name is %s, my age is %d\n"</span>, name, age)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>接下来我们需要将我们实行的整个Show方法暴露给CLI, 我们从生成的main文件入手分析。</p>
+<ol>
+<li>在main里面调用了 demo/cmd包里面暴露的Execute 函数 [cmd.Execute()]</li>
+<li>在demo/cmd/root.go中发现Execute执行的是RootCmd.Execute()</li>
+<li>而RootCmd是一个cobra的Command结构体[RootCmd = &amp;cobra.Command]<br>显然我们想要实行不带子命令的CLI，只需要将RootCmd的修改成我们需要的结构体就ok了</li>
+</ol>
+<p>这里做了几点修改</p>
+<ol>
+<li>RootCmd中的Command结构体中的Run方法需要我们定义， 主要功能就是调用simple里面的Show接口</li>
+<li>cmd包初始化得时候需要通过RootCmd.Flags()获取命令行传入的name和age的参数，因此这里需要修改init方法</li>
+<li>最后我们不需要从配置文件读取配置，注释掉：nitConfig函数和”github.com/spf13/viper”</li>
+</ol>
+<p>最终这个root.go是这样的<br><figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Copyright © 2016 NAME HERE &lt;EMAIL ADDRESS&gt;</span></div><div class="line"><span class="comment">//</span></div><div class="line"><span class="comment">// Licensed under the Apache License, Version 2.0 (the "License");</span></div><div class="line"><span class="comment">// you may not use this file except in compliance with the License.</span></div><div class="line"><span class="comment">// You may obtain a copy of the License at</span></div><div class="line"><span class="comment">//</span></div><div class="line"><span class="comment">//     http://www.apache.org/licenses/LICENSE-2.0</span></div><div class="line"><span class="comment">//</span></div><div class="line"><span class="comment">// Unless required by applicable law or agreed to in writing, software</span></div><div class="line"><span class="comment">// distributed under the License is distributed on an "AS IS" BASIS,</span></div><div class="line"><span class="comment">// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span></div><div class="line"><span class="comment">// See the License for the specific language governing permissions and</span></div><div class="line"><span class="comment">// limitations under the License.</span></div><div class="line"></div><div class="line"><span class="keyword">package</span> cmd</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"os"</span></div><div class="line"></div><div class="line">	<span class="string">"demo/simple"</span></div><div class="line"></div><div class="line">	<span class="string">"github.com/spf13/cobra"</span></div><div class="line">	<span class="comment">// "github.com/spf13/viper"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="comment">//var cfgFile string</span></div><div class="line"><span class="keyword">var</span> name <span class="keyword">string</span></div><div class="line"><span class="keyword">var</span> age <span class="keyword">int</span></div><div class="line"></div><div class="line"><span class="comment">// RootCmd represents the base command when called without any subcommands</span></div><div class="line"><span class="keyword">var</span> RootCmd = &amp;cobra.Command&#123;</div><div class="line">	Use:   <span class="string">"demo"</span>,</div><div class="line">	Short: <span class="string">"A test demo"</span>,</div><div class="line">	Long: <span class="string">`Demo is a test appcation for print things`</span>,</div><div class="line"><span class="comment">// Uncomment the following line if your bare application</span></div><div class="line"><span class="comment">// has an action associated with it:</span></div><div class="line">	Run: <span class="function"><span class="keyword">func</span><span class="params">(cmd *cobra.Command, args []<span class="keyword">string</span>)</span></span> &#123;</div><div class="line">		<span class="keyword">if</span> <span class="built_in">len</span>(name) == <span class="number">0</span> &#123;</div><div class="line">			cmd.Help()</div><div class="line">			<span class="keyword">return</span></div><div class="line">		&#125;</div><div class="line">		simple.Show(name, age)</div><div class="line">	&#125;,</div><div class="line"></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// Execute adds all child commands to the root command sets flags appropriately.</span></div><div class="line"><span class="comment">// This is called by main.main(). It only needs to happen once to the rootCmd.</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">Execute</span><span class="params">()</span></span> &#123;</div><div class="line">	<span class="keyword">if</span> err := RootCmd.Execute(); err != <span class="literal">nil</span> &#123;</div><div class="line">		fmt.Println(err)</div><div class="line">		os.Exit(<span class="number">-1</span>)</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">init</span><span class="params">()</span></span> &#123;</div><div class="line">	<span class="comment">// cobra.OnInitialize(initConfig)</span></div><div class="line"></div><div class="line">	<span class="comment">// Here you will define your flags and configuration settings.</span></div><div class="line">	<span class="comment">// Cobra supports Persistent Flags, which, if defined here,</span></div><div class="line">	<span class="comment">// will be global for your application.</span></div><div class="line"></div><div class="line">	<span class="comment">// RootCmd.PersistentFlags().StringVar(&amp;cfgFile, "config", "", "config file (default is $HOME/.demo.yaml)")</span></div><div class="line">	<span class="comment">// Cobra also supports local flags, which will only run</span></div><div class="line">	<span class="comment">// when this action is called directly.</span></div><div class="line">	<span class="comment">// RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")</span></div><div class="line"></div><div class="line">	RootCmd.Flags().StringVarP(&amp;name, <span class="string">"name"</span>, <span class="string">"n"</span>, <span class="string">""</span>, <span class="string">"persion's name"</span>)</div><div class="line">	RootCmd.Flags().IntVarP(&amp;age, <span class="string">"age"</span>, <span class="string">"a"</span>, <span class="number">0</span>, <span class="string">"person's age"</span>)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// // initConfig reads in config file and ENV variables if set.</span></div><div class="line"><span class="comment">// func initConfig() &#123;</span></div><div class="line"><span class="comment">// 	if cfgFile != "" &#123; // enable ability to specify config file via flag</span></div><div class="line"><span class="comment">// 		viper.SetConfigFile(cfgFile)</span></div><div class="line"><span class="comment">// 	&#125;</span></div><div class="line"></div><div class="line"><span class="comment">// 	viper.SetConfigName(".demo") // name of config file (without extension)</span></div><div class="line"><span class="comment">// 	viper.AddConfigPath("$HOME")  // adding home directory as first search path</span></div><div class="line"><span class="comment">// 	viper.AutomaticEnv()          // read in environment variables that match</span></div><div class="line"></div><div class="line"><span class="comment">// 	// If a config file is found, read it in.</span></div><div class="line"><span class="comment">// 	if err := viper.ReadInConfig(); err == nil &#123;</span></div><div class="line"><span class="comment">// 		fmt.Println("Using config file:", viper.ConfigFileUsed())</span></div><div class="line"><span class="comment">// 	&#125;</span></div><div class="line"><span class="comment">// &#125;</span></div></pre></td></tr></table></figure></p>
+<p>最后测试下是不是我们想要的效果<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">maojun@maojun-mbp$ go run main.go -h</div><div class="line">Demo is a <span class="built_in">test</span> appcation <span class="keyword">for</span> <span class="built_in">print</span> things</div><div class="line"></div><div class="line">Usage:</div><div class="line">  demo [flags]</div><div class="line"></div><div class="line">Flags:</div><div class="line">  <span class="_">-a</span>, --age int       person<span class="string">'s age</span></div><div class="line">  -n, --name string   persion's name</div><div class="line">maojun@maojun-mbp$ go run main.go -n <span class="string">"test"</span> <span class="_">-a</span> 10</div><div class="line">My name is <span class="built_in">test</span>, my age is 10</div></pre></td></tr></table></figure></p>
+<h3 id="带子命令的CLI"><a href="#带子命令的CLI" class="headerlink" title="带子命令的CLI"></a>带子命令的CLI</h3><p>对于复杂的情况，往往需要带子命令场景，比如Docker的CLI，而最终的效果应该是这样的<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">demo</div><div class="line">Demo is a <span class="built_in">test</span> appcation <span class="keyword">for</span> <span class="built_in">print</span> things</div><div class="line"></div><div class="line">Usage:</div><div class="line">  demo [flags]</div><div class="line">  demo [<span class="built_in">command</span>]</div><div class="line"></div><div class="line">Available Commands:</div><div class="line">  <span class="built_in">test</span>        A brief description of your <span class="built_in">command</span></div><div class="line"></div><div class="line">Flags:</div><div class="line">  <span class="_">-a</span>, --age int       person<span class="string">'s age</span></div><div class="line">  -h, --help          help for demo</div><div class="line">  -n, --name string   person's name</div><div class="line"></div><div class="line">Use <span class="string">"demo [command] --help"</span> <span class="keyword">for</span> more information about a command.</div></pre></td></tr></table></figure></p>
+<p>支持子命令是cobra的自己的功能，因此直接可以通过cobra生成带子命令的代码<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">maojun@maojun-mbp$ cobra init demo</div><div class="line">Your Cobra application is ready at</div><div class="line">/Users/maojun/GoWorkDir/src/demo</div><div class="line">Give it a try by going there and running `go run main.go`</div><div class="line">Add commands to it by running `cobra add [cmdname]`</div><div class="line"></div><div class="line">maojun@maojun-mbp$ cobra add <span class="built_in">test</span></div><div class="line"><span class="built_in">test</span> created at /Users/maojun/GoWorkDir/src/cmd/test.go</div></pre></td></tr></table></figure></p>
+<p>注释掉root.go那些不需要的地方, 然后修改生成的test.go<br><figure class="highlight go"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Copyright © 2016 NAME HERE &lt;EMAIL ADDRESS&gt;</span></div><div class="line"><span class="comment">//</span></div><div class="line"><span class="comment">// Licensed under the Apache License, Version 2.0 (the "License");</span></div><div class="line"><span class="comment">// you may not use this file except in compliance with the License.</span></div><div class="line"><span class="comment">// You may obtain a copy of the License at</span></div><div class="line"><span class="comment">//</span></div><div class="line"><span class="comment">//     http://www.apache.org/licenses/LICENSE-2.0</span></div><div class="line"><span class="comment">//</span></div><div class="line"><span class="comment">// Unless required by applicable law or agreed to in writing, software</span></div><div class="line"><span class="comment">// distributed under the License is distributed on an "AS IS" BASIS,</span></div><div class="line"><span class="comment">// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span></div><div class="line"><span class="comment">// See the License for the specific language governing permissions and</span></div><div class="line"><span class="comment">// limitations under the License.</span></div><div class="line"></div><div class="line"><span class="keyword">package</span> cmd</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"fmt"</span></div><div class="line"></div><div class="line">	<span class="string">"github.com/spf13/cobra"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="keyword">var</span> name <span class="keyword">string</span></div><div class="line"><span class="keyword">var</span> age <span class="keyword">int</span></div><div class="line"></div><div class="line"><span class="comment">// testCmd represents the test command</span></div><div class="line"><span class="keyword">var</span> testCmd = &amp;cobra.Command&#123;</div><div class="line">	Use:   <span class="string">"test"</span>,</div><div class="line">	Short: <span class="string">"A brief description of your command"</span>,</div><div class="line">	Long: <span class="string">`A longer description that spans multiple lines and likely contains examples</span></div><div class="line">and usage of using your command. For example:</div><div class="line"></div><div class="line">Cobra is a CLI library for Go that empowers applications.</div><div class="line">This application is a tool to generate the needed files</div><div class="line">to quickly create a Cobra application.`,</div><div class="line">	Run: <span class="function"><span class="keyword">func</span><span class="params">(cmd *cobra.Command, args []<span class="keyword">string</span>)</span></span> &#123;</div><div class="line">		<span class="comment">// <span class="doctag">TODO:</span> Work your own magic here</span></div><div class="line">		fmt.Printf(<span class="string">"My name is %s, my age is %d\n"</span>, name, age)</div><div class="line">	&#125;,</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">init</span><span class="params">()</span></span> &#123;</div><div class="line">	RootCmd.AddCommand(testCmd)</div><div class="line"></div><div class="line">	<span class="comment">// Here you will define your flags and configuration settings.</span></div><div class="line"></div><div class="line">	<span class="comment">// Cobra supports Persistent Flags which will work for this command</span></div><div class="line">	<span class="comment">// and all subcommands, e.g.:</span></div><div class="line">	<span class="comment">// testCmd.PersistentFlags().String("foo", "", "A help for foo")</span></div><div class="line"></div><div class="line">	<span class="comment">// Cobra supports local flags which will only run when this command</span></div><div class="line">	<span class="comment">// is called directly, e.g.:</span></div><div class="line">	testCmd.Flags().StringVarP(&amp;name, <span class="string">"name"</span>, <span class="string">"n"</span>, <span class="string">""</span>, <span class="string">"persion's name"</span>)</div><div class="line">	testCmd.Flags().IntVarP(&amp;age, <span class="string">"age"</span>, <span class="string">"a"</span>, <span class="number">0</span>, <span class="string">"person's age"</span>)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>最后测试下是不是我们想要的效果</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line">maojun@maojun-mbp$ go run main.go -h</div><div class="line">A longer description that spans multiple lines and likely contains</div><div class="line">examples and usage of using your application. For example:</div><div class="line"></div><div class="line">Cobra is a CLI library <span class="keyword">for</span> Go that empowers applications.</div><div class="line">This application is a tool to generate the needed files</div><div class="line">to quickly create a Cobra application.</div><div class="line"></div><div class="line">Usage:</div><div class="line">  demo [<span class="built_in">command</span>]</div><div class="line"></div><div class="line">Available Commands:</div><div class="line">  <span class="built_in">test</span>        A brief description of your <span class="built_in">command</span></div><div class="line"></div><div class="line">Flags:</div><div class="line">      --config string   config file (default is <span class="variable">$HOME</span>/.demo.yaml)</div><div class="line">  -t, --toggle          Help message <span class="keyword">for</span> toggle</div><div class="line"></div><div class="line">Use <span class="string">"demo [command] --help"</span> <span class="keyword">for</span> more information about a command.</div><div class="line"></div><div class="line">maojun@maojun-mbp$ go run main.go <span class="built_in">test</span> -h</div><div class="line">A longer description that spans multiple lines and likely contains examples</div><div class="line">and usage of using your command. For example:</div><div class="line"></div><div class="line">Cobra is a CLI library <span class="keyword">for</span> Go that empowers applications.</div><div class="line">This application is a tool to generate the needed files</div><div class="line">to quickly create a Cobra application.</div><div class="line"></div><div class="line">Usage:</div><div class="line">  demo <span class="built_in">test</span> [flags]</div><div class="line"></div><div class="line">Flags:</div><div class="line">  <span class="_">-a</span>, --age int       person<span class="string">'s age</span></div><div class="line">  -n, --name string   persion's name</div><div class="line"></div><div class="line">Global Flags:</div><div class="line">      --config string   config file (default is <span class="variable">$HOME</span>/.demo.yaml)</div><div class="line"></div><div class="line"> maojun@maojun-mbp$ go run main.go <span class="built_in">test</span> <span class="_">-a</span> 10 -n <span class="built_in">test</span></div><div class="line">My name is <span class="built_in">test</span>, my age is 10</div></pre></td></tr></table></figure>
+<p>命令行补全，man这些可以自己手动测试</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;无论是Openstack还是Docker都有一个漂亮的命令行工具，Openstack的命令行工具主要使用的是Python的argparse库，至于Docker的CLI的实现还没看，但是今天看到了一个在Golang中 用于构建像Docker命令行风格的一个库:cobra&lt;br&gt;
+    
+    </summary>
+    
+      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
+    
+      <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
+    
+    
+      <category term="cobra" scheme="https://blog.yumaojun.net/tags/cobra/"/>
+    
+  </entry>
+  
+</feed>

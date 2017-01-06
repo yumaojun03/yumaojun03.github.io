@@ -74,6 +74,8 @@
 
 
 
+  <link rel="alternate" href="/atom.xml" title="紫川秀的博客" type="application/atom+xml" />
+
 
 
 
@@ -84,19 +86,17 @@
 
 
 
-<meta name="description" content="按照现在的趋势，前后端分离几乎已经是业界对开发和部署方式所达成的一种共识, 后台只负责数据的提供和计算，而完全不处理展现。而前端则负责拿到数据，组织数据并展现的工作。这样结构清晰，关注点分离，前后端会变得相对独立并松耦合。而前段和后端对待的契约就是API设计文档, 有了API的设计文档过后, 后端依据设计文件开发后端程序, 前段根据API设计文档模拟服务器,开发前段页面。而Swagger就是其中一">
 <meta property="og:type" content="article">
 <meta property="og:title" content="如何使用swagger设计出漂亮的RESTful API">
 <meta property="og:url" content="https://blog.yumaojun.net/2017/01/05/api-design-swagger/index.html">
 <meta property="og:site_name" content="紫川秀的博客">
-<meta property="og:description" content="按照现在的趋势，前后端分离几乎已经是业界对开发和部署方式所达成的一种共识, 后台只负责数据的提供和计算，而完全不处理展现。而前端则负责拿到数据，组织数据并展现的工作。这样结构清晰，关注点分离，前后端会变得相对独立并松耦合。而前段和后端对待的契约就是API设计文档, 有了API的设计文档过后, 后端依据设计文件开发后端程序, 前段根据API设计文档模拟服务器,开发前段页面。而Swagger就是其中一">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/swagger_example.png">
 <meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/swagger_gen_server_code.png">
 <meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/swagger_gen_client_code.png">
-<meta property="og:updated_time" content="2017-01-06T02:43:20.000Z">
+<meta property="og:updated_time" content="2017-01-06T06:02:18.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="如何使用swagger设计出漂亮的RESTful API">
-<meta name="twitter:description" content="按照现在的趋势，前后端分离几乎已经是业界对开发和部署方式所达成的一种共识, 后台只负责数据的提供和计算，而完全不处理展现。而前端则负责拿到数据，组织数据并展现的工作。这样结构清晰，关注点分离，前后端会变得相对独立并松耦合。而前段和后端对待的契约就是API设计文档, 有了API的设计文档过后, 后端依据设计文件开发后端程序, 前段根据API设计文档模拟服务器,开发前段页面。而Swagger就是其中一">
-<meta name="twitter:image" content="http://oiw1gzfww.bkt.clouddn.com/swagger_gen_server_code.png">
+<meta name="twitter:image" content="http://oiw1gzfww.bkt.clouddn.com/swagger_example.png">
 
 
 
@@ -335,7 +335,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-01-05T13:18:16+08:00">
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-01-05T13:19:16+08:00">
                 2017-01-05
               </time>
             
@@ -425,8 +425,8 @@
       
 
       
-        <p>按照现在的趋势，前后端分离几乎已经是业界对开发和部署方式所达成的一种共识, 后台只负责数据的提供和计算，而完全不处理展现。而前端则负责拿到数据，组织数据并展现的工作。这样结构清晰，关注点分离，前后端会变得相对独立并松耦合。而前段和后端对待的契约就是API设计文档, 有了API的设计文档过后, 后端依据设计文件开发后端程序, 前段根据API设计文档模拟服务器,开发前段页面。而<code>Swagger</code>就是其中一种比较优秀的 <code>RESTful API</code>设计工具。</p>
-<a id="more"></a>
+        <p><img src="http://oiw1gzfww.bkt.clouddn.com/swagger_example.png" alt=""><br><a id="more"></a></p>
+<p>按照现在的趋势，前后端分离几乎已经是业界对开发和部署方式所达成的一种共识, 后台只负责数据的提供和计算，而完全不处理展现。而前端则负责拿到数据，组织数据并展现的工作。这样结构清晰，关注点分离，前后端会变得相对独立并松耦合。而前段和后端对待的契约就是API设计文档, 有了API的设计文档过后, 后端依据设计文件开发后端程序, 前段根据API设计文档模拟服务器,开发前段页面。而<code>Swagger</code>就是其中一种比较优秀的 <code>RESTful API</code>设计工具。</p>
 <h2 id="swagger-工具简介"><a href="#swagger-工具简介" class="headerlink" title="swagger 工具简介"></a>swagger 工具简介</h2><p>swagger是一个RESTful API 的设计工具，官方提供3种工具：</p>
 <ol>
 <li><code>swagger-editor</code> 在线编辑器，同时提供编辑-展现-客户端-服务端代码的生成</li>
@@ -800,6 +800,13 @@
         </nav>
 
         
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
 
         <div class="links-of-author motion-element">
           
@@ -893,7 +900,7 @@
       <div class="footer-inner">
         <div class="copyright" >
   
-  &copy; 
+  &copy;  2016 - 
   <span itemprop="copyrightYear">2017</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
@@ -915,6 +922,22 @@
 
 
         
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i>本站访客数<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>人次</span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i>站总访问量<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
 
         
       </div>
