@@ -1,0 +1,1149 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="restful," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:title" content="RESTful API 设计规范">
+<meta property="og:url" content="https://blog.yumaojun.net/2017/01/06/rest-api-design/index.html">
+<meta property="og:site_name" content="紫川秀的博客">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/rest_api.jpg">
+<meta property="og:updated_time" content="2017-01-06T04:38:40.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RESTful API 设计规范">
+<meta name="twitter:image" content="http://oiw1gzfww.bkt.clouddn.com/rest_api.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '11723790',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://blog.yumaojun.net/2017/01/06/rest-api-design/"/>
+
+
+
+
+
+  <title> RESTful API 设计规范 | 紫川秀的博客 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?035e345b7c80cdf05aec8bc846b2f227";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">紫川秀的博客</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+    
+      <p class="site-subtitle">Stay Hungry, Stay Foolish.</p>
+    
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/01/06/rest-api-design/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="紫川秀">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="http://oiw1gzfww.bkt.clouddn.com/me.png">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="紫川秀的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="紫川秀的博客" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                RESTful API 设计规范
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-01-06T12:32:55+08:00">
+                2017-01-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/程序设计/" itemprop="url" rel="index">
+                    <span itemprop="name">程序设计</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/程序设计/RESTful-API/" itemprop="url" rel="index">
+                    <span itemprop="name">RESTful API</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/01/06/rest-api-design/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/01/06/rest-api-design/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+             <span id="/2017/01/06/rest-api-design/" class="leancloud_visitors" data-flag-title="RESTful API 设计规范">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><img src="http://oiw1gzfww.bkt.clouddn.com/rest_api.jpg" alt=""></p>
+<a id="more"></a>
+<p>做出一个好的API设计很难。API表达的是你的数据和你的数据使用者之间的契约，因此API的设计往往是站在使用者的角度进行的，而关于RESTful的介绍可以参考阮一峰的博客<a href="http://www.ruanyifeng.com/blog/2011/09/restful.html" target="_blank" rel="external">理解RESTful架构
+</a>, 这里同时也参考了他的另一篇博客<a href="http://www.ruanyifeng.com/blog/2014/05/restful_api.html" target="_blank" rel="external">RESTful API 设计指南</a>在这方面有一篇很出名的文章，这里需要你自己解决翻墙问题<a href="https://codeplanet.io/principles-good-restful-api-design/" target="_blank" rel="external">Principles of good RESTful API Design</a></p>
+<h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><p>   这里有一些非常重要的术语，我将在本文里面一直用到它们</p>
+<ul>
+<li>资源(Resource)：一个对象的单独实例，如一只动物</li>
+<li>集合(Collection)：一群同种对象，如动物</li>
+<li>HTTP：跨网络的通信协议</li>
+<li>客户端(Consumer)：可以创建HTTP请求的客户端应用程序</li>
+<li>第三方开发者(Third Party Developer)：这个开发者不属于你的项目但是有想使用你的数据</li>
+<li>服务器(Server)：一个HTTP服务器或者应用程序，客户端可以跨网络访问它</li>
+<li>端点(Endpoint)：这个API在服务器上的URL用于表达一个资源或者一个集合</li>
+<li>幂等(Idempotent)：无边际效应，多次操作得到相同的结果</li>
+<li>URL段(Segment)：在URL里面已斜杠分隔的内容</li>
+</ul>
+<h2 id="数据设计与抽象"><a href="#数据设计与抽象" class="headerlink" title="数据设计与抽象"></a>数据设计与抽象</h2><ul>
+<li><p>理清业务数据流程</p>
+<p>  规划好你的API的外观要先于开发它实际的功能。首先你要知道数据该如何设计和核心服务/应用程序会如何工作, 这部分的工作<br>  往往就是需要写好 PRD和DRD这些功能文档</p>
+</li>
+<li><p>站在使用者的角度进行合理抽象</p>
+<p>  有时候一个集合可以表达一个数据库表，而一个资源可以表达成里面的一行记录，但是这并不是常态。事实上，你的API应该尽可能<br>  通过抽象来分离数据与业务逻辑。这点非常重要，只有这样做你才不会打击到那些拥有复杂业务的第三方开发者，<br>  否则他们是不会使用你的API的。</p>
+</li>
+<li><p>如何开放API</p>
+<p>  当然你的服务可能很多部分是不应该通过API暴露出去的。比较常见的例子就是很多API是不允许第三方来创建用户的。</p>
+</li>
+</ul>
+<h2 id="HTTP-动词"><a href="#HTTP-动词" class="headerlink" title="HTTP 动词"></a>HTTP 动词</h2><p>一个好的RESTful API只允许第三方调用者使用这四个半HTTP动词进行数据交互，并且在URL段里面不出现任何其他的动词。<br>一般来说，GET请求可以被浏览器缓存（通常也是这样的）。例如，缓存请求头用于第二次用户的POST请求。<br>HEAD请求是基于一个无响应体的GET请求，并且也可以被缓存的。</p>
+<ul>
+<li>GET (选择)：从服务器上获取一个具体的资源或者一个资源列表。</li>
+<li>POST （创建）： 在服务器上创建一个新的资源。</li>
+<li>PUT （更新）：以整体的方式更新服务器上的一个资源。</li>
+<li>PATCH （更新）：只更新服务器上一个资源的一个属性。</li>
+<li>DELETE （删除）：删除服务器上的一个资源。</li>
+<li>HEAD ： 获取一个资源的元数据，如数据的哈希值或最后的更新时间。</li>
+<li>OPTIONS：获取客户端能对资源做什么操作的信息。</li>
+</ul>
+<h2 id="域名"><a href="#域名" class="headerlink" title="域名"></a>域名</h2><p>  域名是用于访问你的API服务的第一步，因此如何在域名上表现自己提供的API 服务喃，以下有2种方法</p>
+<ul>
+<li><p>应该尽量将API部署在专用域名之下。</p>
+</li>
+<li><p>如果确定API很简单，不会有进一步扩展，可以考虑放在主域名下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">https://api.example.com   # 专业域名</div><div class="line">https://example.org/api/  # URI中明确说明</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="版本化"><a href="#版本化" class="headerlink" title="版本化"></a>版本化</h2><p>  API是服务器与客户端之间的一个公共契约。如果你对服务器上的API做了一个更改，并且这些更改无法向后兼容，<br>  那么你就打破了这个契约，客户端又会要求你重新支持它。为了避免这样的事情，你既要确保应用程序逐步的演变，<br>  又要让客户端满意。那么你必须在引入新版本API的同时保持旧版本API仍然可用。</p>
+<p>  随着时间的推移，你可能声明不再支持某些旧版本的API。申明不支持一个特性并不意味着关闭或者破坏它。<br>  而是告诉客户端旧版本的API将在某个特定的时间被删除，并且建议他们使用新版本的API。</p>
+<p>  如果你只是简单的增加一个新的特性到API上，如资源上的一个新属性或者增加一个新的端点，你不需要增加API的版本。<br>  因为这些并不会造成向后兼容性的问题，你只需要修改文档即可。</p>
+<p>  这里实现方式有2种：</p>
+<ul>
+<li><p>应该将API的版本号放入URL</p>
+</li>
+<li><p>将版本号放在HTTP头信息中，但不如放入URL方便和直观, Github采用的就是这种做法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">https://api.example.com/v1/                       # 在URL中说明</div><div class="line"></div><div class="line">curl -i https://api.github.com/users/octocat/orgs # HTTP头中表示API版本</div><div class="line"></div><div class="line">  HTTP/1.1 200 OK</div><div class="line">  Server: nginx</div><div class="line">  Date: Fri, 12 Oct 2012 23:33:14 GMT</div><div class="line">  Content-Type: application/json; charset=utf-8</div><div class="line">  Connection: keep-alive</div><div class="line">  Status: 200 OK</div><div class="line">  ETag: &quot;a00049ba79152d03380c34652f2cb612&quot;</div><div class="line">  X-GitHub-Media-Type: github.v3</div><div class="line">  </div><div class="line">  X-RateLimit-Limit: 5000</div><div class="line">  X-RateLimit-Remaining: 4987</div><div class="line">  X-RateLimit-Reset: 1350085394</div><div class="line">  </div><div class="line">  Content-Length: 5</div><div class="line">  Cache-Control: max-age=0, private, must-revalidate</div><div class="line">  X-Content-Type-Options: nosniff</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="API-ROOT-URI"><a href="#API-ROOT-URI" class="headerlink" title="API ROOT URI"></a>API ROOT URI</h2><p>  API的根地址很重要。可以通过这个列表快速了解你提供的服务，因此，让你的API根入口点保持尽可能的简单。以github的列</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">maojun@maojun-mbp# curl https://api.github.com</div><div class="line">&#123;</div><div class="line">  &quot;current_user_url&quot;: &quot;https://api.github.com/user&quot;,</div><div class="line">  &quot;current_user_authorizations_html_url&quot;: &quot;https://github.com/settings/connections/applications&#123;/client_id&#125;&quot;,</div><div class="line">  &quot;authorizations_url&quot;: &quot;https://api.github.com/authorizations&quot;,</div><div class="line">  &quot;code_search_url&quot;: &quot;https://api.github.com/search/code?q=&#123;query&#125;&#123;&amp;page,per_page,sort,order&#125;&quot;,</div><div class="line">  &quot;emails_url&quot;: &quot;https://api.github.com/user/emails&quot;,</div><div class="line">  &quot;emojis_url&quot;: &quot;https://api.github.com/emojis&quot;,</div><div class="line">  &quot;events_url&quot;: &quot;https://api.github.com/events&quot;,</div><div class="line">  &quot;feeds_url&quot;: &quot;https://api.github.com/feeds&quot;,</div><div class="line">  &quot;followers_url&quot;: &quot;https://api.github.com/user/followers&quot;,</div><div class="line">  &quot;following_url&quot;: &quot;https://api.github.com/user/following&#123;/target&#125;&quot;,</div><div class="line">  &quot;gists_url&quot;: &quot;https://api.github.com/gists&#123;/gist_id&#125;&quot;,</div><div class="line">  &quot;hub_url&quot;: &quot;https://api.github.com/hub&quot;,</div><div class="line">  &quot;issue_search_url&quot;: &quot;https://api.github.com/search/issues?q=&#123;query&#125;&#123;&amp;page,per_page,sort,order&#125;&quot;,</div><div class="line">  &quot;issues_url&quot;: &quot;https://api.github.com/issues&quot;,</div><div class="line">  &quot;keys_url&quot;: &quot;https://api.github.com/user/keys&quot;,</div><div class="line">  &quot;notifications_url&quot;: &quot;https://api.github.com/notifications&quot;,</div><div class="line">  &quot;organization_repositories_url&quot;: &quot;https://api.github.com/orgs/&#123;org&#125;/repos&#123;?type,page,per_page,sort&#125;&quot;,</div><div class="line">  &quot;organization_url&quot;: &quot;https://api.github.com/orgs/&#123;org&#125;&quot;,</div><div class="line">  &quot;public_gists_url&quot;: &quot;https://api.github.com/gists/public&quot;,</div><div class="line">  &quot;rate_limit_url&quot;: &quot;https://api.github.com/rate_limit&quot;,</div><div class="line">  &quot;repository_url&quot;: &quot;https://api.github.com/repos/&#123;owner&#125;/&#123;repo&#125;&quot;,</div><div class="line">  &quot;repository_search_url&quot;: &quot;https://api.github.com/search/repositories?q=&#123;query&#125;&#123;&amp;page,per_page,sort,order&#125;&quot;,</div><div class="line">  &quot;current_user_repositories_url&quot;: &quot;https://api.github.com/user/repos&#123;?type,page,per_page,sort&#125;&quot;,</div><div class="line">  &quot;starred_url&quot;: &quot;https://api.github.com/user/starred&#123;/owner&#125;&#123;/repo&#125;&quot;,</div><div class="line">  &quot;starred_gists_url&quot;: &quot;https://api.github.com/gists/starred&quot;,</div><div class="line">  &quot;team_url&quot;: &quot;https://api.github.com/teams&quot;,</div><div class="line">  &quot;user_url&quot;: &quot;https://api.github.com/users/&#123;user&#125;&quot;,</div><div class="line">  &quot;user_organizations_url&quot;: &quot;https://api.github.com/user/orgs&quot;,</div><div class="line">  &quot;user_repositories_url&quot;: &quot;https://api.github.com/users/&#123;user&#125;/repos&#123;?type,page,per_page,sort&#125;&quot;,</div><div class="line">  &quot;user_search_url&quot;: &quot;https://api.github.com/search/users?q=&#123;query&#125;&#123;&amp;page,per_page,sort,order&#125;&quot;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="Endpoints"><a href="#Endpoints" class="headerlink" title="Endpoints"></a>Endpoints</h2><p>  一个端点就是指向特定资源或资源集合的URL。针对每一个端点来说，你可能想列出所有可行的HTTP动词和端点的组合。<br>  在RESTful架构中，每个网址代表一种资源（resource），所以网址中不能有动词，只能有名词，<br>  而且所用的名词往往与数据库的表格名对应。一般来说，数据库中的表都是同种记录的<br>  “集合”（collection），所以API中的名词也应该使用复数。</p>
+<p>  请注意如何展示数据之间的关系，特别是雇员与动物园之间的多对多关系。通过添加一个额外的URL段就可以实现更多的交互能力。<br>  当然没有一个HTTP动词能表示正在解雇一个人，但是你可以使用DELETE一个动物园里的雇员来达到相同的效果。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">https://api.example.com/v1/zoos</div><div class="line">https://api.example.com/v1/animals</div><div class="line">https://api.example.com/v1/animal_types</div><div class="line">https://api.example.com/v1/employees</div><div class="line"></div><div class="line">GET /zoos: List all Zoos (ID and Name, not too much detail)</div><div class="line">POST /zoos: Create a new Zoo</div><div class="line">GET /zoos/ZID: Retrieve an entire Zoo object</div><div class="line">PUT /zoos/ZID: Update a Zoo (entire object)</div><div class="line">PATCH /zoos/ZID: Update a Zoo (partial object)</div><div class="line">DELETE /zoos/ZID: Delete a Zoo</div><div class="line">GET /zoos/ZID/animals: Retrieve a listing of Animals (ID and Name).</div><div class="line">GET /animals: List all Animals (ID and Name).</div><div class="line">POST /animals: Create a new Animal</div><div class="line">GET /animals/AID: Retrieve an Animal object</div><div class="line">PUT /animals/AID: Update an Animal (entire object)</div><div class="line">PATCH /animals/AID: Update an Animal (partial object)</div></pre></td></tr></table></figure>
+<h2 id="过滤和排序"><a href="#过滤和排序" class="headerlink" title="过滤和排序"></a>过滤和排序</h2><p>  使用过滤和排序有多种原因，因此API应该提供参数，过滤和排序返回结果，降低客户端的复杂度。</p>
+<ul>
+<li><p>如果记录数量很多，服务器不可能都将它们返回给用户。</p>
+</li>
+<li><p>从客户端的角度来说，最小化网络传输，并让客户端尽可能快的得到查询结果。</p>
+</li>
+<li><p>从服务器角度来说，响应请求越小负载就越小。</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">?limit=10: 减少返回给客户端的结果数量（用于分页）</div><div class="line">?offset=10: 发送一堆信息给客户端（用于分页）</div><div class="line">?animal_type_id=1: 使用条件匹配来过滤记录</div><div class="line">?sortby=name&amp;order=asc:  对结果按特定属性进行排序</div></pre></td></tr></table></figure>
+<h2 id="状态码"><a href="#状态码" class="headerlink" title="状态码"></a>状态码</h2><p>  服务器向用户返回的状态码和提示信息，因为它们是HTTP的标准，所以通用性上有保证，<br>  状态码的完整定义请看<a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html" target="_blank" rel="external">HTTP1.1/rfc Status Code define</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">状态码范围说明：</div><div class="line">1xx：保留给底层HTTP功能使用的，并且估计在你的职业生涯里面也用不着手动发送这样一个状态码出来。</div><div class="line">2xx：保留给成功消息使用的，你尽可能的确保服务器总发送这些状态码给用户。</div><div class="line">3xx：保留给重定向用的。大多数的API不会太常使用这类状态码，但是在新的超媒体样式的API中会使用更多一些。</div><div class="line">4xx：保留给客户端错误用的。例如，客户端提供了一些错误的数据或请求了不存在的内容。这些请求应该是幂等的，不会改变任何服务器的状态。</div><div class="line">5xx：保留给服务器端错误用的。这些错误常常是从底层的函数抛出来的，并且开发人员也通常没法处理。发送这类状态码的目的是确保客户端能得到一些响应。收到5xx响应后，客户端没办法知道服务器端的状态，所以这类状态码是要尽可能的避免。</div><div class="line"></div><div class="line">常见的一些状态码：</div><div class="line">200 OK - [GET]：服务器成功返回用户请求的数据，该操作是幂等的（Idempotent）。</div><div class="line">201 CREATED - [POST/PUT/PATCH]：用户新建或修改数据成功。</div><div class="line">202 Accepted - [*]：表示一个请求已经进入后台排队（异步任务）</div><div class="line">204 NO CONTENT - [DELETE]：用户删除数据成功。</div><div class="line">400 INVALID REQUEST - [POST/PUT/PATCH]：用户发出的请求有错误，服务器没有进行新建或修改数据的操作，该操作是幂等的。</div><div class="line">401 Unauthorized - [*]：表示用户没有权限（令牌、用户名、密码错误）。</div><div class="line">403 Forbidden - [*] 表示用户得到授权（与401错误相对），但是访问是被禁止的。</div><div class="line">404 NOT FOUND - [*]：用户发出的请求针对的是不存在的记录，服务器没有进行操作，该操作是幂等的。</div><div class="line">406 Not Acceptable - [GET]：用户请求的格式不可得（比如用户请求JSON格式，但是只有XML格式）。</div><div class="line">410 Gone -[GET]：用户请求的资源被永久删除，且不会再得到的。</div><div class="line">422 Unprocesable entity - [POST/PUT/PATCH] 当创建一个对象时，发生一个验证错误。</div><div class="line">500 INTERNAL SERVER ERROR - [*]：服务器发生错误，用户将无法判断发出的请求是否成功。</div></pre></td></tr></table></figure>
+<h2 id="错误处理"><a href="#错误处理" class="headerlink" title="错误处理"></a>错误处理</h2><p>如果状态码是4xx，就应该向用户返回出错信息。一般来说，返回的信息中将error作为键名，出错信息作为键值即可。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">    <span class="attr">error</span>: <span class="string">"Invalid API key"</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="返回结果"><a href="#返回结果" class="headerlink" title="返回结果"></a>返回结果</h2><p>  针对不同操作，服务器向用户返回的结果应该符合以下规范。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">GET /collection: 返回一系列资源对象</div><div class="line">GET /collection/resource: 返回单独的资源对象</div><div class="line">POST /collection: 返回新创建的资源对象</div><div class="line">PUT /collection/resource: 返回完整的资源对象</div><div class="line">PATCH /collection/resource: 返回完整的资源对象</div><div class="line">DELETE /collection/resource: 返回一个空文档</div></pre></td></tr></table></figure>
+<h2 id="Hypermedia-API"><a href="#Hypermedia-API" class="headerlink" title="Hypermedia API"></a>Hypermedia API</h2><p>  RESTful API最好做到Hypermedia，即返回结果中提供链接，连向其他API方法，使得用户不查文档，也知道下一步应该做什么<br>  Hypermedia API的设计被称为<a href="https://en.wikipedia.org/wiki/HATEOAS" target="_blank" rel="external">HATEOAS</a></p>
+<ul>
+<li><p>link: 用户读取这个属性就知道下一步该调用什么API了</p>
+</li>
+<li><p>rel: rel表示这个API与当前网址的关系（collection关系，并给出该collection的网址）</p>
+</li>
+<li><p>href: API的绝对路径</p>
+</li>
+<li><p>title: API的标题,用于概述用途</p>
+</li>
+<li><p>type: API 响应的数据类型</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&#123;&quot;link&quot;: &#123;</div><div class="line">  &quot;rel&quot;:   &quot;collection https://www.example.com/zoos&quot;,</div><div class="line">  &quot;href&quot;:  &quot;https://api.example.com/zoos&quot;,</div><div class="line">  &quot;title&quot;: &quot;List of zoos&quot;,</div><div class="line">  &quot;type&quot;:  &quot;application/vnd.yourformat+json&quot;</div><div class="line">&#125;&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"> maojun@maojun-mbp#curl https://api.github.com/user</div><div class="line">&#123;</div><div class="line">  &quot;message&quot;: &quot;Requires authentication&quot;,</div><div class="line">  &quot;documentation_url&quot;: &quot;https://developer.github.com/v3&quot;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="认证"><a href="#认证" class="headerlink" title="认证"></a>认证</h2><p>  认证和授权的用户模型该尽量采用RBAC模型，因为其良好的扩容性。 API认证的手段最好采用OAuth2.0, 简单的可以采用<br>  JWT（Json Web Token）</p>
+<p>  关于OAuth的简介可以参考<a href="http://www.ruanyifeng.com/blog/2014/05/oauth_2_0.html" target="_blank" rel="external">阮一峰OAuth2.0简介</a><br>  关于JWT参考此文<a href="http://www.haomou.net/2014/08/13/2014_web_token/" target="_blank" rel="external">JWT使用</a></p>
+<h2 id="内容类型"><a href="#内容类型" class="headerlink" title="内容类型"></a>内容类型</h2><p>  XML已是过去时了，现代的web统一使用JSON，也就是HTTP头种的Content Type标签采用 application/json</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">请求报文</div><div class="line">POST /v1/animal HTTP/1.1</div><div class="line">Host: api.example.org</div><div class="line">Accept: application/json</div><div class="line">Content-Type: application/json</div><div class="line">Content-Length: 24</div><div class="line"> </div><div class="line">&#123;</div><div class="line">  &quot;name&quot;: &quot;Gir&quot;,</div><div class="line">  &quot;animal_type&quot;: 12</div><div class="line">&#125;</div><div class="line"></div><div class="line">响应报文</div><div class="line">HTTP/1.1 200 OK</div><div class="line">Date: Wed, 18 Dec 2013 06:08:22 GMT</div><div class="line">Content-Type: application/json</div><div class="line">Access-Control-Max-Age: 1728000</div><div class="line">Cache-Control: no-cache</div><div class="line"> </div><div class="line">&#123;</div><div class="line">  &quot;id&quot;: 12,</div><div class="line">  &quot;created&quot;: 1386363036,</div><div class="line">  &quot;modified&quot;: 1386363036,</div><div class="line">  &quot;name&quot;: &quot;Gir&quot;,</div><div class="line">  &quot;animal_type&quot;: 12</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://oiw1gzfww.bkt.clouddn.com/alipay.jpg" alt="紫川秀 Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/restful/" rel="tag"># restful</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/01/05/api-design-swagger/" rel="next" title="如何使用swagger设计出漂亮的RESTful API">
+                <i class="fa fa-chevron-left"></i> 如何使用swagger设计出漂亮的RESTful API
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2017/01/06/rest-api-design/"
+           data-title="RESTful API 设计规范" data-url="https://blog.yumaojun.net/2017/01/06/rest-api-design/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://oiw1gzfww.bkt.clouddn.com/me.png"
+               alt="紫川秀" />
+          <p class="site-author-name" itemprop="name">紫川秀</p>
+          <p class="site-description motion-element" itemprop="description">喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。</p>
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/yumaojun03" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://douban.com/people/155892492" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/zi-chuan-xiu-86" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.liaoxuefeng.com/" title="廖雪峰官网" target="_blank">廖雪峰官网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://xiaorui.cc/" title="峰云,就她了" target="_blank">峰云,就她了</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#定义"><span class="nav-number">1.</span> <span class="nav-text">定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据设计与抽象"><span class="nav-number">2.</span> <span class="nav-text">数据设计与抽象</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP-动词"><span class="nav-number">3.</span> <span class="nav-text">HTTP 动词</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#域名"><span class="nav-number">4.</span> <span class="nav-text">域名</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#版本化"><span class="nav-number">5.</span> <span class="nav-text">版本化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#API-ROOT-URI"><span class="nav-number">6.</span> <span class="nav-text">API ROOT URI</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Endpoints"><span class="nav-number">7.</span> <span class="nav-text">Endpoints</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#过滤和排序"><span class="nav-number">8.</span> <span class="nav-text">过滤和排序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#状态码"><span class="nav-number">9.</span> <span class="nav-text">状态码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#错误处理"><span class="nav-number">10.</span> <span class="nav-text">错误处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#返回结果"><span class="nav-number">11.</span> <span class="nav-text">返回结果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hypermedia-API"><span class="nav-number">12.</span> <span class="nav-text">Hypermedia API</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#认证"><span class="nav-number">13.</span> <span class="nav-text">认证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内容类型"><span class="nav-number">14.</span> <span class="nav-text">内容类型</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">紫川秀</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"yumaojun"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+      
+      <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+      <script src="/js/src/hook-duoshuo.js?v=5.1.0"></script>
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("51RM6PwqfSuyOFX9MxLeq5yY-gzGzoHsz", "dNQYvnf4KlnN364JVGClL7bp");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+
+</body>
+</html>
