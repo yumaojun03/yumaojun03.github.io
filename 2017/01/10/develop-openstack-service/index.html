@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="紫川秀, 博客" />
+  <meta name="keywords" content="openstack," />
 
 
 
@@ -86,16 +86,17 @@
 
 
 
-<meta name="description" content="喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。">
-<meta property="og:type" content="website">
-<meta property="og:title" content="分类">
-<meta property="og:url" content="https://blog.yumaojun.net/categories/index.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何开发Openstack服务-开篇(一)">
+<meta property="og:url" content="https://blog.yumaojun.net/2017/01/10/develop-openstack-service/index.html">
 <meta property="og:site_name" content="紫川秀的博客">
-<meta property="og:description" content="喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。">
-<meta property="og:updated_time" content="2016-12-30T08:14:04.000Z">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/openstack.develop.png">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/openstack-conceptual-arch-folsom.jpg">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/openstack-restful-api.png">
+<meta property="og:updated_time" content="2017-01-12T07:31:06.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="分类">
-<meta name="twitter:description" content="喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。">
+<meta name="twitter:title" content="如何开发Openstack服务-开篇(一)">
+<meta name="twitter:image" content="http://oiw1gzfww.bkt.clouddn.com/openstack.develop.png">
 
 
 
@@ -123,19 +124,13 @@
 
 
 
-  <link rel="canonical" href="https://blog.yumaojun.net/categories/"/>
+  <link rel="canonical" href="https://blog.yumaojun.net/2017/01/10/develop-openstack-service/"/>
 
 
 
 
 
-  <title>
-  
-
-  
-    分类 | 紫川秀的博客
-  
-</title>
+  <title> 如何开发Openstack服务-开篇(一) | 紫川秀的博客 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -166,7 +161,7 @@
     
   
 
-  <div class="container one-collumn sidebar-position-left  ">
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -292,25 +287,229 @@
             
 
   <div id="posts" class="posts-expand">
-  <header class="post-header">
+    
 
-	<h2 class="post-title" itemprop="name headline">分类</h2>
+  
 
+  
+  
+  
 
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/01/10/develop-openstack-service/">
 
-</header>
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="紫川秀">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="http://oiw1gzfww.bkt.clouddn.com/me.png">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="紫川秀的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="紫川秀的博客" src="">
+    </span>
+  </span>
 
     
-    
-      <div class="category-all-page">
-        <div class="category-all-title">
-            目前共计 8 个分类
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                如何开发Openstack服务-开篇(一)
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-01-10T22:06:53+08:00">
+                2017-01-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开发语言/" itemprop="url" rel="index">
+                    <span itemprop="name">开发语言</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开发语言/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/01/10/develop-openstack-service/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/01/10/develop-openstack-service/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+             <span id="/2017/01/10/develop-openstack-service/" class="leancloud_visitors" data-flag-title="如何开发Openstack服务-开篇(一)">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
         </div>
-        <div class="category-all">
-          <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/开发语言/">开发语言</a><span class="category-list-count">4</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/开发语言/Golang/">Golang</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/开发语言/JavaScript/">JavaScript</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/开发语言/Python/">Python</a><span class="category-list-count">2</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂谈/">杂谈</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/杂谈/年终总结/">年终总结</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/程序设计/">程序设计</a><span class="category-list-count">2</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/程序设计/RESTful-API/">RESTful API</a><span class="category-list-count">2</span></li></ul></li></ul>
-        </div>
-      </div>
+      </header>
     
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><img src="http://oiw1gzfww.bkt.clouddn.com/openstack.develop.png" alt=""><br><a id="more"></a></p>
+<p>openstack是我见过最大最复杂的python项目, 虽然openstack项目的热度在下滑, 但是openstack这套开发理念任然是相当不错的，值得我们学习. 由于工作需要, 我也需要开发一些自定义的openstack服务, 因此想将开发openstack服务的过程以一系列的文章记录下来, 方便需要的人。</p>
+<h2 id="openstack简介"><a href="#openstack简介" class="headerlink" title="openstack简介"></a>openstack简介</h2><p>openstack是一个IaaS平台, 提供计算服务、网络服务、存储服务等, 有3种方式使用openstack提供的服务</p>
+<ul>
+<li>API<br>通过API使用OpenStack的方式是由各个服务自己实现的, 这些API都是有统一的形式的，都是采用了HTTP协议实现的符合REST规范的API。</li>
+<li>CLI/SDK<br>通过命令行是用OpenStack服务的方式是由一系列项目来提供的，这些项目一般都命名为python-projectclient，比如python-keystoneclient，python-novaclietn等。这些命令行项目分别对应到各个主要的服务，为用户提供命令行操作界面和Python的SDK。比如python-keystoneclient对应到keystone，为用户提供了keystone这个命令，同时也提供了keyston项目的SDK（其实是在SDK的基础上实现了命令行）。这些client项目提供的SDK其实也是封装了对各自服务的API的调用。由于每个主要项目都有一个自己的命令行工具，社区觉得不好，于是又有了一个新的项目python-openstackclient，用来提供一个统一的命令行工具openstack（命令的名字就叫做openstack），这个工具实现了命令行，然后使用各个服务的client项目提供的SDK来完成对应的操作</li>
+<li>WebUI<br>通过Web界面使用OpenStack服务这种方式是通过OpenStack的Horizon项目提供的。Horizon项目是一个Django应用，实现了一个面板功能，是传统的MVC开发模型, 不过最新的项目 在慢慢往Angular上迁移。Horizon项目主要是提供一种交互界面，它会通过API来和各个OpenStack服务进行交互，然后在Web界面上展示各个服务的状态；它也会接收用户的操作，然后调用各个服务的API来完成用户对各个服务的使用</li>
+</ul>
+<p>因此开发一个完整的openstack项目需要完成上面介绍的3部分的开发，当然API服务是根本。</p>
+<h2 id="openstack架构"><a href="#openstack架构" class="headerlink" title="openstack架构"></a>openstack架构</h2><p>整个openstack的服务是以插件化得方式进行独立开发, 然后通过API相互关联, 比如:<br><img src="http://oiw1gzfww.bkt.clouddn.com/openstack-conceptual-arch-folsom.jpg" alt=""><br>接下来我们会以demo的形式开发一个和openstack服务类似的服务，该服务的名称就叫demo</p>
+<h2 id="openstack中的api服务"><a href="#openstack中的api服务" class="headerlink" title="openstack中的api服务"></a>openstack中的api服务</h2><p>openstack的API设计风格为RESTful, 如何设计RESTful API我在前面的博客中有介绍, Python的Web开发框架很多，基本上，还活跃的框架都支持<code>RESTful API</code>的开发, 有些框架还专门为<code>RESTful API</code>的开发提供了便利的功能,比如<code>Pecan</code>，有些框架则通过第三方模块来提供这种便利，比如<code>Django</code>和<code>Flask</code>都有不少和REST相关的第三方库。<br>对于框架选择，也没有什么特别好的标准，一般都是比较性能、文档、社区是否活跃等。在我看来，选择流行的一般就不会错<br>下面是openstack keystone关于credential的API:<br><img src="http://oiw1gzfww.bkt.clouddn.com/openstack-restful-api.png" alt=""></p>
+<h3 id="早期项目的api服务"><a href="#早期项目的api服务" class="headerlink" title="早期项目的api服务"></a>早期项目的api服务</h3><p>OpenStack项目倾向于不重新发明轮子，一般都会选择现有的库和框架来使用，除非现有的框架不满足需求。因为Web框架的选择很多，而且都满足需求，所以OpenStack项目到目前为止都是使用现成的Web框架。<br>OpenStack早期的项目并没有使用一个框架，而是使用了几个不同的模块来组合出一个框架：Paste + PasteDeploy + Routes + WebOb，这几个不同的模块分别负责应用的WSGI化、URL路由和请求处理等功能。Nova, Glance, Neutron, Keystone等早期的项目都是使用这样的架构来实现RESTful API的。<br>早期的这种技术选型带来的好处是”框架”具备足够的灵活性，缺点则是要把这几个模块组合起来实现一个REST服务，需要写很多代码，连WSGI的入口函数都要自己实现（比如Keystone项目的keystone/common/wsgi.py文件中的class Application）。因为灵活性的好处不是很明显，而代码量大的坏处很明显，比如上面那个class Application需要在每个项目中复制一遍，所以社区的新项目就开始使用新的Web框架Pecan</p>
+<h3 id="新项目的api服务"><a href="#新项目的api服务" class="headerlink" title="新项目的api服务"></a>新项目的api服务</h3><p>Pecan是一个基于对象路由的框架，即灵活又简单。Pecan主要实现了URL路由功能，支持RESTful API。Pecan没有实现模板、session管理和ORM等功能，但是这些功能可以通过其他的模块来实现。对于OpenStack来说，Pecan是一个很好的选择，因为OpenStack项目中统一使用sqlalchemy来实现ORM，API的实现也不需要模板功能，安全控制则基于Keystone体系。使用Pecan来开发REST服务，代码量很少，代码结构也清晰。Ceilometer项目就是使用了Pecan</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://oiw1gzfww.bkt.clouddn.com/alipay.jpg" alt="紫川秀 Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/openstack/" rel="tag"># openstack</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/01/06/rest-api-design/" rel="next" title="RESTful API 设计规范">
+                <i class="fa fa-chevron-left"></i> RESTful API 设计规范
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
   </div>
 
 
@@ -319,6 +518,14 @@
 
 
           
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2017/01/10/develop-openstack-service/"
+           data-title="如何开发Openstack服务-开篇(一)" data-url="https://blog.yumaojun.net/2017/01/10/develop-openstack-service/">
+      </div>
+    
+  </div>
+
 
         </div>
         
@@ -338,8 +545,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
+      <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="http://oiw1gzfww.bkt.clouddn.com/me.png"
@@ -449,6 +665,22 @@
 
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#openstack简介"><span class="nav-number">1.</span> <span class="nav-text">openstack简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#openstack架构"><span class="nav-number">2.</span> <span class="nav-text">openstack架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#openstack中的api服务"><span class="nav-number">3.</span> <span class="nav-text">openstack中的api服务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#早期项目的api服务"><span class="nav-number">3.1.</span> <span class="nav-text">早期项目的api服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#新项目的api服务"><span class="nav-number">3.2.</span> <span class="nav-text">新项目的api服务</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
     </div>
@@ -563,6 +795,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
 
   
 

@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog.yumaojun.net/"/>
-  <updated>2017-01-06T04:38:40.000Z</updated>
+  <updated>2017-01-12T07:31:06.000Z</updated>
   <id>https://blog.yumaojun.net/</id>
   
   <author>
@@ -14,6 +14,43 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>如何开发Openstack服务-开篇(一)</title>
+    <link href="https://blog.yumaojun.net/2017/01/10/develop-openstack-service/"/>
+    <id>https://blog.yumaojun.net/2017/01/10/develop-openstack-service/</id>
+    <published>2017-01-10T14:06:53.000Z</published>
+    <updated>2017-01-12T07:31:06.000Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="http://oiw1gzfww.bkt.clouddn.com/openstack.develop.png" alt=""><br><a id="more"></a></p>
+<p>openstack是我见过最大最复杂的python项目, 虽然openstack项目的热度在下滑, 但是openstack这套开发理念任然是相当不错的，值得我们学习. 由于工作需要, 我也需要开发一些自定义的openstack服务, 因此想将开发openstack服务的过程以一系列的文章记录下来, 方便需要的人。</p>
+<h2 id="openstack简介"><a href="#openstack简介" class="headerlink" title="openstack简介"></a>openstack简介</h2><p>openstack是一个IaaS平台, 提供计算服务、网络服务、存储服务等, 有3种方式使用openstack提供的服务</p>
+<ul>
+<li>API<br>通过API使用OpenStack的方式是由各个服务自己实现的, 这些API都是有统一的形式的，都是采用了HTTP协议实现的符合REST规范的API。</li>
+<li>CLI/SDK<br>通过命令行是用OpenStack服务的方式是由一系列项目来提供的，这些项目一般都命名为python-projectclient，比如python-keystoneclient，python-novaclietn等。这些命令行项目分别对应到各个主要的服务，为用户提供命令行操作界面和Python的SDK。比如python-keystoneclient对应到keystone，为用户提供了keystone这个命令，同时也提供了keyston项目的SDK（其实是在SDK的基础上实现了命令行）。这些client项目提供的SDK其实也是封装了对各自服务的API的调用。由于每个主要项目都有一个自己的命令行工具，社区觉得不好，于是又有了一个新的项目python-openstackclient，用来提供一个统一的命令行工具openstack（命令的名字就叫做openstack），这个工具实现了命令行，然后使用各个服务的client项目提供的SDK来完成对应的操作</li>
+<li>WebUI<br>通过Web界面使用OpenStack服务这种方式是通过OpenStack的Horizon项目提供的。Horizon项目是一个Django应用，实现了一个面板功能，是传统的MVC开发模型, 不过最新的项目 在慢慢往Angular上迁移。Horizon项目主要是提供一种交互界面，它会通过API来和各个OpenStack服务进行交互，然后在Web界面上展示各个服务的状态；它也会接收用户的操作，然后调用各个服务的API来完成用户对各个服务的使用</li>
+</ul>
+<p>因此开发一个完整的openstack项目需要完成上面介绍的3部分的开发，当然API服务是根本。</p>
+<h2 id="openstack架构"><a href="#openstack架构" class="headerlink" title="openstack架构"></a>openstack架构</h2><p>整个openstack的服务是以插件化得方式进行独立开发, 然后通过API相互关联, 比如:<br><img src="http://oiw1gzfww.bkt.clouddn.com/openstack-conceptual-arch-folsom.jpg" alt=""><br>接下来我们会以demo的形式开发一个和openstack服务类似的服务，该服务的名称就叫demo</p>
+<h2 id="openstack中的api服务"><a href="#openstack中的api服务" class="headerlink" title="openstack中的api服务"></a>openstack中的api服务</h2><p>openstack的API设计风格为RESTful, 如何设计RESTful API我在前面的博客中有介绍, Python的Web开发框架很多，基本上，还活跃的框架都支持<code>RESTful API</code>的开发, 有些框架还专门为<code>RESTful API</code>的开发提供了便利的功能,比如<code>Pecan</code>，有些框架则通过第三方模块来提供这种便利，比如<code>Django</code>和<code>Flask</code>都有不少和REST相关的第三方库。<br>对于框架选择，也没有什么特别好的标准，一般都是比较性能、文档、社区是否活跃等。在我看来，选择流行的一般就不会错<br>下面是openstack keystone关于credential的API:<br><img src="http://oiw1gzfww.bkt.clouddn.com/openstack-restful-api.png" alt=""></p>
+<h3 id="早期项目的api服务"><a href="#早期项目的api服务" class="headerlink" title="早期项目的api服务"></a>早期项目的api服务</h3><p>OpenStack项目倾向于不重新发明轮子，一般都会选择现有的库和框架来使用，除非现有的框架不满足需求。因为Web框架的选择很多，而且都满足需求，所以OpenStack项目到目前为止都是使用现成的Web框架。<br>OpenStack早期的项目并没有使用一个框架，而是使用了几个不同的模块来组合出一个框架：Paste + PasteDeploy + Routes + WebOb，这几个不同的模块分别负责应用的WSGI化、URL路由和请求处理等功能。Nova, Glance, Neutron, Keystone等早期的项目都是使用这样的架构来实现RESTful API的。<br>早期的这种技术选型带来的好处是”框架”具备足够的灵活性，缺点则是要把这几个模块组合起来实现一个REST服务，需要写很多代码，连WSGI的入口函数都要自己实现（比如Keystone项目的keystone/common/wsgi.py文件中的class Application）。因为灵活性的好处不是很明显，而代码量大的坏处很明显，比如上面那个class Application需要在每个项目中复制一遍，所以社区的新项目就开始使用新的Web框架Pecan</p>
+<h3 id="新项目的api服务"><a href="#新项目的api服务" class="headerlink" title="新项目的api服务"></a>新项目的api服务</h3><p>Pecan是一个基于对象路由的框架，即灵活又简单。Pecan主要实现了URL路由功能，支持RESTful API。Pecan没有实现模板、session管理和ORM等功能，但是这些功能可以通过其他的模块来实现。对于OpenStack来说，Pecan是一个很好的选择，因为OpenStack项目中统一使用sqlalchemy来实现ORM，API的实现也不需要模板功能，安全控制则基于Keystone体系。使用Pecan来开发REST服务，代码量很少，代码结构也清晰。Ceilometer项目就是使用了Pecan</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;img src=&quot;http://oiw1gzfww.bkt.clouddn.com/openstack.develop.png&quot; alt=&quot;&quot;&gt;&lt;br&gt;
+    
+    </summary>
+    
+      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
+    
+      <category term="Python" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Python/"/>
+    
+    
+      <category term="openstack" scheme="https://blog.yumaojun.net/tags/openstack/"/>
+    
+  </entry>
   
   <entry>
     <title>RESTful API 设计规范</title>
@@ -378,7 +415,7 @@
     <link href="https://blog.yumaojun.net/2017/01/02/python-bestpractice/"/>
     <id>https://blog.yumaojun.net/2017/01/02/python-bestpractice/</id>
     <published>2017-01-02T04:46:29.000Z</published>
-    <updated>2017-01-10T05:49:31.000Z</updated>
+    <updated>2017-01-10T05:56:00.000Z</updated>
     
     <content type="html"><![CDATA[<p><img src="http://oiw1gzfww.bkt.clouddn.com/python_tips_.png" alt=""><br><a id="more"></a></p>
 <p>由于Python简洁，优雅，开发效率高，渐渐在计算环境中无处不在。但是如果你不注意，容易编写出具有严重安全隐患的代码, 以下我整理的一些如何编写出安全代码的一些建议。</p>
