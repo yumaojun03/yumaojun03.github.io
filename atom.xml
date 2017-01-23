@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog.yumaojun.net/"/>
-  <updated>2017-01-17T06:11:50.000Z</updated>
+  <updated>2017-01-23T05:48:52.000Z</updated>
   <id>https://blog.yumaojun.net/</id>
   
   <author>
@@ -14,6 +14,37 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>使用pandoc将markdown文档转换成pdf</title>
+    <link href="https://blog.yumaojun.net/2017/01/19/markdown-to-pdf/"/>
+    <id>https://blog.yumaojun.net/2017/01/19/markdown-to-pdf/</id>
+    <published>2017-01-19T05:03:18.000Z</published>
+    <updated>2017-01-23T05:48:52.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>在公司做内部分享的时候往往用ppt, 写ppt的过程中往往还有比较多的代码示例, 通常的做法就是直接截图, 其实这对使用者来说是很不友好的, 而我之前一直使用markdown写博客, 比如我这个博客, 因此就想使用MarkDown来写分享的文档, 但是MarkDown的文档并不方便内部传阅, 因此想到了一个问题: 能否用MarkDown写, 然后转换成PDF, 给同事使用？于是问了下度娘, 果然找到了一个工具: <code>Pandoc</code>, 使用下来感觉不错, 在此分享一下使用方法, 也方便以后自己查阅。<br><a id="more"></a></p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Pandoc是一个用haskell编写的开源文本转换工具，小巧迅速且支持格式广泛，堪称文本转换应用的瑞士军刀。支持很多种输入输出，有关Pandoc可以在其官网进行详细了解。下载页面可以<a href="https://github.com/jgm/pandoc" target="_blank" rel="external">点此进入</a>，在其中选择合适的版本即可（GitHub下载不多赘述), 至于详细的描述请看github上的说明。<br>我这里主要使用 <code>markdown</code>—-&gt;<code>pdf</code>。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>我这里仅介绍Mac下的安装, 需要安装<code>pandoc</code>和<code>LaTeX</code><br>其他平台官方有详尽的介绍, 具体请查看：<a href="http://pandoc.org/installing.html" target="_blank" rel="external">pandoc官方安装文档</a></p>
+<h3 id="pandoc安装"><a href="#pandoc安装" class="headerlink" title="pandoc安装"></a>pandoc安装</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ brew install pandoc</div></pre></td></tr></table></figure>
+<h3 id="LaTeX安装"><a href="#LaTeX安装" class="headerlink" title="LaTeX安装"></a>LaTeX安装</h3><p>因为我需要转换成pdf,还需要装<code>LaTeX</code>, 选一个Basic版本的安装即可, <code>LaTeX</code>的<a href="http://www.tug.org/mactex/morepackages.html" target="_blank" rel="external">下载地址</a></p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>简单的使用可以<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pandoc -h</div></pre></td></tr></table></figure></p>
+<p>详细用法可以man查看，我这里直接给干活了,我使用庞房,这里记得选一种你系统上有的字体。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">pandoc -N -s --toc --latex-engine=xelatex -V CJKmainfont=&apos;PingFang SC&apos; -V mainfont=&apos;Monaco&apos; -V geometry:margin=1in Keystone_extension.markdown  -o Keystone.pdf</div></pre></td></tr></table></figure></p>
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><p>主要是Pandoc默认是对markDown语法有扩展，如果遇到转换后的效果和预期效果不一样, 还得阅读Pandoc扩展的MarkDown语法, 这篇博客对次介绍不错<a href="http://www.cnblogs.com/baiyangcao/p/pandoc_markdown.html" target="_blank" rel="external">Pandoc中的markdown语法</a><br>我这里仅列举一个我遇到的坑，当然如果你想使用标准的MarkDown语法，也可<code>-f markdown_strict</code>。</p>
+<h3 id="图片位置对应不上"><a href="#图片位置对应不上" class="headerlink" title="图片位置对应不上"></a>图片位置对应不上</h3><p>在markDown中插入的图片和Markdown里的不一样, 这里需要在图片后面添加一个<code>\</code>, 这样图片才不会换行, 这个在它扩展语法中有描述。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;在公司做内部分享的时候往往用ppt, 写ppt的过程中往往还有比较多的代码示例, 通常的做法就是直接截图, 其实这对使用者来说是很不友好的, 而我之前一直使用markdown写博客, 比如我这个博客, 因此就想使用MarkDown来写分享的文档, 但是MarkDown的文档并不方便内部传阅, 因此想到了一个问题: 能否用MarkDown写, 然后转换成PDF, 给同事使用？于是问了下度娘, 果然找到了一个工具: &lt;code&gt;Pandoc&lt;/code&gt;, 使用下来感觉不错, 在此分享一下使用方法, 也方便以后自己查阅。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="文档工具" scheme="https://blog.yumaojun.net/categories/%E6%96%87%E6%A1%A3%E5%B7%A5%E5%85%B7/"/>
+    
+      <category term="pandoc" scheme="https://blog.yumaojun.net/categories/%E6%96%87%E6%A1%A3%E5%B7%A5%E5%85%B7/pandoc/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>commit message编写规范</title>
