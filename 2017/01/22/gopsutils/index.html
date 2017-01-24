@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="summary," />
+  <meta name="keywords" content="gopsutils," />
 
 
 
@@ -86,19 +86,16 @@
 
 
 
-<meta name="description" content="孔子曰:”吾日三省吾身”, 平时很少会静下心来反省和总结一段时间的功与过, 2016马上就要过去了，在这一年将要结束之时, 还是想回过一下这一年来的得与失, 顺便安排下来年的计划。
-记录下这一年来自己的变化, 同时也为来年再战作准备, 而且我这人记性不好, 留个底,照亮自己需要走的路。">
+<meta name="description" content="很欣赏telegraf的架构,之前也多次使用, 最近也要通过他来获取系统运行时信息然后上传,所以想借鉴下telegraf里面的system模块的实现，看了下他的源码，发现他使用了一个名叫gopsutils库来完成所有的系统数据的采集的, 于是决定手动试试这个库的功能。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="2016总结与2017计划">
-<meta property="og:url" content="https://blog.yumaojun.net/2016/12/31/2016-summary/index.html">
+<meta property="og:title" content="夸平台系统监控库-gopsutils">
+<meta property="og:url" content="https://blog.yumaojun.net/2017/01/22/gopsutils/index.html">
 <meta property="og:site_name" content="紫川秀的博客">
-<meta property="og:description" content="孔子曰:”吾日三省吾身”, 平时很少会静下心来反省和总结一段时间的功与过, 2016马上就要过去了，在这一年将要结束之时, 还是想回过一下这一年来的得与失, 顺便安排下来年的计划。
-记录下这一年来自己的变化, 同时也为来年再战作准备, 而且我这人记性不好, 留个底,照亮自己需要走的路。">
-<meta property="og:updated_time" content="2017-01-02T15:32:52.000Z">
+<meta property="og:description" content="很欣赏telegraf的架构,之前也多次使用, 最近也要通过他来获取系统运行时信息然后上传,所以想借鉴下telegraf里面的system模块的实现，看了下他的源码，发现他使用了一个名叫gopsutils库来完成所有的系统数据的采集的, 于是决定手动试试这个库的功能。">
+<meta property="og:updated_time" content="2017-01-24T12:37:41.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="2016总结与2017计划">
-<meta name="twitter:description" content="孔子曰:”吾日三省吾身”, 平时很少会静下心来反省和总结一段时间的功与过, 2016马上就要过去了，在这一年将要结束之时, 还是想回过一下这一年来的得与失, 顺便安排下来年的计划。
-记录下这一年来自己的变化, 同时也为来年再战作准备, 而且我这人记性不好, 留个底,照亮自己需要走的路。">
+<meta name="twitter:title" content="夸平台系统监控库-gopsutils">
+<meta name="twitter:description" content="很欣赏telegraf的架构,之前也多次使用, 最近也要通过他来获取系统运行时信息然后上传,所以想借鉴下telegraf里面的system模块的实现，看了下他的源码，发现他使用了一个名叫gopsutils库来完成所有的系统数据的采集的, 于是决定手动试试这个库的功能。">
 
 
 
@@ -126,13 +123,13 @@
 
 
 
-  <link rel="canonical" href="https://blog.yumaojun.net/2016/12/31/2016-summary/"/>
+  <link rel="canonical" href="https://blog.yumaojun.net/2017/01/22/gopsutils/"/>
 
 
 
 
 
-  <title> 2016总结与2017计划 | 紫川秀的博客 </title>
+  <title> 夸平台系统监控库-gopsutils | 紫川秀的博客 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -298,7 +295,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-  <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2016/12/31/2016-summary/">
+  <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/01/22/gopsutils/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
     <meta itemprop="name" content="紫川秀">
@@ -322,7 +319,7 @@
             
             
               
-                2016总结与2017计划
+                夸平台系统监控库-gopsutils
               
             
           </h1>
@@ -337,8 +334,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-12-31T20:03:29+08:00">
-                2016-12-31
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-01-22T14:37:09+08:00">
+                2017-01-22
               </time>
             
 
@@ -360,8 +357,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/杂谈/" itemprop="url" rel="index">
-                    <span itemprop="name">杂谈</span>
+                  <a href="/categories/开发语言/" itemprop="url" rel="index">
+                    <span itemprop="name">开发语言</span>
                   </a>
                 </span>
 
@@ -371,8 +368,8 @@
                 
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/杂谈/年终总结/" itemprop="url" rel="index">
-                    <span itemprop="name">年终总结</span>
+                  <a href="/categories/开发语言/Golang/" itemprop="url" rel="index">
+                    <span itemprop="name">Golang</span>
                   </a>
                 </span>
 
@@ -389,8 +386,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2016/12/31/2016-summary/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/12/31/2016-summary/" itemprop="commentCount"></span>
+                <a href="/2017/01/22/gopsutils/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/01/22/gopsutils/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -400,7 +397,7 @@
 
           
           
-             <span id="/2016/12/31/2016-summary/" class="leancloud_visitors" data-flag-title="2016总结与2017计划">
+             <span id="/2017/01/22/gopsutils/" class="leancloud_visitors" data-flag-title="夸平台系统监控库-gopsutils">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -427,69 +424,16 @@
       
 
       
-        <p>孔子曰:”吾日三省吾身”, 平时很少会静下心来反省和总结一段时间的功与过, 2016马上就要过去了，在这一年将要结束之时, 还是想回过一下这一年来的得与失, 顺便安排下来年的计划。</p>
-<p>记录下这一年来自己的变化, 同时也为来年再战作准备, 而且我这人记性不好, 留个底,照亮自己需要走的路。</p>
-<a id="more"></a>
-<h2 id="转瞬即逝的2016"><a href="#转瞬即逝的2016" class="headerlink" title="转瞬即逝的2016"></a>转瞬即逝的2016</h2><p>2016是繁忙的一年，工作上处处充满挑战，有些挑战是自己喜欢的，有些挑战也是自己比较抵触的，我喜欢开发，从运维开发转而参与大型系统开发，这的确是一个不小的挑战，我是一个对技术有点激情的人，因此这个挑战对我而言还是比较喜欢的。后来同时做起了产品设计, 每天扣脑袋, 看别人的产品，画产品设计图， 这些在当时的我是很抵触的, 当时我还处于单纯的想积累技术的阶段。现在看来这段经历也是我宝贵的财富, 毕竟产品决定东西的价值，用再牛叉的技术,做一个没有价值的东西, 这是一件愚蠢的行为，我这里说的价值是长远价值，而不是当下看起来有价值, 这个说起来很悬，以后有机会深入讨论这个。</p>
-<p>2016这一年也在和JumpServer一同成长的一年，感触也蛮多的，首先是技术的成长，一个开源产品的技术的迭代，我们致力于设计NB的产品和写出漂亮的代码。其次为有可能的融资谈判而兴奋过，然而最后还是平静下来, 慢慢做一个自己认可的能力范围之内的产品。</p>
-<p>工作上的事儿, 总是有那么点紧绷, 其实生活上也有很多值得高兴的事儿，我们有了自己的房子，并且搬进去了，告别了租房的日子，这一切多谢我的老婆打理，我基本是啥心都没操过。其次，我女儿和我关系也很不错，虽然她生气的时候只找她妈妈，但是我在她心中的地位也仅次于她妈妈，我也心有愧疚，作为一个父亲我陪伴她的时候是有点少了。还有我的好搭档，在我最需要钱的时候, 一身不吭的直接转我支付宝上,人生中能交到一个这样的朋友，是我的莫大的荣幸。</p>
-<p>还有一个事儿，我终于用上Mac了，虽然是一个二手的MBP，但是这对满足一个屌丝的虚荣心完全受用了, 说岔了, 我再也不用在Windows上装Ubuntu开发了。</p>
-<h2 id="瞬息万变的2017"><a href="#瞬息万变的2017" class="headerlink" title="瞬息万变的2017"></a>瞬息万变的2017</h2><p>变化和革新是很快的, 比如OpenStack没有那么热了, 容器技术也基本成了开发的必备技能, 无论你作为一个前端开发还是后端开发JavaScript都快成为一门必备语言了。前后端的完全分离也愈演愈烈, 各种前段框架的变化。<br>伴随而来的是微服务+容器技术的紧密结合。在最后DDD也随着微服务的出现，对开发人员提出了更高的需求, 以后那种只会写代码的人将愈来愈少了。</p>
-<p>我Hold不住这些，因此在技术方面我仅能列出我需要提升的书单:</p>
-<h3 id="Python提升书单-今年主力"><a href="#Python提升书单-今年主力" class="headerlink" title="Python提升书单(今年主力)"></a>Python提升书单(今年主力)</h3><ol>
-<li>基础回过<ul>
-<li><a href="http://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000" target="_blank" rel="external">廖雪峰官网</a></li>
-<li>Think Python 2ed 中译版精校  PDF 电子书</li>
+        <p>很欣赏<code>telegraf</code>的架构,之前也多次使用, 最近也要通过他来获取系统运行时信息然后上传,所以想借鉴下<code>telegraf</code>里面的system模块的实现，看了下他的源码，发现他使用了一个名叫<code>gopsutils</code>库来完成所有的系统数据的采集的, 于是决定手动试试这个库的功能。<br><a id="more"></a></p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>在说<code>gopsutils</code>之前我们必须先说下<code>psutils</code>是啥, 因为<code>gopsutils</code>实际上就是一个golang版本的<code>psutils</code>(从名字上也能看出来)<br><code>psutils</code>是一个比较出名的python库, <code>psutils</code>是<code>python process and system utilities</code>的一个缩写. 它有如下特点</p>
+<ul>
+<li>跨平台: Linux, Windows, OSX, Sun Solaris, FreeBSD, OpenBSD and NetBSD的32位和64位系统</li>
+<li>功能丰富: 实现了进程管理,系统诊断, 这个库基本实现了这些命令行工具的功能: ps, top, lsof, netstat, ifconfig, who, df, kill, free, nice, ionice, iostat, iotop, uptime, pidof, tty, taskset, pmap</li>
 </ul>
-</li>
-<li>进阶深<ul>
-<li><a href="http://python3-cookbook.readthedocs.io/zh_CN/latest/preface.html" target="_blank" rel="external">python3-cookbook</a></li>
-<li>电子书Python高手之路</li>
-</ul>
-</li>
-<li>常见的一些代码实现<ul>
-<li><a href="https://github.com/liquanzhou/ops_doc/blob/master/python%E5%AE%9E%E4%BE%8B%E6%89%8B%E5%86%8C.py" target="_blank" rel="external">python实例手册</a>  </li>
-<li><a href="https://segmentfault.com/t/python/blogs" target="_blank" rel="external">网站上的文章</a></li>
-</ul>
-</li>
-<li>设计模式<ul>
-<li><a href="http://www.cnblogs.com/wuyuegb2312/archive/2013/04/09/3008320.html" target="_blank" rel="external">快速版大话设计模式</a></li>
-<li><a href="https://github.com/faif/python-patterns" target="_blank" rel="external">一些最新的例子</a></li>
-<li><a href="http://www.ituring.com.cn/book/1715" target="_blank" rel="external">精通Python设计模式</a></li>
-</ul>
-</li>
-<li>数据结构与算法<ul>
-<li><a href="http://top.jobbole.com/4681/" target="_blank" rel="external">快速阅读总结</a></li>
-<li>电子书：Data Structures and Algorithms with Python-2015</li>
-</ul>
-</li>
-<li>源码阅读<ul>
-<li>Django Class Based View </li>
-<li>Flask 源码阅读</li>
-<li>Openstack KeyStone 源码阅读</li>
-</ul>
-</li>
-<li>理解Python解释器<ul>
-<li><a href="http://mt.sohu.com/20161030/n471778650.shtml" target="_blank" rel="external">用Python实现一个Python解释器</a></li>
-</ul>
-</li>
-</ol>
-<h3 id="Golang提升书单"><a href="#Golang提升书单" class="headerlink" title="Golang提升书单"></a>Golang提升书单</h3><ol>
-<li>回过基础：<ul>
-<li><a href="http://mt.sohu.com/20161030/n471778650.shtml" target="_blank" rel="external">Go Web 编程</a></li>
-<li><a href="https://hotsnow.gitbooks.io/the-way-to-go_zh_cn/content/" target="_blank" rel="external">Go入门指南</a></li>
-</ul>
-</li>
-</ol>
-<h3 id="JavaScript提升书单"><a href="#JavaScript提升书单" class="headerlink" title="JavaScript提升书单"></a>JavaScript提升书单</h3><ol>
-<li>回过基础：<ul>
-<li><a href="http://www.liaoxuefeng.com/wiki/001434446689867b27157e896e74d51a89c25cc8b43bdb3000" target="_blank" rel="external">廖雪峰官网</a></li>
-<li><a href="http://javascript.ruanyifeng.com/#nodejs" target="_blank" rel="external">阮一峰的javascript教程 </a></li>
-<li><a href="http://es6.ruanyifeng.com/" target="_blank" rel="external">ECMAScript 6 入门</a></li>
-</ul>
-</li>
-</ol>
-<p>除了技术, 还应该有生活。而生活就是: <strong><em>赶紧把账还完</em></strong></p>
+<p>如果想要了解关于<code>gopsutils</code>更多的详情 请查看<a href="https://github.com/shirou/gopsutil" target="_blank" rel="external">gopsutils github地址</a></p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">➜  gops_test go get  -v &quot;github.com/shirou/gopsutil&quot;</div></pre></td></tr></table></figure>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>具体的使用文档可以参考<a href="https://godoc.org/github.com/shirou/gopsutil" target="_blank" rel="external">gopsutil的godoc文档</a><br>以下以测试收集cpu, disk, load, mem, net, process 为列, 注意这些对象都使用String方法, 因此可以直接调用fmt打印，String方法会将其转换成Json输出.<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"fmt"</span></div><div class="line"></div><div class="line">	<span class="string">"github.com/shirou/gopsutil/cpu"</span></div><div class="line">	<span class="string">"github.com/shirou/gopsutil/disk"</span></div><div class="line">	<span class="string">"github.com/shirou/gopsutil/load"</span></div><div class="line">	<span class="string">"github.com/shirou/gopsutil/mem"</span></div><div class="line">	<span class="string">"github.com/shirou/gopsutil/net"</span></div><div class="line">	<span class="string">"github.com/shirou/gopsutil/process"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	fmt.Println(<span class="string">"CPU统计:"</span>)</div><div class="line">	c, _ := cpu.Info()</div><div class="line">	fmt.Println(c)</div><div class="line"></div><div class="line">	fmt.Println(<span class="string">"内存统计:"</span>)</div><div class="line">	m, _ := mem.VirtualMemory()</div><div class="line">	fmt.Println(m)</div><div class="line"></div><div class="line">	fmt.Println(<span class="string">"磁盘用量和IO统计:"</span>)</div><div class="line">	dp, _ := disk.Partitions(<span class="literal">true</span>)</div><div class="line">	du, _ := disk.Usage(<span class="string">"/"</span>)</div><div class="line">	di, _ := disk.IOCounters()</div><div class="line">	fmt.Println(du)</div><div class="line">	fmt.Println(dp)</div><div class="line">	fmt.Println(di)</div><div class="line"></div><div class="line">	fmt.Println(<span class="string">"网络IO统计:"</span>)</div><div class="line">	ni, _ := net.IOCounters(<span class="literal">true</span>)</div><div class="line">	fmt.Println(ni)</div><div class="line"></div><div class="line">	fmt.Println(<span class="string">"协议统计:"</span>)</div><div class="line">	nt, _ := net.ProtoCounters(<span class="literal">nil</span>)</div><div class="line">	fmt.Println(nt)</div><div class="line"></div><div class="line">	fmt.Println(<span class="string">"链接状态统计:"</span>)</div><div class="line">	nc, _ := net.Connections(<span class="string">"all"</span>)</div><div class="line">	fmt.Println(nc)</div><div class="line"></div><div class="line">	fmt.Println(<span class="string">"进程统计:"</span>)</div><div class="line">	pi, _ := process.Pids()</div><div class="line">	fmt.Println(pi)</div><div class="line">	p, _ := process.NewProcess(<span class="number">614</span>)</div><div class="line">	pm, _ := p.MemoryPercent()</div><div class="line">	pn, _ := p.Username()</div><div class="line">	fmt.Println(pm)</div><div class="line">	fmt.Println(pn)</div><div class="line"></div><div class="line">	fmt.Println(<span class="string">"负载统计:"</span>)</div><div class="line">	pl, _ := load.Avg()</div><div class="line">	fmt.Println(pl)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>最后执行过会的结果大概为这样:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">CPU统计:</div><div class="line">[&#123;&quot;cpu&quot;:0,&quot;vendorId&quot;:&quot;GenuineIntel&quot;,&quot;family&quot;:&quot;6&quot;,&quot;model&quot;:&quot;69&quot;,&quot;stepping&quot;:1,&quot;physicalId&quot;:&quot;&quot;,&quot;coreId&quot;:&quot;&quot;,&quot;cores&quot;:2,&quot;modelName&quot;:&quot;Intel(R) Core(TM) i5-4278U CPU @ 2.60GHz&quot;,&quot;mhz&quot;:2600,&quot;cacheSize&quot;:256,&quot;flags&quot;:[&quot;fpu&quot;,&quot;vme&quot;,&quot;de&quot;,&quot;pse&quot;,&quot;tsc&quot;,&quot;msr&quot;,&quot;pae&quot;,&quot;mce&quot;,&quot;cx8&quot;,&quot;apic&quot;,&quot;sep&quot;,&quot;mtrr&quot;,&quot;pge&quot;,&quot;mca&quot;,&quot;cmov&quot;,&quot;pat&quot;,&quot;pse36&quot;,&quot;clfsh&quot;,&quot;ds&quot;,&quot;acpi&quot;,&quot;mmx&quot;,&quot;fxsr&quot;,&quot;sse&quot;,&quot;sse2&quot;,&quot;ss&quot;,&quot;htt&quot;,&quot;tm&quot;,&quot;pbe&quot;,&quot;sse3&quot;,&quot;pclmulqdq&quot;,&quot;dtes64&quot;,&quot;mon&quot;,&quot;dscpl&quot;,&quot;vmx&quot;,&quot;est&quot;,&quot;tm2&quot;,&quot;ssse3&quot;,&quot;fma&quot;,&quot;cx16&quot;,&quot;tpr&quot;,&quot;pdcm&quot;,&quot;sse4.1&quot;,&quot;sse4.2&quot;,&quot;x2apic&quot;,&quot;movbe&quot;,&quot;popcnt&quot;,&quot;aes&quot;,&quot;pcid&quot;,&quot;xsave&quot;,&quot;osxsave&quot;,&quot;seglim64&quot;,&quot;tsctmr&quot;,&quot;avx1.0&quot;,&quot;rdrand&quot;,&quot;f16c&quot;,&quot;smep&quot;,&quot;erms&quot;,&quot;rdwrfsgs&quot;,&quot;tsc_thread_offset&quot;,&quot;bmi1&quot;,&quot;avx2&quot;,&quot;bmi2&quot;,&quot;invpcid&quot;,&quot;fpu_csds&quot;,&quot;syscall&quot;,&quot;xd&quot;,&quot;1gbpage&quot;,&quot;em64t&quot;,&quot;lahf&quot;,&quot;lzcnt&quot;,&quot;rdtscp&quot;,&quot;tsci&quot;]&#125;]</div><div class="line">内存统计:</div><div class="line">&#123;&quot;total&quot;:8589934592,&quot;available&quot;:4315959296,&quot;used&quot;:4273975296,&quot;usedPercent&quot;:49.7556209564209,&quot;free&quot;:3390992384,&quot;active&quot;:2908176384,&quot;inactive&quot;:924966912,&quot;wired&quot;:1364955136,&quot;buffers&quot;:0,&quot;cached&quot;:0,&quot;writeback&quot;:0,&quot;dirty&quot;:0,&quot;writebacktmp&quot;:0,&quot;shared&quot;:0,&quot;slab&quot;:0,&quot;pagetables&quot;:0,&quot;swapcached&quot;:0&#125;</div><div class="line">磁盘用量和IO统计:</div><div class="line">&#123;&quot;path&quot;:&quot;/&quot;,&quot;fstype&quot;:&quot;hfs&quot;,&quot;total&quot;:249769230336,&quot;free&quot;:201003577344,&quot;used&quot;:48503508992,&quot;usedPercent&quot;:19.41932916506611,&quot;inodesTotal&quot;:60978814,&quot;inodesUsed&quot;:11905675,&quot;inodesFree&quot;:49073139,&quot;inodesUsedPercent&quot;:19.524281006842802&#125;</div><div class="line">[&#123;&quot;device&quot;:&quot;/dev/disk1&quot;,&quot;mountpoint&quot;:&quot;/&quot;,&quot;fstype&quot;:&quot;hfs&quot;,&quot;opts&quot;:&quot;rw,multilabel&quot;&#125; &#123;&quot;device&quot;:&quot;devfs&quot;,&quot;mountpoint&quot;:&quot;/dev&quot;,&quot;fstype&quot;:&quot;devfs&quot;,&quot;opts&quot;:&quot;rw,suiddir,multilabel&quot;&#125; &#123;&quot;device&quot;:&quot;map -hosts&quot;,&quot;mountpoint&quot;:&quot;/net&quot;,&quot;fstype&quot;:&quot;autofs&quot;,&quot;opts&quot;:&quot;rw,nosuid,suiddir,nosymfollow,multilabel&quot;&#125; &#123;&quot;device&quot;:&quot;map auto_home&quot;,&quot;mountpoint&quot;:&quot;/home&quot;,&quot;fstype&quot;:&quot;autofs&quot;,&quot;opts&quot;:&quot;rw,suiddir,nosymfollow,multilabel&quot;&#125;]</div><div class="line">map[]</div><div class="line">网络IO统计:</div><div class="line">[&#123;&quot;name&quot;:&quot;lo0&quot;,&quot;bytesSent&quot;:22687,&quot;bytesRecv&quot;:22687,&quot;packetsSent&quot;:215,&quot;packetsRecv&quot;:215,&quot;errin&quot;:0,&quot;errout&quot;:0,&quot;dropin&quot;:0,&quot;dropout&quot;:0,&quot;fifoin&quot;:0,&quot;fifoout&quot;:0&#125; &#123;&quot;name&quot;:&quot;gif0&quot;,&quot;bytesSent&quot;:0,&quot;bytesRecv&quot;:0,&quot;packetsSent&quot;:0,&quot;packetsRecv&quot;:0,&quot;errin&quot;:0,&quot;errout&quot;:0,&quot;dropin&quot;:0,&quot;dropout&quot;:0,&quot;fifoin&quot;:0,&quot;fifoout&quot;:0&#125; &#123;&quot;name&quot;:&quot;stf0&quot;,&quot;bytesSent&quot;:0,&quot;bytesRecv&quot;:0,&quot;packetsSent&quot;:0,&quot;packetsRecv&quot;:0,&quot;errin&quot;:0,&quot;errout&quot;:0,&quot;dropin&quot;:0,&quot;dropout&quot;:0,&quot;fifoin&quot;:0,&quot;fifoout&quot;:0&#125; &#123;&quot;name&quot;:&quot;en0&quot;,&quot;bytesSent&quot;:6401764,&quot;bytesRecv&quot;:120874758,&quot;packetsSent&quot;:85192,&quot;packetsRecv&quot;:87266,&quot;errin&quot;:0,&quot;errout&quot;:0,&quot;dropin&quot;:0,&quot;dropout&quot;:0,&quot;fifoin&quot;:0,&quot;fifoout&quot;:0&#125; &#123;&quot;name&quot;:&quot;en1&quot;,&quot;bytesSent&quot;:0,&quot;bytesRecv&quot;:0,&quot;packetsSent&quot;:0,&quot;packetsRecv&quot;:0,&quot;errin&quot;:0,&quot;errout&quot;:0,&quot;dropin&quot;:0,&quot;dropout&quot;:0,&quot;fifoin&quot;:0,&quot;fifoout&quot;:0&#125; &#123;&quot;name&quot;:&quot;en2&quot;,&quot;bytesSent&quot;:0,&quot;bytesRecv&quot;:0,&quot;packetsSent&quot;:0,&quot;packetsRecv&quot;:0,&quot;errin&quot;:0,&quot;errout&quot;:0,&quot;dropin&quot;:0,&quot;dropout&quot;:0,&quot;fifoin&quot;:0,&quot;fifoout&quot;:0&#125; &#123;&quot;name&quot;:&quot;p2p0&quot;,&quot;bytesSent&quot;:0,&quot;bytesRecv&quot;:0,&quot;packetsSent&quot;:0,&quot;packetsRecv&quot;:0,&quot;errin&quot;:0,&quot;errout&quot;:0,&quot;dropin&quot;:0,&quot;dropout&quot;:0,&quot;fifoin&quot;:0,&quot;fifoout&quot;:0&#125; &#123;&quot;name&quot;:&quot;awdl0&quot;,&quot;bytesSent&quot;:2331,&quot;bytesRecv&quot;:0,&quot;packetsSent&quot;:2,&quot;packetsRecv&quot;:0,&quot;errin&quot;:0,&quot;errout&quot;:0,&quot;dropin&quot;:0,&quot;dropout&quot;:0,&quot;fifoin&quot;:0,&quot;fifoout&quot;:0&#125; &#123;&quot;name&quot;:&quot;bridg&quot;,&quot;bytesSent&quot;:342,&quot;bytesRecv&quot;:0,&quot;packetsSent&quot;:1,&quot;packetsRecv&quot;:0,&quot;errin&quot;:0,&quot;errout&quot;:0,&quot;dropin&quot;:0,&quot;dropout&quot;:0,&quot;fifoin&quot;:0,&quot;fifoout&quot;:0&#125;]</div><div class="line">协议统计:</div><div class="line">[]</div><div class="line">链接状态统计:</div><div class="line">[&#123;&quot;fd&quot;:13,&quot;family&quot;:2,&quot;type&quot;:2,&quot;localaddr&quot;:&#123;&quot;ip&quot;:&quot;*&quot;,&quot;port&quot;:63824&#125;,&quot;remoteaddr&quot;:&#123;&quot;ip&quot;:&quot;&quot;,&quot;port&quot;:0&#125;,&quot;status&quot;:&quot;&quot;,&quot;uids&quot;:null,&quot;pid&quot;:238&#125; &#123;&quot;fd&quot;:64,&quot;family&quot;:2,&quot;type&quot;:1,&quot;localaddr&quot;:&#123;&quot;ip&quot;:&quot;192.168.3.7&quot;,&quot;port&quot;:49224&#125;,&quot;remoteaddr&quot;:&#123;&quot;ip&quot;:&quot;191.238.172.191&quot;,&quot;port&quot;:443&#125;,&quot;status&quot;:&quot;CLOSED&quot;,&quot;uids&quot;:null,&quot;pid&quot;:394&#125;]</div><div class="line">进程统计:</div><div class="line">[1 45 46 48 49 53 54 55 62 64 65 69 70 71 73 74 76 77 79 80 81 82 83 85 88 89 93 95 96 97 98 100 101 102 105 110 118 130 133 135 136 142 143 147 149 159 168 169 170 171 172 173 174 175 179 182 183 184 185 187 188 189 190 192 195 196 197 198 200 218 219 220 226 227 229 231 232 233 237 238 239 242 243 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 265 266 267 268 269 270 271 272 273 274 276 277 278 279 280 281 282 283 284 285 286 287 289 290 291 292 294 295 296 297 299 300 302 305 307 308 311 312 314 316 317 324 325 329 339 340 342 343 344 345 346 348 360 361 362 366 367 368 371 377 386 391 392 393 394 397 423 426 427 428 429 430 433 437 443 445 446 451 452 454 455 456 461 463 469 470 474 475 477 481 483 486 487 488 511 514 554 555 624 650 711 722 723 724 725 726 727 729 736 737 741 742 743 791 866 867 878 880 883 889 516 517 518]</div><div class="line">0</div><div class="line">root</div><div class="line">负载统计:</div><div class="line">&#123;&quot;load1&quot;:1.32,&quot;load5&quot;:1.35,&quot;load15&quot;:1.31&#125;</div></pre></td></tr></table></figure></p>
 
       
     </div>
@@ -529,7 +473,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/summary/" rel="tag"># summary</a>
+            <a href="/tags/gopsutils/" rel="tag"># gopsutils</a>
           
         </div>
       
@@ -538,8 +482,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/12/30/go-cobra/" rel="next" title="如何使用golang编写漂亮的命令行工具">
-                <i class="fa fa-chevron-left"></i> 如何使用golang编写漂亮的命令行工具
+              <a href="/2017/01/19/markdown-to-pdf/" rel="next" title="使用pandoc将markdown文档转换成pdf">
+                <i class="fa fa-chevron-left"></i> 使用pandoc将markdown文档转换成pdf
               </a>
             
           </div>
@@ -548,8 +492,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2017/01/01/nodejs-vscode/" rel="prev" title="使用VSCode快速搭建NodeJS开发环境">
-                使用VSCode快速搭建NodeJS开发环境 <i class="fa fa-chevron-right"></i>
+              <a href="/2017/01/24/http-proxy/" rel="prev" title="利用Polipo构建基于SS的http proxy">
+                利用Polipo构建基于SS的http proxy <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -576,8 +520,8 @@
           
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/12/31/2016-summary/"
-           data-title="2016总结与2017计划" data-url="https://blog.yumaojun.net/2016/12/31/2016-summary/">
+      <div class="ds-thread" data-thread-key="2017/01/22/gopsutils/"
+           data-title="夸平台系统监控库-gopsutils" data-url="https://blog.yumaojun.net/2017/01/22/gopsutils/">
       </div>
     
   </div>
@@ -731,7 +675,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#转瞬即逝的2016"><span class="nav-number">1.</span> <span class="nav-text">转瞬即逝的2016</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#瞬息万变的2017"><span class="nav-number">2.</span> <span class="nav-text">瞬息万变的2017</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Python提升书单-今年主力"><span class="nav-number">2.1.</span> <span class="nav-text">Python提升书单(今年主力)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Golang提升书单"><span class="nav-number">2.2.</span> <span class="nav-text">Golang提升书单</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JavaScript提升书单"><span class="nav-number">2.3.</span> <span class="nav-text">JavaScript提升书单</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装"><span class="nav-number">2.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用"><span class="nav-number">3.</span> <span class="nav-text">使用</span></a></li></ol></div>
             
 
           </div>
