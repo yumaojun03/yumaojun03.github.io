@@ -1,0 +1,1113 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="deractor," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="紫川秀的博客" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="装饰器是一个非常重要的概念，可能算是进阶的一大门槛。装饰器允许向一个现有的对象添加新的功能，同时又不改变其结构,是一种功能增强的模式。在面向对象(OOP)的设计模式中，decorator被称为装饰模式。OOP的装饰模式需要通过继承和组合来实现，而Python除了能支持OOP的decorator外，直接从语法层次支持decorator。Python的decorator可以用函数实现，也可以用类实现。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python进阶系列-装饰器">
+<meta property="og:url" content="https://blog.yumaojun.net/2017/02/05/python-deractor/index.html">
+<meta property="og:site_name" content="紫川秀的博客">
+<meta property="og:description" content="装饰器是一个非常重要的概念，可能算是进阶的一大门槛。装饰器允许向一个现有的对象添加新的功能，同时又不改变其结构,是一种功能增强的模式。在面向对象(OOP)的设计模式中，decorator被称为装饰模式。OOP的装饰模式需要通过继承和组合来实现，而Python除了能支持OOP的decorator外，直接从语法层次支持decorator。Python的decorator可以用函数实现，也可以用类实现。">
+<meta property="og:updated_time" content="2017-02-07T16:07:59.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python进阶系列-装饰器">
+<meta name="twitter:description" content="装饰器是一个非常重要的概念，可能算是进阶的一大门槛。装饰器允许向一个现有的对象添加新的功能，同时又不改变其结构,是一种功能增强的模式。在面向对象(OOP)的设计模式中，decorator被称为装饰模式。OOP的装饰模式需要通过继承和组合来实现，而Python除了能支持OOP的decorator外，直接从语法层次支持decorator。Python的decorator可以用函数实现，也可以用类实现。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '11723790',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://blog.yumaojun.net/2017/02/05/python-deractor/"/>
+
+
+
+
+
+  <title> Python进阶系列-装饰器 | 紫川秀的博客 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?035e345b7c80cdf05aec8bc846b2f227";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">紫川秀的博客</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+    
+      <p class="site-subtitle">比你优秀的人不可怕,可怕的是比你优秀的人比你更努力。</p>
+    
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/02/05/python-deractor/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="紫川秀">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="http://oiw1gzfww.bkt.clouddn.com/me.png">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="紫川秀的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="紫川秀的博客" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Python进阶系列-装饰器
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-02-05T14:59:14+08:00">
+                2017-02-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开发语言/" itemprop="url" rel="index">
+                    <span itemprop="name">开发语言</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开发语言/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/02/05/python-deractor/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/02/05/python-deractor/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+             <span id="/2017/02/05/python-deractor/" class="leancloud_visitors" data-flag-title="Python进阶系列-装饰器">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>装饰器是一个非常重要的概念，可能算是进阶的一大门槛。装饰器允许向一个现有的对象添加新的功能，同时又不改变其结构,是一种功能增强的模式。在面向对象(OOP)的设计模式中，decorator被称为装饰模式。OOP的装饰模式需要通过继承和组合来实现，而Python除了能支持OOP的decorator外，直接从语法层次支持decorator。Python的decorator可以用函数实现，也可以用类实现。接下来将全面介绍关于Python装饰器相关的知识。<br><a id="more"></a></p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>装饰器本质上是一个Python函数，它可以让其他函数在不需要做任何代码变动的前提下增加额外功能，装饰器的返回值也是一个函数对象。它经常用于有切面需求的场景，比如：插入日志、性能测试、事务处理、缓存、权限校验等场景。装饰器是解决这类问题的绝佳设计，有了装饰器，我们就可以抽离出大量与函数功能本身无关的雷同代码并继续重用。<br>概括的讲，装饰器的作用就是为已经存在的函数或对象添加额外的功能。</p>
+<h2 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h2><p>在Python里，一切皆对象, 函数更是头等对象，函数对象可以被赋值给变量，所以，通过变量也能调用该函数<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;&gt; </span><span class="function"><span class="keyword">def</span> <span class="title">now</span><span class="params">()</span>:</span></div><div class="line"><span class="meta">... </span>    print(<span class="string">'2017-02-02'</span>)</div><div class="line">...</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>f = now</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>f()</div><div class="line"><span class="number">2017</span><span class="number">-02</span><span class="number">-02</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>f.__name__</div><div class="line"><span class="string">'now'</span></div></pre></td></tr></table></figure></p>
+<p>现在，假设我们要增强now()函数的功能，比如，在函数调用前后自动打印日志，但又不希望修改now()函数的定义,该怎么做喃？<br>最简单的方式就是动态替换now，并保持函数签名不变<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">now</span><span class="params">()</span>:</span></div><div class="line">    print(<span class="string">'2017-02-02'</span>)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">debug</span><span class="params">(func)</span>:</span></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">wrapper</span><span class="params">()</span>:</span></div><div class="line">        print(<span class="string">"[DEBUG]: enter &#123;&#125;()"</span>.format(func.__name__))</div><div class="line">        <span class="keyword">return</span> func()</div><div class="line"></div><div class="line">    wrapper.__name__ = func.__name__</div><div class="line">    <span class="keyword">return</span> wrapper</div><div class="line"></div><div class="line">now = debug(now)</div><div class="line"></div><div class="line">now()</div></pre></td></tr></table></figure></p>
+<p>为了方便python在语法层面就已经支持了装饰器(python &gt; 2.4),@语法糖实际上就等于<code>now = debug(now)</code>, 因此实际上应该这样写<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">debug</span><span class="params">(func)</span>:</span></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">wrapper</span><span class="params">()</span>:</span></div><div class="line">        print(<span class="string">"[DEBUG]: enter &#123;&#125;()"</span>.format(func.__name__))</div><div class="line">        <span class="keyword">return</span> func()</div><div class="line"></div><div class="line">    wrapper.__name__ = func.__name__</div><div class="line">    <span class="keyword">return</span> wrapper</div><div class="line"></div><div class="line"><span class="meta">@debug</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">now</span><span class="params">()</span>:</span></div><div class="line">    print(<span class="string">'2017-02-02'</span>)</div><div class="line"></div><div class="line">now()</div></pre></td></tr></table></figure></p>
+<p>这个dubug装饰器有个巨大的缺陷: 我们只能装饰不带参数的函数。实际上函数的形式各种各样，如何才能一个装饰器适配各种函数喃？python提供的可变参数可以很好的解决这个问题。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">debug</span><span class="params">(func)</span>:</span></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">wrapper</span><span class="params">(*args, **kwargs)</span>:</span></div><div class="line">        print(<span class="string">"[DEBUG]: enter &#123;&#125;()"</span>.format(func.__name__))</div><div class="line">        <span class="keyword">return</span> func(*args, **kwargs)</div><div class="line"></div><div class="line">    wrapper.__name__ = func.__name__</div><div class="line">    <span class="keyword">return</span> wrapper</div><div class="line"></div><div class="line"><span class="meta">@debug</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">now</span><span class="params">()</span>:</span></div><div class="line">    print(<span class="string">'2017-02-02'</span>)</div><div class="line"></div><div class="line"><span class="meta">@debug</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">hello</span><span class="params">(name)</span>:</span></div><div class="line">    print(<span class="string">"hello %s"</span> % name)</div><div class="line"></div><div class="line">now()</div><div class="line">hello(<span class="string">"Bob"</span>)</div></pre></td></tr></table></figure></p>
+<p>如此一个基础的装饰器就写完了，以下将介绍各式各样的装饰器。</p>
+<h2 id="函数式装饰器"><a href="#函数式装饰器" class="headerlink" title="函数式装饰器"></a>函数式装饰器</h2><p><em>装饰器本身是一个函数</em></p>
+<h3 id="装饰函数"><a href="#装饰函数" class="headerlink" title="装饰函数"></a>装饰函数</h3><p><em>被装饰的对象是一个函数, wrapper是对函数的增强</em></p>
+<h4 id="基础-装饰器无参数"><a href="#基础-装饰器无参数" class="headerlink" title="基础-装饰器无参数"></a>基础-装饰器无参数</h4><p>这是最基础的一种装饰器, 在引子中已经有栗子了。</p>
+<h4 id="高级-装饰器有参数"><a href="#高级-装饰器有参数" class="headerlink" title="高级-装饰器有参数"></a>高级-装饰器有参数</h4><p>带参数的装饰器和类装饰器属于进阶的内容。在理解这些装饰器之前，最好对函数的闭包和装饰器的接口约定有一定了解。关于python中的闭包概念我在下一篇中会单独介绍,这里你只需要知道闭包是一个携带状态的函数即可。<br>实际上就是返回装饰器的一个函数，但是这个装饰器携带外部变量(这就是闭包)<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">debug</span><span class="params">(level=<span class="string">'INFO'</span>)</span>:</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">decorator</span><span class="params">(func)</span>:</span></div><div class="line">        <span class="function"><span class="keyword">def</span> <span class="title">wrapper</span><span class="params">(*args, **kwargs)</span>:</span></div><div class="line">            print(<span class="string">"[&#123;&#125;]: enter &#123;&#125;()"</span>.format(level, func.__name__))</div><div class="line">            <span class="keyword">return</span> func(*args, **kwargs)</div><div class="line">        wrapper.__name__ = func.__name__</div><div class="line">        <span class="keyword">return</span> wrapper</div><div class="line">    <span class="keyword">return</span> decorator</div><div class="line"></div><div class="line"><span class="meta">@debug()</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">now</span><span class="params">()</span>:</span></div><div class="line">    print(<span class="string">'2017-02-02'</span>)</div><div class="line"></div><div class="line"><span class="meta">@debug("DEBUG")</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">hello</span><span class="params">(name)</span>:</span></div><div class="line">    print(<span class="string">"hello %s"</span> % name)</div><div class="line"></div><div class="line">now()</div><div class="line">hello(<span class="string">"Bob"</span>)</div></pre></td></tr></table></figure></p>
+<h3 id="装饰类"><a href="#装饰类" class="headerlink" title="装饰类"></a>装饰类</h3><p><strong>被装饰的对象是一个类,wrapper是对类的增强,所以装饰器的变化并不大,甚至可以沿用</strong></p>
+<h4 id="基础-装饰器无参数-1"><a href="#基础-装饰器无参数-1" class="headerlink" title="基础-装饰器无参数"></a>基础-装饰器无参数</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">debug</span><span class="params">(cls)</span>:</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">wrapper</span><span class="params">(*args, **kwargs)</span>:</span></div><div class="line">        print(<span class="string">"[DEBUG]: enter &#123;&#125; class"</span>.format(cls.__name__))</div><div class="line">        <span class="keyword">return</span> cls(*args, **kwargs)</div><div class="line">    wrapper.__name__ = cls.__name_</div><div class="line">    <span class="keyword">return</span> wrapper</div><div class="line"></div><div class="line"><span class="meta">@debug</span></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Hello</span><span class="params">(object)</span>:</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, value)</span>:</span></div><div class="line">        self.value = value</div><div class="line"></div><div class="line"><span class="meta">@debug</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">hello</span><span class="params">(name)</span>:</span></div><div class="line">    print(<span class="string">"hello %s"</span> % name)</div><div class="line"></div><div class="line">h = Hello(<span class="string">"Bob"</span>)</div><div class="line">hello(<span class="string">"Bob"</span>)</div></pre></td></tr></table></figure>
+<h4 id="高级-装饰器有参数-1"><a href="#高级-装饰器有参数-1" class="headerlink" title="高级-装饰器有参数"></a>高级-装饰器有参数</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">debug</span><span class="params">(level=<span class="string">'INFO'</span>)</span>:</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">decorator</span><span class="params">(cls)</span>:</span></div><div class="line">        <span class="function"><span class="keyword">def</span> <span class="title">wrapper</span><span class="params">(*args, **kwargs)</span>:</span></div><div class="line">            print(<span class="string">"[&#123;&#125;]: enter &#123;&#125; class"</span>.format(level, cls.__name__))</div><div class="line">            <span class="keyword">return</span> cls(*args, **kwargs)</div><div class="line"></div><div class="line">        wrapper.__name__ = cls.__name__</div><div class="line">        <span class="keyword">return</span> wrapper</div><div class="line">    <span class="keyword">return</span> decorator</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"><span class="meta">@debug()</span></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Hello</span><span class="params">(object)</span>:</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, value)</span>:</span></div><div class="line">        self.value = value</div><div class="line"></div><div class="line"><span class="meta">@debug("ERROR")</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">hello</span><span class="params">(name)</span>:</span></div><div class="line">    print(<span class="string">"hello %s"</span> % name)</div><div class="line"></div><div class="line">h = Hello(<span class="string">"Bob"</span>)</div><div class="line">hello(<span class="string">"Bob"</span>)</div></pre></td></tr></table></figure>
+<h2 id="类式装饰器"><a href="#类式装饰器" class="headerlink" title="类式装饰器"></a>类式装饰器</h2><p>装饰器函数其实是这样一个接口约束，它必须接受一个<code>callable</code>对象作为参数，然后返回一个<code>callable</code>对象。在Python中一般<code>callable</code>对象都是函数，但也有例外。只要某个对象重载了 <strong>call</strong> () 方法，那么这个对象就是<code>callable</code>的。<br>我们可以让类的构造函数 <strong>init</strong> () 接受一个函数，然后重载 <strong>call</strong> () 并返回一个函数，也可以达到装饰器函数的效果。</p>
+<h3 id="装饰函数和类"><a href="#装饰函数和类" class="headerlink" title="装饰函数和类"></a>装饰函数和类</h3><p><em>被装饰的对象是一个函数或是一个类，其实并没有本质上的差别，因此这里合并给出栗子</em></p>
+<h4 id="装饰器无参数"><a href="#装饰器无参数" class="headerlink" title="装饰器无参数"></a>装饰器无参数</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">debug</span><span class="params">(object)</span>:</span></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, func)</span>:</span></div><div class="line">        self.func = func</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self, *args, **kwargs)</span>:</span></div><div class="line">        print(<span class="string">"[DEBUG]: enter function &#123;func&#125;()"</span>.format(func=self.func.__name__))</div><div class="line">        <span class="keyword">return</span> self.func(*args, **kwargs)</div><div class="line"></div><div class="line"><span class="meta">@debug</span></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Hello</span><span class="params">(object)</span>:</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, value)</span>:</span></div><div class="line">        self.value = value</div><div class="line"></div><div class="line"><span class="meta">@debug</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">hello</span><span class="params">(name)</span>:</span></div><div class="line">    print(<span class="string">"hello %s"</span> % name)</div><div class="line"></div><div class="line">h = Hello(<span class="string">"Bob"</span>)</div><div class="line">hello(<span class="string">"Bob"</span>)</div></pre></td></tr></table></figure>
+<h4 id="装饰器有参数"><a href="#装饰器有参数" class="headerlink" title="装饰器有参数"></a>装饰器有参数</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">debug</span><span class="params">(object)</span>:</span></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, level=<span class="string">'INFO'</span>)</span>:</span></div><div class="line">        self._level = level</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self, func)</span>:</span></div><div class="line">        <span class="function"><span class="keyword">def</span> <span class="title">wrapper</span><span class="params">(*args, **kwargs)</span>:</span></div><div class="line">            print(<span class="string">"[&#123;&#125;]: enter function &#123;&#125;()"</span>.format(self._level ,func.__name__))</div><div class="line">            <span class="keyword">return</span> func(*args, **kwargs)</div><div class="line">        <span class="keyword">return</span> wrapper</div><div class="line"></div><div class="line"><span class="meta">@debug()</span></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Hello</span><span class="params">(object)</span>:</span></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, name)</span>:</span></div><div class="line">        self.name = name</div><div class="line"></div><div class="line"><span class="meta">@debug("ERROR")</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">hello</span><span class="params">(name)</span>:</span></div><div class="line">    print(<span class="string">"hello %s"</span> % name)</div><div class="line"></div><div class="line">h = Hello(<span class="string">"Bob"</span>)</div><div class="line">hello(<span class="string">"Bob"</span>)</div></pre></td></tr></table></figure>
+<h2 id="内置装饰器"><a href="#内置装饰器" class="headerlink" title="内置装饰器"></a>内置装饰器</h2><p>内置的装饰器和普通的装饰器原理是一样的，只不过返回的不是函数，而是类对象，所以更难理解一些</p>
+<h3 id="propert"><a href="#propert" class="headerlink" title="propert"></a>propert</h3><p>我们先看看property到底是啥,以下是property类的<code>doc string</code><br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">property</span><span class="params">(object)</span>:</span></div><div class="line">    <span class="string">"""</span></div><div class="line">    property(fget=None, fset=None, fdel=None, doc=None) -&gt; property attribute</div><div class="line">    </div><div class="line">    fget is a function to be used for getting an attribute value, and likewise</div><div class="line">    fset is a function for setting, and fdel a function for del'ing, an</div><div class="line">    attribute.  Typical use is to define a managed attribute x:</div><div class="line">    </div><div class="line">    class C(object):</div><div class="line">        def getx(self): return self._x</div><div class="line">        def setx(self, value): self._x = value</div><div class="line">        def delx(self): del self._x</div><div class="line">        x = property(getx, setx, delx, "I'm the 'x' property.")</div><div class="line">    </div><div class="line">    Decorators make defining new properties or modifying existing ones easy:</div><div class="line">    </div><div class="line">    class C(object):</div><div class="line">        @property</div><div class="line">        def x(self):</div><div class="line">            "I am the 'x' property."</div><div class="line">            return self._x</div><div class="line">        @x.setter</div><div class="line">        def x(self, value):</div><div class="line">            self._x = value</div><div class="line">        @x.deleter</div><div class="line">        def x(self):</div><div class="line">            del self._x</div><div class="line">    """</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, fget=None, fset=None, fdel=None, doc=None)</span>:</span> <span class="comment"># known special case of property.__init__</span></div><div class="line">        <span class="keyword">pass</span></div><div class="line"></div><div class="line">    ...</div></pre></td></tr></table></figure></p>
+<p>实际上property装饰器帮我们完成了<code>x = property(getx, setx, delx, &quot;I&#39;m the &#39;x&#39; property.&quot;)</code>这个动作，而且返回的是一个property对象。</p>
+<h3 id="staticmethod"><a href="#staticmethod" class="headerlink" title="staticmethod"></a>staticmethod</h3><p>staticmethod传入一个函数返回一个staticmethod的对象。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">staticmethod</span><span class="params">(object)</span>:</span></div><div class="line">    <span class="string">"""</span></div><div class="line">    staticmethod(function) -&gt; method</div><div class="line">    </div><div class="line">    Convert a function to be a static method.</div><div class="line">    </div><div class="line">    A static method does not receive an implicit first argument.</div><div class="line">    To declare a static method, use this idiom:</div><div class="line">    </div><div class="line">         class C:</div><div class="line">              def f(arg1, arg2, ...): ...</div><div class="line">              f = staticmethod(f)</div><div class="line">    </div><div class="line">    It can be called either on the class (e.g. C.f()) or on an instance</div><div class="line">    (e.g. C().f()).  The instance is ignored except for its class.</div><div class="line">    </div><div class="line">    Static methods in Python are similar to those found in Java or C++.</div><div class="line">    For a more advanced concept, see the classmethod builtin.</div><div class="line">    """</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, function)</span>:</span> <span class="comment"># real signature unknown; restored from __doc__</span></div><div class="line">        <span class="keyword">pass</span></div><div class="line"></div><div class="line">    ...</div></pre></td></tr></table></figure></p>
+<h3 id="classmethod"><a href="#classmethod" class="headerlink" title="classmethod"></a>classmethod</h3><p>同理classmethod传入一个函数返回一个classmethod对象。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">classmethod</span><span class="params">(object)</span>:</span></div><div class="line">    <span class="string">"""</span></div><div class="line">    classmethod(function) -&gt; method</div><div class="line">    </div><div class="line">    Convert a function to be a class method.</div><div class="line">    </div><div class="line">    A class method receives the class as implicit first argument,</div><div class="line">    just like an instance method receives the instance.</div><div class="line">    To declare a class method, use this idiom:</div><div class="line">    </div><div class="line">      class C:</div><div class="line">          def f(cls, arg1, arg2, ...): ...</div><div class="line">          f = classmethod(f)</div><div class="line">    </div><div class="line">    It can be called either on the class (e.g. C.f()) or on an instance</div><div class="line">    (e.g. C().f()).  The instance is ignored except for its class.</div><div class="line">    If a class method is called for a derived class, the derived class</div><div class="line">    object is passed as the implied first argument.</div><div class="line">    </div><div class="line">    Class methods are different than C++ or Java static methods.</div><div class="line">    If you want those, see the staticmethod builtin.</div><div class="line">    """</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, function)</span>:</span> <span class="comment"># real signature unknown; restored from __doc__</span></div><div class="line">        <span class="keyword">pass</span></div><div class="line">    </div><div class="line">    ...</div></pre></td></tr></table></figure></p>
+<h2 id="需要注意的问题"><a href="#需要注意的问题" class="headerlink" title="需要注意的问题"></a>需要注意的问题</h2><p>装饰器可以让你代码更加优雅，减少重复，但也不全是优点，也会带来一些问题。</p>
+<h3 id="位置错误"><a href="#位置错误" class="headerlink" title="位置错误"></a>位置错误</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">html_tags</span><span class="params">(tag_name)</span>:</span></div><div class="line">    print(<span class="string">'begin outer function.'</span>)</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">wrapper</span><span class="params">(func)</span>:</span></div><div class="line">        print(<span class="string">"begin of inner wrapper function."</span>)</div><div class="line"></div><div class="line">        <span class="function"><span class="keyword">def</span> <span class="title">wrapper</span><span class="params">(*args, **kwargs)</span>:</span></div><div class="line">            content = func(*args, **kwargs)</div><div class="line">            print(<span class="string">"&lt;&#123;tag&#125;&gt;&#123;content&#125;&lt;/&#123;tag&#125;&gt;"</span>.format(tag=tag_name, content=content))</div><div class="line">            print(<span class="string">'end of inner wrapper function.'</span>)</div><div class="line"></div><div class="line">        <span class="keyword">return</span> wrapper</div><div class="line"></div><div class="line">    print(<span class="string">'end of outer function'</span>)</div><div class="line">    <span class="keyword">return</span> wrapper</div><div class="line"></div><div class="line"><span class="meta">@html_tags('b')</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">hello</span><span class="params">(name=<span class="string">'Toby'</span>)</span>:</span></div><div class="line">    <span class="keyword">return</span> <span class="string">'Hello &#123;&#125;!'</span>.format(name)</div><div class="line"></div><div class="line"></div><div class="line">hello()</div><div class="line">hello()</div></pre></td></tr></table></figure>
+<p>在装饰器中我在各个可能的位置都加上了 print 语句，用于记录被调用的情况。你知道他们最后打印出来的顺序吗？如果你心里没底，那么最好不要在装饰器函数之外添加逻辑功能，否则这个装饰器就不受你控制了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">begin outer function.</div><div class="line">end of outer function</div><div class="line">begin of inner wrapper function.</div><div class="line">&lt;b&gt;Hello Toby!&lt;/b&gt;</div><div class="line">end of inner wrapper function.</div><div class="line">&lt;b&gt;Hello Toby!&lt;/b&gt;</div><div class="line">end of inner wrapper function.</div></pre></td></tr></table></figure></p>
+<h3 id="函数签名和文档"><a href="#函数签名和文档" class="headerlink" title="函数签名和文档"></a>函数签名和文档</h3><p>使用装饰器后实际上函数的前面和文档都会被替换成wrapper的，虽然我们可以简单处理过来,但是这并不是完美的解决之道<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> inspect</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">debug</span><span class="params">(level=<span class="string">'INFO'</span>)</span>:</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">decorator</span><span class="params">(cls)</span>:</span></div><div class="line">        <span class="function"><span class="keyword">def</span> <span class="title">wrapper</span><span class="params">(*args, **kwargs)</span>:</span></div><div class="line">            print(<span class="string">"[&#123;&#125;]: enter &#123;&#125; class"</span>.format(level, cls.__name__))</div><div class="line">            <span class="keyword">return</span> cls(*args, **kwargs)</div><div class="line"></div><div class="line">        wrapper.__name__ = cls.__name__</div><div class="line">        <span class="keyword">return</span> wrapper</div><div class="line">    <span class="keyword">return</span> decorator</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"><span class="meta">@debug()</span></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Hello</span><span class="params">(object)</span>:</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, value)</span>:</span></div><div class="line">        self.value = value</div><div class="line"></div><div class="line"><span class="meta">@debug("ERROR")</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">hello</span><span class="params">(name)</span>:</span></div><div class="line">    print(<span class="string">"hello %s"</span> % name)</div><div class="line"></div><div class="line">h = Hello(<span class="string">"Bob"</span>)</div><div class="line">hello(<span class="string">"Bob"</span>)</div><div class="line">print(Hello.__name__)</div><div class="line">print(hello.__name__)</div><div class="line"></div><div class="line">print(inspect.getsource(Hello))</div><div class="line">print(inspect.getsource(hello))</div></pre></td></tr></table></figure></p>
+<h3 id="staticmethod和classmethod不能再次装饰"><a href="#staticmethod和classmethod不能再次装饰" class="headerlink" title="staticmethod和classmethod不能再次装饰"></a>staticmethod和classmethod不能再次装饰</h3><p>当你想把装饰器用在一个静态方法或者类方法时，不好意思，报错了。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">debug</span><span class="params">(level=<span class="string">'INFO'</span>)</span>:</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">decorator</span><span class="params">(cls)</span>:</span></div><div class="line">        <span class="function"><span class="keyword">def</span> <span class="title">wrapper</span><span class="params">(*args, **kwargs)</span>:</span></div><div class="line">            print(<span class="string">"[&#123;&#125;]: enter &#123;&#125; class"</span>.format(level, cls.__name__))</div><div class="line">            <span class="keyword">return</span> cls(*args, **kwargs)</div><div class="line"></div><div class="line">        wrapper.__name__ = cls.__name__</div><div class="line">        <span class="keyword">return</span> wrapper</div><div class="line">    <span class="keyword">return</span> decorator</div><div class="line"></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Car</span><span class="params">(object)</span>:</span></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, model)</span>:</span></div><div class="line">        self.model = model</div><div class="line"></div><div class="line"><span class="meta">    @debug  # 装饰实例方法，OK</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(self)</span>:</span></div><div class="line">        print(<span class="string">"&#123;&#125; is running!"</span>.format(self.model))</div><div class="line"></div><div class="line"><span class="meta">    @debug  # 装饰静态方法，Failed</span></div><div class="line"><span class="meta">    @staticmethod</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">check_model_for</span><span class="params">(obj)</span>:</span></div><div class="line">        <span class="keyword">if</span> isinstance(obj, Car):</div><div class="line">            print(<span class="string">"The model of your car is &#123;&#125;"</span>.format(obj.model))</div><div class="line">        <span class="keyword">else</span>:</div><div class="line">            print(<span class="string">"&#123;&#125; is not a car!"</span>.format(obj))</div><div class="line"></div><div class="line"></div><div class="line">car = Car(<span class="string">'six'</span>)</div><div class="line">car.check_model_for(car)</div></pre></td></tr></table></figure></p>
+<p>前面已经解释了@staticmethod这个装饰器，其实它返回的并不是一个<code>callable</code>对象，而是一个<code>staticmethod</code>对象，那么它是不符合装饰器要求的（比如传入一个<code>callable</code>对象），你自然不能在它之上再加别的装饰器。要解决这个问题很简单，只要把你的装饰器放在@staticmethod之前就好了，因为你的装饰器返回的还是一个正常的函数，然后再加上一个@staticmethod是不会出问题的。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">debug</span><span class="params">(level=<span class="string">'INFO'</span>)</span>:</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">decorator</span><span class="params">(cls)</span>:</span></div><div class="line">        <span class="function"><span class="keyword">def</span> <span class="title">wrapper</span><span class="params">(*args, **kwargs)</span>:</span></div><div class="line">            print(<span class="string">"[&#123;&#125;]: enter &#123;&#125; class"</span>.format(level, cls.__name__))</div><div class="line">            <span class="keyword">return</span> cls(*args, **kwargs)</div><div class="line"></div><div class="line">        wrapper.__name__ = cls.__name__</div><div class="line">        <span class="keyword">return</span> wrapper</div><div class="line">    <span class="keyword">return</span> decorator</div><div class="line"></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Car</span><span class="params">(object)</span>:</span></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, model)</span>:</span></div><div class="line">        self.model = model</div><div class="line"></div><div class="line"><span class="meta">    @debug()  # 装饰实例方法，OK</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(self)</span>:</span></div><div class="line">        print(<span class="string">"&#123;&#125; is running!"</span>.format(self.model))</div><div class="line"></div><div class="line"><span class="meta">    @staticmethod</span></div><div class="line"><span class="meta">    @debug()  # 静态装饰器放到最后就ok了</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">check_model_for</span><span class="params">(obj)</span>:</span></div><div class="line">        <span class="keyword">if</span> isinstance(obj, Car):</div><div class="line">            print(<span class="string">"The model of your car is &#123;&#125;"</span>.format(obj.model))</div><div class="line">        <span class="keyword">else</span>:</div><div class="line">            print(<span class="string">"&#123;&#125; is not a car!"</span>.format(obj))</div><div class="line"></div><div class="line"></div><div class="line">car = Car(<span class="string">'six'</span>)</div><div class="line">car.check_model_for(car)</div></pre></td></tr></table></figure></p>
+<h2 id="利用第三方库来写装饰器"><a href="#利用第三方库来写装饰器" class="headerlink" title="利用第三方库来写装饰器"></a>利用第三方库来写装饰器</h2><p>嵌套的装饰函数不太直观，我们可以使用第三方包类改进这样的情况，让装饰器函数可读性更好。</p>
+<h3 id="decorator"><a href="#decorator" class="headerlink" title="decorator"></a>decorator</h3><p>decorator.py是一个非常简单的装饰器加强包。你可以很直观的先定义包装函数wrapper() ，再使用decorate(func, wrapper)方法就可以完成一个装饰器。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@decorator</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">debug</span><span class="params">(func, *args, **kwargs)</span>:</span></div><div class="line">    print(<span class="string">"[DEBUG] &#123;&#125;: enter &#123;&#125;()"</span>.format(datetime.now(), func.__name__))</div><div class="line">    <span class="keyword">return</span> func(*args, **kwargs)</div><div class="line"></div><div class="line"><span class="meta">@debug</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">hello</span><span class="params">(name)</span>:</span></div><div class="line">    <span class="string">"""test"""</span></div><div class="line">    print(<span class="string">"hello %s"</span> % name)</div><div class="line"></div><div class="line"><span class="meta">@debug</span></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Hello</span><span class="params">(object)</span>:</span></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, name)</span>:</span></div><div class="line">        self.name = name</div><div class="line"></div><div class="line">hello(<span class="string">"Bob"</span>)</div><div class="line"></div><div class="line">print(inspect.getsource(hello))</div><div class="line">print(hello.__name__)</div></pre></td></tr></table></figure></p>
+<p>decorator比较简陋, 要装饰类和带参数的装饰就不能很好支持了。</p>
+<h3 id="wrapt"><a href="#wrapt" class="headerlink" title="wrapt"></a>wrapt</h3><p>wrapt是一个功能非常完善的包，用于实现各种你想到或者你没想到的装饰器。使用 wrapt 实现的装饰器你不需要担心之前 inspect 中遇到的所有问题，因为它都帮你处理了，甚至 inspect.getsource ( func ) 也准确无误<br>更全面的文档可以参考<a href="http://wrapt.readthedocs.io/en/latest/decorators.html#decorating-classes" target="_blank" rel="external">wrapt官方文档</a><br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime</div><div class="line"><span class="keyword">import</span> wrapt</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">debug</span><span class="params">(level=<span class="string">'INFO'</span>)</span>:</span></div><div class="line"><span class="meta">    @wrapt.decorator</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">wrapper</span><span class="params">(wrapped, instance, args, kwargs)</span>:</span></div><div class="line">        print(<span class="string">"[&#123;&#125;]: &#123;&#125; message"</span>.format(level, datetime.now()))</div><div class="line">        <span class="keyword">return</span> wrapped(*args, **kwargs)</div><div class="line">    <span class="keyword">return</span> wrapper</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Class</span><span class="params">(object)</span>:</span></div><div class="line"></div><div class="line"><span class="meta">    @debug()</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">function_im</span><span class="params">(self, arg1, arg2)</span>:</span></div><div class="line">        <span class="keyword">pass</span></div><div class="line"></div><div class="line"><span class="meta">    @debug("DEBUG")</span></div><div class="line"><span class="meta">    @classmethod</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">function_cm</span><span class="params">(cls, arg1, arg2)</span>:</span></div><div class="line">        <span class="keyword">pass</span></div><div class="line"></div><div class="line"><span class="meta">    @debug("ERROR")</span></div><div class="line"><span class="meta">    @staticmethod</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">function_sm</span><span class="params">(arg1, arg2)</span>:</span></div><div class="line">        <span class="keyword">pass</span></div><div class="line"></div><div class="line"><span class="meta">@debug()</span></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Hello</span><span class="params">()</span>:</span></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, name)</span>:</span></div><div class="line">        self.name = name</div><div class="line"><span class="meta">@debug()</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">hello</span><span class="params">(name)</span>:</span></div><div class="line">    print(<span class="string">"hello %s"</span> % name)</div><div class="line"></div><div class="line"></div><div class="line">c = Class()</div><div class="line"></div><div class="line">c.function_im(<span class="number">1</span>, <span class="number">2</span>)</div><div class="line">Class.function_im(c, <span class="number">1</span>, <span class="number">2</span>)</div><div class="line">Class.function_cm(<span class="number">1</span>, <span class="number">2</span>)</div><div class="line">Class.function_sm(<span class="number">1</span>, <span class="number">2</span>)</div><div class="line"></div><div class="line">h = Hello(<span class="string">"Bob"</span>)</div><div class="line">hello(<span class="string">"Bob"</span>)</div></pre></td></tr></table></figure></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>装饰器的理念是对原函数、对象的加强，相当于重新封装，所以一般装饰器函数都被命名为wrapper() ，意义在于包装。函数只有在被调用时才会发挥其作用。比如@debug 装饰器可以在函数执行时额外输出日志， @cache装饰过的函数可以缓存计算结果等等。<br>最后避免重复造轮子推荐使用wrapt，除非wrapt真不能满足你的特性需求。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://oiw1gzfww.bkt.clouddn.com/alipay.jpg" alt="紫川秀 Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/deractor/" rel="tag"># deractor</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/01/25/fasthttp/" rel="next" title="高性能web之fasthttp">
+                <i class="fa fa-chevron-left"></i> 高性能web之fasthttp
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2017/02/05/python-deractor/"
+           data-title="Python进阶系列-装饰器" data-url="https://blog.yumaojun.net/2017/02/05/python-deractor/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://oiw1gzfww.bkt.clouddn.com/me.png"
+               alt="紫川秀" />
+          <p class="site-author-name" itemprop="name">紫川秀</p>
+          <p class="site-description motion-element" itemprop="description">喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。</p>
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/yumaojun03" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://douban.com/people/155892492" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/zi-chuan-xiu-86" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.liaoxuefeng.com/" title="廖雪峰官网" target="_blank">廖雪峰官网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://xiaorui.cc/" title="峰云,就她了" target="_blank">峰云,就她了</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#引子"><span class="nav-number">2.</span> <span class="nav-text">引子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#函数式装饰器"><span class="nav-number">3.</span> <span class="nav-text">函数式装饰器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#装饰函数"><span class="nav-number">3.1.</span> <span class="nav-text">装饰函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#基础-装饰器无参数"><span class="nav-number">3.1.1.</span> <span class="nav-text">基础-装饰器无参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#高级-装饰器有参数"><span class="nav-number">3.1.2.</span> <span class="nav-text">高级-装饰器有参数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#装饰类"><span class="nav-number">3.2.</span> <span class="nav-text">装饰类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#基础-装饰器无参数-1"><span class="nav-number">3.2.1.</span> <span class="nav-text">基础-装饰器无参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#高级-装饰器有参数-1"><span class="nav-number">3.2.2.</span> <span class="nav-text">高级-装饰器有参数</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#类式装饰器"><span class="nav-number">4.</span> <span class="nav-text">类式装饰器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#装饰函数和类"><span class="nav-number">4.1.</span> <span class="nav-text">装饰函数和类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#装饰器无参数"><span class="nav-number">4.1.1.</span> <span class="nav-text">装饰器无参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#装饰器有参数"><span class="nav-number">4.1.2.</span> <span class="nav-text">装饰器有参数</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内置装饰器"><span class="nav-number">5.</span> <span class="nav-text">内置装饰器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#propert"><span class="nav-number">5.1.</span> <span class="nav-text">propert</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#staticmethod"><span class="nav-number">5.2.</span> <span class="nav-text">staticmethod</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#classmethod"><span class="nav-number">5.3.</span> <span class="nav-text">classmethod</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#需要注意的问题"><span class="nav-number">6.</span> <span class="nav-text">需要注意的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#位置错误"><span class="nav-number">6.1.</span> <span class="nav-text">位置错误</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#函数签名和文档"><span class="nav-number">6.2.</span> <span class="nav-text">函数签名和文档</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#staticmethod和classmethod不能再次装饰"><span class="nav-number">6.3.</span> <span class="nav-text">staticmethod和classmethod不能再次装饰</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#利用第三方库来写装饰器"><span class="nav-number">7.</span> <span class="nav-text">利用第三方库来写装饰器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#decorator"><span class="nav-number">7.1.</span> <span class="nav-text">decorator</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#wrapt"><span class="nav-number">7.2.</span> <span class="nav-text">wrapt</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">紫川秀</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i>本站访客数<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>人次</span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i>本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"yumaojun"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+      
+      <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+      <script src="/js/src/hook-duoshuo.js?v=5.1.0"></script>
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("51RM6PwqfSuyOFX9MxLeq5yY-gzGzoHsz", "dNQYvnf4KlnN364JVGClL7bp");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+
+</body>
+</html>
