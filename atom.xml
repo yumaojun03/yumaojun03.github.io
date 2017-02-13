@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog.yumaojun.net/"/>
-  <updated>2017-02-09T06:03:35.000Z</updated>
+  <updated>2017-02-13T05:57:35.000Z</updated>
   <id>https://blog.yumaojun.net/</id>
   
   <author>
@@ -14,6 +14,31 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Golang版跳板机开篇-架构与简介</title>
+    <link href="https://blog.yumaojun.net/2017/02/13/go-ssh/"/>
+    <id>https://blog.yumaojun.net/2017/02/13/go-ssh/</id>
+    <published>2017-02-13T05:49:19.000Z</published>
+    <updated>2017-02-13T05:57:35.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>第一步摸清ssh, 实现CLI<br><a id="more"></a></p>
+ <figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div></pre></td><td class="code"><pre><div class="line"> <span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"log"</span></div><div class="line">	<span class="string">"os"</span></div><div class="line"></div><div class="line">	<span class="string">"golang.org/x/crypto/ssh"</span></div><div class="line">	<span class="string">"golang.org/x/crypto/ssh/terminal"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	ce := <span class="function"><span class="keyword">func</span><span class="params">(err error, msg <span class="keyword">string</span>)</span></span> &#123;</div><div class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">			log.Fatalf(<span class="string">"%s error: %v"</span>, msg, err)</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	client, err := ssh.Dial(<span class="string">"tcp"</span>, <span class="string">"localhost:1234"</span>, &amp;ssh.ClientConfig&#123;</div><div class="line">		User: <span class="string">"root"</span>,</div><div class="line">		Auth: []ssh.AuthMethod&#123;ssh.Password(<span class="string">"xxx"</span>)&#125;,</div><div class="line">	&#125;)</div><div class="line">	ce(err, <span class="string">"dial"</span>)</div><div class="line"></div><div class="line">	session, err := client.NewSession()</div><div class="line">	ce(err, <span class="string">"new session"</span>)</div><div class="line">	<span class="keyword">defer</span> session.Close()</div><div class="line"></div><div class="line">	session.Stdout = os.Stdout</div><div class="line">	session.Stderr = os.Stderr</div><div class="line">	session.Stdin = os.Stdin</div><div class="line"></div><div class="line">	modes := ssh.TerminalModes&#123;</div><div class="line">		ssh.ECHO:          <span class="number">1</span>,</div><div class="line">		ssh.ECHOCTL:       <span class="number">0</span>,</div><div class="line">		ssh.TTY_OP_ISPEED: <span class="number">14400</span>,</div><div class="line">		ssh.TTY_OP_OSPEED: <span class="number">14400</span>,</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	termFD := <span class="keyword">int</span>(os.Stdin.Fd())</div><div class="line">	w, h, _ := terminal.GetSize(termFD)</div><div class="line">	termState, _ := terminal.MakeRaw(termFD)</div><div class="line">	<span class="keyword">defer</span> terminal.Restore(termFD, termState)</div><div class="line"></div><div class="line">	err = session.RequestPty(<span class="string">"xterm-256color"</span>, h, w, modes)</div><div class="line">	ce(err, <span class="string">"request pty"</span>)</div><div class="line"></div><div class="line">	err = session.Shell()</div><div class="line">	ce(err, <span class="string">"start shell"</span>)</div><div class="line"></div><div class="line">	err = session.Wait()</div><div class="line">	ce(err, <span class="string">"return"</span>)</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;第一步摸清ssh, 实现CLI&lt;br&gt;
+    
+    </summary>
+    
+      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
+    
+      <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
+    
+    
+      <category term="ssh" scheme="https://blog.yumaojun.net/tags/ssh/"/>
+    
+  </entry>
   
   <entry>
     <title>Python命令行开发神器-click</title>
