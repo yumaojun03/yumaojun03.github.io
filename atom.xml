@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog.yumaojun.net/"/>
-  <updated>2017-02-13T05:57:35.000Z</updated>
+  <updated>2017-02-14T05:16:32.000Z</updated>
   <id>https://blog.yumaojun.net/</id>
   
   <author>
@@ -14,6 +14,36 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>nodejs源加速</title>
+    <link href="https://blog.yumaojun.net/2017/02/14/nodejs-accelerate/"/>
+    <id>https://blog.yumaojun.net/2017/02/14/nodejs-accelerate/</id>
+    <published>2017-02-14T04:57:33.000Z</published>
+    <updated>2017-02-14T05:16:32.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>之前介绍过使用vscode搭建nodejs开发环境, 环境是搭建好了, 使用时有一个硬伤, 就是nodejs官方的源下载奇慢, 而一般js的项目依赖又多, 所以经常的结果就是: 慢得你啥都装不上(time out)。怎么解决喃？ 当然是换国内的源。<br><a id="more"></a><br>我仅使用过淘宝的加速源，效果不错，一直用着，下面做简单的介绍。</p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>淘宝NPM镜像官方是这样描述的: <strong>这是一个完整 npmjs.org 镜像，你可以用此代替官方版本(只读)，同步频率目前为 10分钟 一次以保证尽量与官方服务同步。</strong><br>关于更多的信息请查看:<a href="https://npm.taobao.org/" target="_blank" rel="external">淘宝NPM源官网</a></p>
+<h2 id="同步"><a href="#同步" class="headerlink" title="同步"></a>同步</h2><p>从registry.npm.taobao.org安装所有模块. 当安装的时候发现安装的模块还没有同步过来, 淘宝NPM会自动在后台进行同步, 并且会让你从官方 NPM registry.npmjs.org 进行安装. 下次你再安装这个模块的时候, 就会直接从 淘宝 NPM 安装了.</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>临时使用的话, 可以通过registry参数来指定淘宝源地址，比如<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">npm --registry=https://registry.npm.taobao.org xterm</div></pre></td></tr></table></figure></p>
+<p>当然也可以添加命令别名,这样就不用每次都添加–registry了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">alias cnpm=&quot;npm --registry=https://registry.npm.taobao.org \</div><div class="line">--cache=$HOME/.npm/.cache/cnpm \</div><div class="line">--disturl=https://npm.taobao.org/dist \</div><div class="line">--userconfig=$HOME/.cnpmrc&quot;</div><div class="line"></div><div class="line"># Or alias it in .bashrc or .zshrc</div><div class="line">$ echo &apos;\n#alias for cnpm\nalias cnpm=&quot;npm --registry=https://registry.npm.taobao.org \</div><div class="line">  --cache=$HOME/.npm/.cache/cnpm \</div><div class="line">  --disturl=https://npm.taobao.org/dist \</div><div class="line">  --userconfig=$HOME/.cnpmrc&quot;&apos; &gt;&gt; ~/.zshrc &amp;&amp; source ~/.zshrc</div></pre></td></tr></table></figure></p>
+<p>其实淘宝的源很稳定，同步频率也快，因此一般直接替换系统的npm也可以<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">npm install -g cnpm --registry=https://registry.npm.taobao.org</div></pre></td></tr></table></figure></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;之前介绍过使用vscode搭建nodejs开发环境, 环境是搭建好了, 使用时有一个硬伤, 就是nodejs官方的源下载奇慢, 而一般js的项目依赖又多, 所以经常的结果就是: 慢得你啥都装不上(time out)。怎么解决喃？ 当然是换国内的源。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
+    
+      <category term="Nodejs" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Nodejs/"/>
+    
+    
+      <category term="源加速" scheme="https://blog.yumaojun.net/tags/%E6%BA%90%E5%8A%A0%E9%80%9F/"/>
+    
+  </entry>
   
   <entry>
     <title>Golang版跳板机开篇-架构与简介</title>

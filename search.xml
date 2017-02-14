@@ -3,6 +3,13 @@
   
     
     <entry>
+      <title><![CDATA[nodejs源加速]]></title>
+      <url>%2F2017%2F02%2F14%2Fnodejs-accelerate%2F</url>
+      <content type="text"><![CDATA[之前介绍过使用vscode搭建nodejs开发环境, 环境是搭建好了, 使用时有一个硬伤, 就是nodejs官方的源下载奇慢, 而一般js的项目依赖又多, 所以经常的结果就是: 慢得你啥都装不上(time out)。怎么解决喃？ 当然是换国内的源。我仅使用过淘宝的加速源，效果不错，一直用着，下面做简单的介绍。 简介淘宝NPM镜像官方是这样描述的: 这是一个完整 npmjs.org 镜像，你可以用此代替官方版本(只读)，同步频率目前为 10分钟 一次以保证尽量与官方服务同步。关于更多的信息请查看:淘宝NPM源官网 同步从registry.npm.taobao.org安装所有模块. 当安装的时候发现安装的模块还没有同步过来, 淘宝NPM会自动在后台进行同步, 并且会让你从官方 NPM registry.npmjs.org 进行安装. 下次你再安装这个模块的时候, 就会直接从 淘宝 NPM 安装了. 安装临时使用的话, 可以通过registry参数来指定淘宝源地址，比如1npm --registry=https://registry.npm.taobao.org xterm 当然也可以添加命令别名,这样就不用每次都添加–registry了12345678910alias cnpm=&quot;npm --registry=https://registry.npm.taobao.org \--cache=$HOME/.npm/.cache/cnpm \--disturl=https://npm.taobao.org/dist \--userconfig=$HOME/.cnpmrc&quot;# Or alias it in .bashrc or .zshrc$ echo &apos;\n#alias for cnpm\nalias cnpm=&quot;npm --registry=https://registry.npm.taobao.org \ --cache=$HOME/.npm/.cache/cnpm \ --disturl=https://npm.taobao.org/dist \ --userconfig=$HOME/.cnpmrc&quot;&apos; &gt;&gt; ~/.zshrc &amp;&amp; source ~/.zshrc 其实淘宝的源很稳定，同步频率也快，因此一般直接替换系统的npm也可以1npm install -g cnpm --registry=https://registry.npm.taobao.org]]></content>
+    </entry>
+
+    
+    <entry>
       <title><![CDATA[Golang版跳板机开篇-架构与简介]]></title>
       <url>%2F2017%2F02%2F13%2Fgo-ssh%2F</url>
       <content type="text"><![CDATA[第一步摸清ssh, 实现CLI 1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253 package mainimport ( "log" "os" "golang.org/x/crypto/ssh" "golang.org/x/crypto/ssh/terminal")func main() &#123; ce := func(err error, msg string) &#123; if err != nil &#123; log.Fatalf("%s error: %v", msg, err) &#125; &#125; client, err := ssh.Dial("tcp", "localhost:1234", &amp;ssh.ClientConfig&#123; User: "root", Auth: []ssh.AuthMethod&#123;ssh.Password("xxx")&#125;, &#125;) ce(err, "dial") session, err := client.NewSession() ce(err, "new session") defer session.Close() session.Stdout = os.Stdout session.Stderr = os.Stderr session.Stdin = os.Stdin modes := ssh.TerminalModes&#123; ssh.ECHO: 1, ssh.ECHOCTL: 0, ssh.TTY_OP_ISPEED: 14400, ssh.TTY_OP_OSPEED: 14400, &#125; termFD := int(os.Stdin.Fd()) w, h, _ := terminal.GetSize(termFD) termState, _ := terminal.MakeRaw(termFD) defer terminal.Restore(termFD, termState) err = session.RequestPty("xterm-256color", h, w, modes) ce(err, "request pty") err = session.Shell() ce(err, "start shell") err = session.Wait() ce(err, "return")&#125;]]></content>
