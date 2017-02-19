@@ -1,0 +1,1206 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="crypto," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="紫川秀的博客" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="据记载，公元前400年，古希腊人发明了置换密码。1881年世界上的第一个电话保密专利出现。在第二次世界大战期间，德国军方启用“恩尼格玛”密码机，密码学在战争中起着非常重要的作用, 这段历史很有趣,建议看看恩格玛机破解历史。随着信息化和数字化社会的发展，人们对信息安全和保密的重要性认识不断提高，于是在1997年，美国国家标准局公布实施了“美国数据加密标准（DES）”，民间力量开始全面介入密码学的研究">
+<meta property="og:type" content="article">
+<meta property="og:title" content="密码学简介与Golang的加密库Crypto的使用">
+<meta property="og:url" content="https://blog.yumaojun.net/2017/02/19/go-crypto/index.html">
+<meta property="og:site_name" content="紫川秀的博客">
+<meta property="og:description" content="据记载，公元前400年，古希腊人发明了置换密码。1881年世界上的第一个电话保密专利出现。在第二次世界大战期间，德国军方启用“恩尼格玛”密码机，密码学在战争中起着非常重要的作用, 这段历史很有趣,建议看看恩格玛机破解历史。随着信息化和数字化社会的发展，人们对信息安全和保密的重要性认识不断提高，于是在1997年，美国国家标准局公布实施了“美国数据加密标准（DES）”，民间力量开始全面介入密码学的研究">
+<meta property="og:updated_time" content="2017-02-19T15:28:10.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="密码学简介与Golang的加密库Crypto的使用">
+<meta name="twitter:description" content="据记载，公元前400年，古希腊人发明了置换密码。1881年世界上的第一个电话保密专利出现。在第二次世界大战期间，德国军方启用“恩尼格玛”密码机，密码学在战争中起着非常重要的作用, 这段历史很有趣,建议看看恩格玛机破解历史。随着信息化和数字化社会的发展，人们对信息安全和保密的重要性认识不断提高，于是在1997年，美国国家标准局公布实施了“美国数据加密标准（DES）”，民间力量开始全面介入密码学的研究">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '11723790',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://blog.yumaojun.net/2017/02/19/go-crypto/"/>
+
+
+
+
+
+  <title> 密码学简介与Golang的加密库Crypto的使用 | 紫川秀的博客 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?035e345b7c80cdf05aec8bc846b2f227";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">紫川秀的博客</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+    
+      <p class="site-subtitle">比你优秀的人不可怕,可怕的是比你优秀的人比你更努力。</p>
+    
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup">
+ <span class="search-icon fa fa-search"></span>
+ <input type="text" id="local-search-input">
+ <div id="local-search-result"></div>
+ <span class="popup-btn-close">close</span>
+</div>
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/02/19/go-crypto/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="紫川秀">
+    <meta itemprop="description" content="">
+    <meta itemprop="image" content="http://oiw1gzfww.bkt.clouddn.com/me.png">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="紫川秀的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="紫川秀的博客" src="">
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                密码学简介与Golang的加密库Crypto的使用
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-02-19T23:07:51+08:00">
+                2017-02-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开发语言/" itemprop="url" rel="index">
+                    <span itemprop="name">开发语言</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开发语言/Golang/" itemprop="url" rel="index">
+                    <span itemprop="name">Golang</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/02/19/go-crypto/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/02/19/go-crypto/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+             <span id="/2017/02/19/go-crypto/" class="leancloud_visitors" data-flag-title="密码学简介与Golang的加密库Crypto的使用">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>据记载，公元前400年，古希腊人发明了置换密码。1881年世界上的第一个电话保密专利出现。在第二次世界大战期间，德国军方启用“恩尼格玛”密码机，密码学在战争中起着非常重要的作用, 这段历史很有趣,建议看看<a href="https://www.zhihu.com/question/28397034" target="_blank" rel="external">恩格玛机破解历史</a>。<br>随着信息化和数字化社会的发展，人们对信息安全和保密的重要性认识不断提高，于是在1997年，美国国家标准局公布实施了“美国数据加密标准（DES）”，民间力量开始全面介入密码学的研究和应用中，采用的加密算法有DES、RSA、SHA等。随着对加密强度需求的不断提高，近期又出现了AES、ECC等。<br><a id="more"></a></p>
+<h2 id="密码学的目的"><a href="#密码学的目的" class="headerlink" title="密码学的目的"></a>密码学的目的</h2><ul>
+<li>保密性：防止用户的标识或数据被读取。</li>
+<li>数据完整性：防止数据被更改。</li>
+<li>身份验证：确保数据发自特定的一方。</li>
+</ul>
+<h2 id="密码学的应用"><a href="#密码学的应用" class="headerlink" title="密码学的应用"></a>密码学的应用</h2><p>随着密码学商业应用的普及，公钥密码学受到前所未有的重视。除传统的密码应用系统外，PKI系统以公钥密码技术为主，提供加密、签名、认证、密钥管理、分配等功能。</p>
+<ul>
+<li>保密通信：保密通信是密码学产生的动因。使用公私钥密码体制进行保密通信时，信息接收者只有知道对应的密钥才可以解密该信息。</li>
+<li>数字签名：数字签名技术可以代替传统的手写签名，而且从安全的角度考虑，数字签名具有很好的防伪造功能。在政府机关、军事领域、商业领域有广泛的应用环境。</li>
+<li>秘密共享：秘密共享技术是指将一个秘密信息利用密码技术分拆成n个称为共享因子的信息，分发给n个成员，只有k(k≤n)个合法成员的共享因子才可以恢复该秘密信息，其中任何一个或m(m≤k)个成员合作都不知道该秘密信息。利用秘密共享技术可以控制任何需要多个人共同控制的秘密信息、命令等。</li>
+<li>认证功能：在公开的信道上进行敏感信息的传输，采用签名技术实现对消息的真实性、完整性进行验证，通过验证公钥证书实现对通信主体的身份验证。</li>
+<li>密钥管理：密钥是保密系统中更为脆弱而重要的环节，公钥密码体制是解决密钥管理工作的有力工具；利用公钥密码体制进行密钥协商和产生，保密通信双方不需要事先共享秘密信息；利用公钥密码体制进行密钥分发、保护、密钥托管、密钥恢复等。</li>
+</ul>
+<h2 id="加密算法介绍"><a href="#加密算法介绍" class="headerlink" title="加密算法介绍"></a>加密算法介绍</h2><p>根据密钥类型不同将现代密码技术分为两类：</p>
+<ul>
+<li>对称加密算法: 加密和解密均采用同一把秘密钥匙。</li>
+<li>非对称加密算法: 有2把密钥,公钥和私钥, 公钥加密, 私钥解密。</li>
+</ul>
+<h3 id="对称加密算法"><a href="#对称加密算法" class="headerlink" title="对称加密算法"></a>对称加密算法</h3><p>对称加密算法用来对敏感数据等信息进行加密，常用的算法包括：</p>
+<ul>
+<li>DES(Data Encryption Standard): 数据加密标准，速度较快，适用于加密大量数据的场合。</li>
+<li>3DES(Triple DES): 是基于DES，对一块数据用三个不同的密钥进行三次加密，强度更高。</li>
+<li>AES(Advanced Encryption Standard): 高级加密标准，是下一代的加密算法标准，速度快，安全级别高；</li>
+</ul>
+<h4 id="AES"><a href="#AES" class="headerlink" title="AES"></a>AES</h4><p>2000年10月，NIST(美国国家标准和技术协会)宣布通过从15种侯选算法中选出的一项新的密匙加密标准。Rijndael被选中成为将来的AES。 Rijndael是在1999年下半年，由研究员Joan Daemen和Vincent Rijmen创建的。AES正日益成为加密各种形式的电子数据的实际标准。<br>并于2002年5月26日制定了新的高级加密标准 (AES) 规范。<br>算法原理</p>
+<blockquote>
+<p>AES算法基于排列和置换运算。排列是对数据重新进行安排，置换是将一个数据单元替换为另一个。AES 使用几种不同的方法来执行排列和置换运算。<br>AES是一个迭代的、对称密钥分组的密码，它可以使用128、192 和 256 位密钥，并且用 128 位（16字节）分组加密和解密数据。与公共密钥密码使用密钥对不同，对称密钥密码使用相同的密钥加密和解密数据。通过分组密码返回的加密数据的位数与输入数据相同。迭代加密使用一个循环结构，在该循环中重复置换和替换输入数据。</p>
+</blockquote>
+<h4 id="DES"><a href="#DES" class="headerlink" title="DES"></a>DES</h4><p>DES全称为Data Encryption Standard，即数据加密标准，是一种使用密钥加密的块算法，1977年被美国联邦政府的国家标准局确定为联邦资料处理标准（FIPS），并授权在非密级政府通信中使用，随后该算法在国际上广泛流传开来。</p>
+<h4 id="AES与3DES的比较"><a href="#AES与3DES的比较" class="headerlink" title="AES与3DES的比较"></a>AES与3DES的比较</h4><table>
+<thead>
+<tr>
+<th>算法名称</th>
+<th style="text-align:center">算法类型</th>
+<th style="text-align:center">密钥长度</th>
+<th style="text-align:center">速度</th>
+<th style="text-align:center">解密时间（建设机器每秒尝试255个密钥）</th>
+<th style="text-align:right">资源消耗</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AES</td>
+<td style="text-align:center">对称block密码</td>
+<td style="text-align:center">128、192、256位</td>
+<td style="text-align:center">高</td>
+<td style="text-align:center">1490000亿年</td>
+<td style="text-align:right">低</td>
+</tr>
+<tr>
+<td>3DES</td>
+<td style="text-align:center">对称feistel密码</td>
+<td style="text-align:center">112位或168位</td>
+<td style="text-align:center">低</td>
+<td style="text-align:center">46亿年</td>
+<td style="text-align:right">中</td>
+</tr>
+</tbody>
+</table>
+<h4 id="破解历史"><a href="#破解历史" class="headerlink" title="破解历史"></a>破解历史</h4><p>历史上有三次对DES有影响的攻击实验。1997年，利用当时各国 7万台计算机，历时96天破解了DES的密钥。1998年，电子边境基金会（EFF）用25万美元制造的专用计算机，用56小时破解了DES的密钥。1999年，EFF用22小时15分完成了破解工作。因此。曾经有过卓越贡献的DES也不能满足我们日益增长的需求了。</p>
+<h4 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h4><p>综上看来AES安全度最高, 基本现状就是AES已经替代DES成为新一代对称加密的标准, 下面是Golang中AES使用的栗子<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"crypto/aes"</span></div><div class="line">	<span class="string">"crypto/cipher"</span></div><div class="line">	<span class="string">"fmt"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="keyword">var</span> commonIV = []<span class="keyword">byte</span>&#123;<span class="number">0x00</span>, <span class="number">0x01</span>, <span class="number">0x02</span>, <span class="number">0x03</span>, <span class="number">0x04</span>, <span class="number">0x05</span>, <span class="number">0x06</span>, <span class="number">0x07</span>, <span class="number">0x08</span>, <span class="number">0x09</span>, <span class="number">0x0a</span>, <span class="number">0x0b</span>, <span class="number">0x0c</span>, <span class="number">0x0d</span>, <span class="number">0x0e</span>, <span class="number">0x0f</span>&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">encrypt</span><span class="params">(plainText <span class="keyword">string</span>, keyText <span class="keyword">string</span>)</span> <span class="params">(cipherByte []<span class="keyword">byte</span>, err error)</span></span> &#123;</div><div class="line">	<span class="comment">// 转换成字节数据, 方便加密</span></div><div class="line">	plainByte := []<span class="keyword">byte</span>(plainText)</div><div class="line">	keyByte := []<span class="keyword">byte</span>(keyText)</div><div class="line"></div><div class="line">	<span class="comment">// 创建加密算法aes</span></div><div class="line">	c, err := aes.NewCipher(keyByte)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, err</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="comment">//加密字符串</span></div><div class="line">	cfb := cipher.NewCFBEncrypter(c, commonIV)</div><div class="line">	cipherByte = <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="built_in">len</span>(plainByte))</div><div class="line">	cfb.XORKeyStream(cipherByte, plainByte)</div><div class="line">	<span class="keyword">return</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">decrypt</span><span class="params">(cipherByte []<span class="keyword">byte</span>, keyText <span class="keyword">string</span>)</span> <span class="params">(plainText <span class="keyword">string</span>, err error)</span></span> &#123;</div><div class="line">	<span class="comment">// 转换成字节数据, 方便加密</span></div><div class="line">	keyByte := []<span class="keyword">byte</span>(keyText)</div><div class="line"></div><div class="line">	<span class="comment">// 创建加密算法aes</span></div><div class="line">	c, err := aes.NewCipher(keyByte)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="string">""</span>, err</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="comment">// 解密字符串</span></div><div class="line">	cfbdec := cipher.NewCFBDecrypter(c, commonIV)</div><div class="line">	plainByte := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="built_in">len</span>(cipherByte))</div><div class="line">	cfbdec.XORKeyStream(plainByte, cipherByte)</div><div class="line">	plainText = <span class="keyword">string</span>(plainByte)</div><div class="line">	<span class="keyword">return</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	plain := <span class="string">"The text need to be encrypt."</span></div><div class="line">	<span class="comment">// AES 规定有3种长度的key: 16, 24, 32分别对应AES-128, AES-192, or AES-256</span></div><div class="line">	key := <span class="string">"abcdefgehjhijkmlkjjwwoew"</span></div><div class="line">	<span class="comment">// 加密</span></div><div class="line">	cipherByte, err := encrypt(plain, key)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		fmt.Println(err)</div><div class="line">	&#125;</div><div class="line">	fmt.Printf(<span class="string">"%s ==&gt; %x\n"</span>, plain, cipherByte)</div><div class="line">	<span class="comment">// 解密</span></div><div class="line">	plainText, err := decrypt(cipherByte, key)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		fmt.Println(err)</div><div class="line">	&#125;</div><div class="line">	fmt.Printf(<span class="string">"%x ==&gt; %s\n"</span>, cipherByte, plainText)</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h3 id="非对称算法"><a href="#非对称算法" class="headerlink" title="非对称算法"></a>非对称算法</h3><p>非对称加密算法常用于数据加密和身份认证, 常见的非对称加密算法如下：</p>
+<ul>
+<li>RSA: 由RSA公司发明，是一个支持变长密钥的公共密钥算法，需要加密的文件块的长度也是可变的；</li>
+<li>DSA(Digital Signature Algorithm): 数字签名算法，是一种标准的DSS(数字签名标准)；</li>
+<li>ECC(Elliptic Curves Cryptography): 椭圆曲线密码编码学。</li>
+<li>ECDSA(Elliptic Curve Digital Signature Algorithm): 基于椭圆曲线的DSA签名算法</li>
+</ul>
+<h4 id="DSA"><a href="#DSA" class="headerlink" title="DSA"></a>DSA</h4><p>DSA是基于整数有限域离散对数难题的，其安全性与RSA相比差不多。DSA的一个重要特点是两个素数公开，这样，当使用别人的p和q时，即使不知道私钥，你也能确认它们是否是随机产生的，还是作了手脚。RSA算法却做不到<br>但是其缺点就是只能用于数字签名, 不能用于加密。</p>
+<h4 id="RSA"><a href="#RSA" class="headerlink" title="RSA"></a>RSA</h4><p>在1976年，由于对称加密算法已经不能满足需要，Diffie 和Hellman发表了一篇叫《密码学新动向》的文章，介绍了公匙加密的概念，由Rivet、Shamir、Adelman提出了RSA算法。<br>RSA是目前最有影响力的公钥加密算法，它能够抵抗到目前为止已知的绝大多数密码攻击，已被ISO推荐为公钥数据加密标准。</p>
+<h4 id="ECC"><a href="#ECC" class="headerlink" title="ECC"></a>ECC</h4><p>ECC加密的原理依赖椭圆曲线上的难题。<br>今天只有短的RSA钥匙才可能被强力方式解破。到2008年为止，世界上还没有任何可靠的攻击RSA算法的方式。只要其钥匙的长度足够长，用RSA加密的信息实际上是不能被解破的。但在分布式计算和量子计算机理论日趋成熟的今天，RSA加密安全性受到了挑战。<br>随着分解大整数方法的进步及完善、计算机速度的提高以及计算机网络的发展，为了保障数据的安全，RSA的密钥需要不断增加，但是，密钥长度的增加导致了其加解密的速度大为降低，硬件实现也变得越来越难以忍受，这对使用RSA的应用带来了很重的负担，因此需要一种新的算法来代替RSA。<br>1985年N.Koblitz和Miller提出将椭圆曲线用于密码算法，根据是有限域上的椭圆曲线上的点群中的离散对数问题ECDLP。ECDLP是比因子分解问题更难的问题，它是指数级的难度。</p>
+<h4 id="ECDSA"><a href="#ECDSA" class="headerlink" title="ECDSA"></a>ECDSA</h4><p>因为在数字签名的安全性高, 基于ECC的DSA更高, 所以非常适合数字签名使用场景, 在SSH TLS有广泛使用, ECC把离散对数安全性高很少, 所以ECC在安全领域会成为下一个标准。</p>
+<h4 id="ECC与RSA的比较"><a href="#ECC与RSA的比较" class="headerlink" title="ECC与RSA的比较"></a>ECC与RSA的比较</h4><p>ECC和RSA相比，在许多方面都有对绝对的优势，主要体现在以下方面：</p>
+<ul>
+<li>抗攻击性强。相同的密钥长度，其抗攻击性要强很多倍。</li>
+<li>计算量小，处理速度快。ECC总的速度比RSA、DSA要快得多。</li>
+<li>存储空间占用小。ECC的密钥尺寸和系统参数与RSA、DSA相比要小得多，意味着它所占的存贮空间要小得多。这对于加密算法在IC卡上的应用具有特别重要的意义。</li>
+<li>带宽要求低。当对长消息进行加解密时，三类密码系统有相同的带宽要求，但应用于短消息时ECC带宽要求却低得多。带宽要求低使ECC在无线网络领域具有广泛的应用前景。</li>
+<li>ECC的这些特点使它必将取代RSA，成为通用的公钥加密算法。比如SET协议的制定者已把它作为下一代SET协议中缺省的公钥密码算法。<br>ECC的这些特点使它必将取代RSA，成为通用的公钥加密算法。比如SET协议的制定者已把它作为下一代SET协议中缺省的公钥密码算法。</li>
+</ul>
+<h4 id="代码示例-1"><a href="#代码示例-1" class="headerlink" title="代码示例"></a>代码示例</h4><p>ECC是未来的一个趋势, 在IOT行业是一个不错的选择, 但是现在被广泛使用的依然是RSA<br>以下使用RSA进行加解密: 使用对方的公钥加密数据, 然后发给对方, 对方使用自己的私钥解密.<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"crypto/rand"</span></div><div class="line">	<span class="string">"crypto/rsa"</span></div><div class="line">	<span class="string">"crypto/sha1"</span></div><div class="line">	<span class="string">"crypto/x509"</span></div><div class="line">	<span class="string">"encoding/pem"</span></div><div class="line">	<span class="string">"fmt"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="comment">// 使用对方的公钥的数据, 只有对方的私钥才能解开</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">encrypt</span><span class="params">(plain <span class="keyword">string</span>, publicKey <span class="keyword">string</span>)</span> <span class="params">(cipherByte []<span class="keyword">byte</span>, err error)</span></span> &#123;</div><div class="line">	msg := []<span class="keyword">byte</span>(plain)</div><div class="line">	<span class="comment">// 解码公钥</span></div><div class="line">	pubBlock, _ := pem.Decode([]<span class="keyword">byte</span>(publicKey))</div><div class="line"></div><div class="line">	<span class="comment">// 读取公钥</span></div><div class="line">	pubKeyValue, err := x509.ParsePKIXPublicKey(pubBlock.Bytes)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="built_in">panic</span>(err)</div><div class="line">	&#125;</div><div class="line">	pub := pubKeyValue.(*rsa.PublicKey)</div><div class="line"></div><div class="line">	<span class="comment">// 加密数据方法: 不用使用EncryptPKCS1v15方法加密,源码里面推荐使用EncryptOAEP, 因此这里使用安全的方法加密</span></div><div class="line">	encryptOAEP, err := rsa.EncryptOAEP(sha1.New(), rand.Reader, pub, msg, <span class="literal">nil</span>)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="built_in">panic</span>(err)</div><div class="line">	&#125;</div><div class="line">	cipherByte = encryptOAEP</div><div class="line">	<span class="keyword">return</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 使用私钥解密公钥加密的数据</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">decrypt</span><span class="params">(cipherByte []<span class="keyword">byte</span>, privateKey <span class="keyword">string</span>)</span> <span class="params">(plainText <span class="keyword">string</span>, err error)</span></span> &#123;</div><div class="line"></div><div class="line">	<span class="comment">// 解析出私钥</span></div><div class="line">	priBlock, _ := pem.Decode([]<span class="keyword">byte</span>(privateKey))</div><div class="line">	priKey, err := x509.ParsePKCS1PrivateKey(priBlock.Bytes)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="built_in">panic</span>(err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="comment">// 解密RSA-OAEP方式加密后的内容</span></div><div class="line">	decryptOAEP, err := rsa.DecryptOAEP(sha1.New(), rand.Reader, priKey, cipherByte, <span class="literal">nil</span>)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="built_in">panic</span>(err)</div><div class="line">	&#125;</div><div class="line">	plainText = <span class="keyword">string</span>(decryptOAEP)</div><div class="line">	<span class="keyword">return</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">test</span><span class="params">()</span></span> &#123;</div><div class="line">	msg := <span class="string">"Content bo be encrypted!"</span></div><div class="line">	<span class="comment">// 获取公钥, 生产环境往往是文件中读取, 这里为了测试方便, 直接生成了.</span></div><div class="line">	publicKeyData := <span class="string">`-----BEGIN PUBLIC KEY-----</span></div><div class="line">MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDZsfv1qscqYdy4vY+P4e3cAtmv</div><div class="line">ppXQcRvrF1cB4drkv0haU24Y7m5qYtT52Kr539RdbKKdLAM6s20lWy7+5C0Dgacd</div><div class="line">wYWd/7PeCELyEipZJL07Vro7Ate8Bfjya+wltGK9+XNUIHiumUKULW4KDx21+1NL</div><div class="line">AUeJ6PeW+DAkmJWF6QIDAQAB</div><div class="line">-----END PUBLIC KEY-----</div><div class="line">`</div><div class="line">	<span class="comment">// 获取私钥</span></div><div class="line">	privateKeyData := <span class="string">`-----BEGIN RSA PRIVATE KEY-----</span></div><div class="line">MIICXQIBAAKBgQDZsfv1qscqYdy4vY+P4e3cAtmvppXQcRvrF1cB4drkv0haU24Y</div><div class="line">7m5qYtT52Kr539RdbKKdLAM6s20lWy7+5C0DgacdwYWd/7PeCELyEipZJL07Vro7</div><div class="line">Ate8Bfjya+wltGK9+XNUIHiumUKULW4KDx21+1NLAUeJ6PeW+DAkmJWF6QIDAQAB</div><div class="line">AoGBAJlNxenTQj6OfCl9FMR2jlMJjtMrtQT9InQEE7m3m7bLHeC+MCJOhmNVBjaM</div><div class="line">ZpthDORdxIZ6oCuOf6Z2+Dl35lntGFh5J7S34UP2BWzF1IyyQfySCNexGNHKT1G1</div><div class="line">XKQtHmtc2gWWthEg+S6ciIyw2IGrrP2Rke81vYHExPrexf0hAkEA9Izb0MiYsMCB</div><div class="line">/jemLJB0Lb3Y/B8xjGjQFFBQT7bmwBVjvZWZVpnMnXi9sWGdgUpxsCuAIROXjZ40</div><div class="line">IRZ2C9EouwJBAOPjPvV8Sgw4vaseOqlJvSq/C/pIFx6RVznDGlc8bRg7SgTPpjHG</div><div class="line">4G+M3mVgpCX1a/EU1mB+fhiJ2LAZ/pTtY6sCQGaW9NwIWu3DRIVGCSMm0mYh/3X9</div><div class="line">DAcwLSJoctiODQ1Fq9rreDE5QfpJnaJdJfsIJNtX1F+L3YceeBXtW0Ynz2MCQBI8</div><div class="line">9KP274Is5FkWkUFNKnuKUK4WKOuEXEO+LpR+vIhs7k6WQ8nGDd4/mujoJBr5mkrw</div><div class="line">DPwqA3N5TMNDQVGv8gMCQQCaKGJgWYgvo3/milFfImbp+m7/Y3vCptarldXrYQWO</div><div class="line">AQjxwc71ZGBFDITYvdgJM1MTqc8xQek1FXn1vfpy2c6O</div><div class="line">-----END RSA PRIVATE KEY-----</div><div class="line">`</div><div class="line">	cipherData, err := encrypt(msg, publicKeyData)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="built_in">panic</span>(err)</div><div class="line">	&#125;</div><div class="line">	fmt.Printf(<span class="string">"encrypt message: %x\n"</span>, cipherData)</div><div class="line"></div><div class="line">	plainData, err := decrypt(cipherData, privateKeyData)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="built_in">panic</span>(err)</div><div class="line">	&#125;</div><div class="line">	fmt.Printf(<span class="string">"decrypt message:%s\n"</span>, plainData)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	test()</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>ecdsa正在逐渐成为数字签名的一个标准, 在golang的ssh库中就是使用这个算法来签名的: A使用自己的私钥签名一段数据, 然后将公钥发放出去. 用户拿到公钥后, 验证数据的签名,如果通过则证明数据来源是A, 从而达到身份认证的作用.<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"crypto/ecdsa"</span></div><div class="line">	<span class="string">"crypto/elliptic"</span></div><div class="line">	<span class="string">"crypto/md5"</span></div><div class="line">	<span class="string">"crypto/rand"</span></div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"hash"</span></div><div class="line">	<span class="string">"io"</span></div><div class="line">	<span class="string">"math/big"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="comment">// SignData 用于保存签名的数据</span></div><div class="line"><span class="keyword">type</span> SignData <span class="keyword">struct</span> &#123;</div><div class="line">	r         *big.Int</div><div class="line">	s         *big.Int</div><div class="line">	signhash  *[]<span class="keyword">byte</span></div><div class="line">	signature *[]<span class="keyword">byte</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 使用私钥签名一段数据</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">sign</span><span class="params">(message <span class="keyword">string</span>, privateKey *ecdsa.PrivateKey)</span> <span class="params">(signData *SignData, err error)</span></span> &#123;</div><div class="line"></div><div class="line">	<span class="comment">// 签名数据</span></div><div class="line">	<span class="keyword">var</span> h hash.Hash</div><div class="line">	h = md5.New()</div><div class="line">	r := big.NewInt(<span class="number">0</span>)</div><div class="line">	s := big.NewInt(<span class="number">0</span>)</div><div class="line"></div><div class="line">	io.WriteString(h, message)</div><div class="line">	signhash := h.Sum(<span class="literal">nil</span>)</div><div class="line"></div><div class="line">	r, s, serr := ecdsa.Sign(rand.Reader, privateKey, signhash)</div><div class="line">	<span class="keyword">if</span> serr != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, serr</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	signature := r.Bytes()</div><div class="line">	signature = <span class="built_in">append</span>(signature, s.Bytes()...)</div><div class="line">	signData = &amp;SignData&#123;</div><div class="line">		r:         r,</div><div class="line">		s:         s,</div><div class="line">		signhash:  &amp;signhash,</div><div class="line">		signature: &amp;signature,</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 校验数字签名</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">verifySign</span><span class="params">(signData *SignData, publicKey *ecdsa.PublicKey)</span> <span class="params">(status <span class="keyword">bool</span>)</span></span> &#123;</div><div class="line">	status = ecdsa.Verify(publicKey, *signData.signhash, signData.r, signData.s)</div><div class="line">	<span class="keyword">return</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">test</span><span class="params">()</span></span> &#123;</div><div class="line">	<span class="comment">//使用椭圆曲线的P256算法,现在一共也就实现了4种,我们使用折中一种,具体见http://golang.org/pkg/crypto/elliptic/#P256</span></div><div class="line">	pubkeyCurve := elliptic.P256()</div><div class="line">	privateKey := <span class="built_in">new</span>(ecdsa.PrivateKey)</div><div class="line"></div><div class="line">	<span class="comment">// 生成秘钥对</span></div><div class="line">	privateKey, err := ecdsa.GenerateKey(pubkeyCurve, rand.Reader)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="built_in">panic</span>(err)</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">var</span> publicKey ecdsa.PublicKey</div><div class="line">	publicKey = privateKey.PublicKey</div><div class="line"></div><div class="line">	<span class="comment">// 签名</span></div><div class="line">	signData, err := sign(<span class="string">"This is a message to be signed and verified by ECDSA!"</span>, privateKey)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="built_in">panic</span>(err)</div><div class="line">	&#125;</div><div class="line">	fmt.Printf(<span class="string">"The signhash: %x\nThe signature: %x\n"</span>, *signData.signhash, *signData.signature)</div><div class="line"></div><div class="line">	<span class="comment">// 验证</span></div><div class="line">	status := verifySign(signData, &amp;publicKey)</div><div class="line">	fmt.Printf(<span class="string">"The verify result is: %v\n"</span>, status)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	test()</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h3 id="散列算法"><a href="#散列算法" class="headerlink" title="散列算法"></a>散列算法</h3><p>散列是信息的提炼，通常其长度要比信息小得多，且为一个固定长度。加密性强的散列一定是不可逆的，这就意味着通过散列结果，无法推出任何部分的原始信息。任何输入信息的变化，哪怕仅一位，都将导致散列结果的明显变化，这称之为雪崩效应。散列还应该是防冲突的，即找不出具有相同散列结果的两条信息。具有这些特性的散列结果就可以用于验证信息是否被修改。常用于保证数据完整性<br>单向散列函数一般用于产生消息摘要，密钥加密等，常见的有：</p>
+<ul>
+<li>MD5(Message Digest Algorithm 5): 是RSA数据安全公司开发的一种单向散列算法。</li>
+<li>SHA(Secure Hash Algorithm): 可以对任意长度的数据运算生成一个160位的数值；</li>
+</ul>
+<h4 id="MD5"><a href="#MD5" class="headerlink" title="MD5"></a>MD5</h4><p>MD5即Message-Digest Algorithm 5（信息-摘要算法5），用于确保信息传输完整一致。是计算机广泛使用的杂凑算法之一（又译摘要算法、哈希算法），主流编程语言普遍已有MD5实现。将数据（如汉字）运算为另一固定长度值，是杂凑算法的基础原理，MD5的前身有MD2、MD3和MD4</p>
+<h4 id="SHA-1"><a href="#SHA-1" class="headerlink" title="SHA-1"></a>SHA-1</h4><p>在1993年，安全散列算法（SHA）由美国国家标准和技术协会(NIST)提出，并作为联邦信息处理标准（FIPS PUB 180）公布；1995年又发布了一个修订版FIPS PUB 180-1，通常称之为SHA-1。SHA-1是基于MD4算法的，并且它的设计在很大程度上是模仿MD4的。现在已成为公认的最安全的散列算法之一，并被广泛使用。<br>SHA-1是一种数据加密算法，该算法的思想是接收一段明文，然后以一种不可逆的方式将它转换成一段（通常更小）密文，也可以简单的理解为取一串输入码（称为预映射或信息），并把它们转化为长度较短、位数固定的输出序列即散列值（也称为信息摘要或信息认证代码）的过程。<br>该算法输入报文的最大长度不超过264位，产生的输出是一个160位的报文摘要。输入是按512 位的分组进行处理的。SHA-1是不可逆的、防冲突，并具有良好的雪崩效应。<br>sha1是SHA家族的五个算法之一(其它四个是SHA-224、SHA-256、SHA-384，和SHA-512)</p>
+<h4 id="HMac"><a href="#HMac" class="headerlink" title="HMac"></a>HMac</h4><p>Hmac算法也是一种哈希算法，它可以利用MD5或SHA1等哈希算法。不同的是，Hmac还需要一个密钥, 只要密钥发生了变化，那么同样的输入数据也会得到不同的签名，因此，可以把Hmac理解为用随机数“增强”的哈希算法。</p>
+<h4 id="SHA-1与MD5的比较"><a href="#SHA-1与MD5的比较" class="headerlink" title="SHA-1与MD5的比较"></a>SHA-1与MD5的比较</h4><p>因为二者均由MD4导出，SHA-1和MD5彼此很相似。相应的，他们的强度和其他特性也是相似，但还有以下几点不同：</p>
+<ul>
+<li>对强行供给的安全性：最显著和最重要的区别是SHA-1摘要比MD5摘要长32 位。使用强行技术，产生任何一个报文使其摘要等于给定报摘要的难度对MD5是2128数量级的操作，而对SHA-1则是2160数量级的操作。这样，SHA-1对强行攻击有更大的强度。</li>
+<li>对密码分析的安全性：由于MD5的设计，易受密码分析的攻击，SHA-1显得不易受这样的攻击。</li>
+<li>速度：在相同的硬件上，SHA-1的运行速度比MD5慢。</li>
+</ul>
+<h4 id="代码示例-2"><a href="#代码示例-2" class="headerlink" title="代码示例"></a>代码示例</h4><p>由于MD5已经被破解了(中国山东大学的王小云教授破解), 常用的散列算法是sha家族, 更加安全的算法是使用Hmac<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"crypto/hmac"</span></div><div class="line">	<span class="string">"crypto/sha1"</span></div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"io"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="comment">// sha1散列算法</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">sha1Hash</span><span class="params">(msg <span class="keyword">string</span>)</span> <span class="params">(hashData []<span class="keyword">byte</span>)</span></span> &#123;</div><div class="line">	h := sha1.New()</div><div class="line">	io.WriteString(h, msg)</div><div class="line">	hashData = h.Sum(<span class="literal">nil</span>)</div><div class="line">	<span class="keyword">return</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 使用sha1的Hmac散列算法</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">hmacHash</span><span class="params">(msg <span class="keyword">string</span>, key <span class="keyword">string</span>)</span> <span class="params">(hashData []<span class="keyword">byte</span>)</span></span> &#123;</div><div class="line">	k := []<span class="keyword">byte</span>(key)</div><div class="line">	mac := hmac.New(sha1.New, k)</div><div class="line">	io.WriteString(mac, msg)</div><div class="line">	hashData = mac.Sum(<span class="literal">nil</span>)</div><div class="line">	<span class="keyword">return</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	msg := <span class="string">"This is the message to hash!"</span></div><div class="line">	<span class="comment">// sha1</span></div><div class="line">	sha1Data := sha1Hash(msg)</div><div class="line">	fmt.Printf(<span class="string">"SHA1: %x\n"</span>, sha1Data)</div><div class="line"></div><div class="line">	<span class="comment">// hmac</span></div><div class="line">	hmacData := hmacHash(msg, <span class="string">"The key string!"</span>)</div><div class="line">	fmt.Printf(<span class="string">"HMAC: %x\n"</span>, hmacData)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h3 id="秘钥交换算法"><a href="#秘钥交换算法" class="headerlink" title="秘钥交换算法"></a>秘钥交换算法</h3><p>一种密钥交换协议，注意该算法只能用于密钥的交换，而不能进行消息的加密和解密。双方确定要用的密钥后，要使用其他对称密钥操作加密算法实际加密和解密消息。它可以让双方在不泄漏密钥的情况下协商出一个密钥来, 常用于保证对称加密的秘钥的安全, TLS就是这样做的。<br>在这个领域应该2种</p>
+<ul>
+<li>DH：ECDH是DH的加强版</li>
+<li>ECDH: DH算法的加强版, 常用的是NIST系列,但是后面curve25519</li>
+<li>curve25519: 实质上也是一种ECDH,但是其实现更为优秀,表现的更为安全,可能是下一代秘钥交换算法的标准。</li>
+</ul>
+<h4 id="DH"><a href="#DH" class="headerlink" title="DH"></a>DH</h4><p>DH全称是:<code>Diffie-Hellman</code>, 是一种确保共享KEY安全穿越不安全网络的方法，它是OAKLEY的一个组成部分。Whitefield与Martin Hellman在1976年提出了一个奇妙的密钥交换协议，称为Diffie-Hellman密钥交换协议/算法(Diffie-Hellman Key Exchange/Agreement Algorithm).这个机制的巧妙在于需要安全通信的双方可以用这个方法确定对称密钥。然后可以用这个密钥进行加密和解密。<br>DH依赖于计算离散对数的难度, 大概过程如下:</p>
+<blockquote>
+<p>可以如下定义离散对数：首先定义一个素数p的原根，为其各次幂产生从1 到p-1的所有整数根，也就是说，如果a是素数p的一个原根，那么数值 a mod p,a2 mod p,…,ap-1 mod p 是各不相同的整数，并且以某种排列方式组成了从1到p-1的所有整数. 对于一个整数b和素数p的一个原根a，可以找到惟一的指数i，使得 b = a^i mod p 其中0 ≤ i ≤ （p-1） 指数i称为b的以a为基数的模p的离散对数或者指数.该值被记为inda,p(b).</p>
+</blockquote>
+<h4 id="ECDH"><a href="#ECDH" class="headerlink" title="ECDH"></a>ECDH</h4><p>全称是<code>Elliptic Curve Diffie-Hellman</code>, 是DH算法的加强版, 基于椭圆曲线难题加密, 现在是主流的密钥交换算法。<br>ECC是建立在基于椭圆曲线的离散对数的难度, 大概过程如下:</p>
+<blockquote>
+<p>给定椭圆曲线上的一个点P，一个整数k，求解Q=kP很容易；给定一个点P、Q，知道Q=kP，求整数k确是一个难题。ECDH即建立在此数学难题之上</p>
+</blockquote>
+<p>椭圆曲线算法因参数不同有多种类型, 这个网站列出了现阶段那些ECC是相对安全的:<a href="http://safecurves.cr.yp.to/" target="_blank" rel="external">椭圆曲线算法安全列表</a>, 而curve25519便是其中的佼佼者。<br>Curve25519/Ed25519/X25519是著名密码学家Daniel J. Bernstein在2006年独立设计的椭圆曲线加密/签名/密钥交换算法, 和现有的任何椭圆曲线算法都完全独立。<br>特点是：</p>
+<ul>
+<li>完全开放设计: 算法各参数的选择直截了当，非常明确，没有任何可疑之处，相比之下目前广泛使用的椭圆曲线是NIST系列标准，方程的系数是使用来历不明的随机种子 c49d3608 86e70493 6a6678e1 139d26b7 819f7e90 生成的，非常可疑，疑似后门；</li>
+<li>高安全性： 一个椭圆曲线加密算法就算在数学上是安全的，在实用上也并不一定安全，有很大的概率通过缓存、时间、恶意输入摧毁安全性，而25519系列椭圆曲线经过特别设计，尽可能的将出错的概率降到了最低，可以说是实践上最安全的加密算法。例如，任何一个32位随机数都是一个合法的X25519公钥，因此通过恶意数值攻击是不可能的，算法在设计的时候刻意避免的某些分支操作，这样在编程的时候可以不使用if ，减少了不同if分支代码执行时间不同的时序攻击概率，相反， NIST系列椭圆曲线算法在实际应用中出错的可能性非常大，而且对于某些理论攻击的免疫能力不高， Bernstein 对市面上所有的加密算法使用12个标准进行了考察， 25519是几乎唯一满足这些标准的 <a href="http://t.cn/RMGmi1g" target="_blank" rel="external">http://t.cn/RMGmi1g</a> ；</li>
+<li>速度快: 25519系列曲线是目前最快的椭圆曲线加密算法，性能远远超过NIST系列，而且具有比P-256更高的安全性；</li>
+<li>作者功底深厚: Daniel J. Bernstein是世界著名的密码学家，他在大学曾经开设过一门 UNIX 系统安全的课程给学生，结果一学期下来，发现了 UNIX 程序中的 91 个安全漏洞；他早年在美国依然禁止出口加密算法时，曾因为把自己设计的加密算法发布到网上遭到了美国政府的起诉，他本人抗争六年，最后美国政府撤销所有指控，目前另一个非常火的高性能安全流密码 ChaCha20 也是出自 Bernstein 之手；</li>
+<li>下一代的标准: 25519系列曲线自2006年发表以来，除了学术界无人问津， 2013 年爱德华·斯诺登曝光棱镜计划后，该算法突然大火，大量软件，如OpenSSH都迅速增加了对25519系列的支持，如今25519已经是大势所趋，可疑的NIST曲线迟早要退出椭圆曲线的历史舞台，目前， RFC增加了SSL/TLS对X25519密钥交换协议的支持，而新版 OpenSSL 1.1也加入支持，是摆脱老大哥的第一步，下一步是将 Ed25519做为可选的TLS证书签名算法，彻底摆脱NIST</li>
+</ul>
+<h4 id="代码示例-3"><a href="#代码示例-3" class="headerlink" title="代码示例"></a>代码示例</h4><p>这里需要指出下golang的标准库的crypto里的椭圆曲线实现了这4种(<a href="https://golang.org/pkg/crypto/elliptic/" target="_blank" rel="external">elliptic文档</a>): P224/P256/P384/P521, 而curve25519是单独实现的, 他不在标准库中: golang.org/x/crypto/curve25519<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div><div class="line">175</div><div class="line">176</div><div class="line">177</div><div class="line">178</div><div class="line">179</div><div class="line">180</div><div class="line">181</div><div class="line">182</div><div class="line">183</div><div class="line">184</div><div class="line">185</div><div class="line">186</div><div class="line">187</div><div class="line">188</div><div class="line">189</div><div class="line">190</div><div class="line">191</div><div class="line">192</div><div class="line">193</div><div class="line">194</div><div class="line">195</div><div class="line">196</div><div class="line">197</div><div class="line">198</div><div class="line">199</div><div class="line">200</div><div class="line">201</div><div class="line">202</div><div class="line">203</div><div class="line">204</div><div class="line">205</div><div class="line">206</div><div class="line">207</div><div class="line">208</div><div class="line">209</div><div class="line">210</div><div class="line">211</div><div class="line">212</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"crypto"</span></div><div class="line">	<span class="string">"crypto/elliptic"</span></div><div class="line">	<span class="string">"crypto/rand"</span></div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"io"</span></div><div class="line">	<span class="string">"math/big"</span></div><div class="line"></div><div class="line">	<span class="string">"golang.org/x/crypto/curve25519"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="comment">// ECDH 秘钥交换算法的主接口</span></div><div class="line"><span class="keyword">type</span> ECDH <span class="keyword">interface</span> &#123;</div><div class="line">	GenerateKey(io.Reader) (crypto.PrivateKey, crypto.PublicKey, error)</div><div class="line">	Marshal(crypto.PublicKey) []<span class="keyword">byte</span></div><div class="line">	Unmarshal([]<span class="keyword">byte</span>) (crypto.PublicKey, <span class="keyword">bool</span>)</div><div class="line">	GenerateSharedSecret(crypto.PrivateKey, crypto.PublicKey) ([]<span class="keyword">byte</span>, error)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">type</span> ellipticECDH <span class="keyword">struct</span> &#123;</div><div class="line">	ECDH</div><div class="line">	curve elliptic.Curve</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">type</span> ellipticPublicKey <span class="keyword">struct</span> &#123;</div><div class="line">	elliptic.Curve</div><div class="line">	X, Y *big.Int</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">type</span> ellipticPrivateKey <span class="keyword">struct</span> &#123;</div><div class="line">	D []<span class="keyword">byte</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// NewEllipticECDH 指定一种椭圆曲线算法用于创建一个ECDH的实例</span></div><div class="line"><span class="comment">// 关于椭圆曲线算法标准库里面实现了4种: 见crypto/elliptic</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewEllipticECDH</span><span class="params">(curve elliptic.Curve)</span> <span class="title">ECDH</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> &amp;ellipticECDH&#123;</div><div class="line">		curve: curve,</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// GenerateKey 基于标准库的NIST椭圆曲线算法生成秘钥对</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *ellipticECDH)</span> <span class="title">GenerateKey</span><span class="params">(rand io.Reader)</span> <span class="params">(crypto.PrivateKey, crypto.PublicKey, error)</span></span> &#123;</div><div class="line">	<span class="keyword">var</span> d []<span class="keyword">byte</span></div><div class="line">	<span class="keyword">var</span> x, y *big.Int</div><div class="line">	<span class="keyword">var</span> priv *ellipticPrivateKey</div><div class="line">	<span class="keyword">var</span> pub *ellipticPublicKey</div><div class="line">	<span class="keyword">var</span> err error</div><div class="line"></div><div class="line">	d, x, y, err = elliptic.GenerateKey(e.curve, rand)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">nil</span>, err</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	priv = &amp;ellipticPrivateKey&#123;</div><div class="line">		D: d,</div><div class="line">	&#125;</div><div class="line">	pub = &amp;ellipticPublicKey&#123;</div><div class="line">		Curve: e.curve,</div><div class="line">		X:     x,</div><div class="line">		Y:     y,</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">return</span> priv, pub, <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// Marshal用于公钥的序列化</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *ellipticECDH)</span> <span class="title">Marshal</span><span class="params">(p crypto.PublicKey)</span> []<span class="title">byte</span></span> &#123;</div><div class="line">	pub := p.(*ellipticPublicKey)</div><div class="line">	<span class="keyword">return</span> elliptic.Marshal(e.curve, pub.X, pub.Y)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// Unmarshal用于公钥的反序列化</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *ellipticECDH)</span> <span class="title">Unmarshal</span><span class="params">(data []<span class="keyword">byte</span>)</span> <span class="params">(crypto.PublicKey, <span class="keyword">bool</span>)</span></span> &#123;</div><div class="line">	<span class="keyword">var</span> key *ellipticPublicKey</div><div class="line">	<span class="keyword">var</span> x, y *big.Int</div><div class="line"></div><div class="line">	x, y = elliptic.Unmarshal(e.curve, data)</div><div class="line">	<span class="keyword">if</span> x == <span class="literal">nil</span> || y == <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> key, <span class="literal">false</span></div><div class="line">	&#125;</div><div class="line">	key = &amp;ellipticPublicKey&#123;</div><div class="line">		Curve: e.curve,</div><div class="line">		X:     x,</div><div class="line">		Y:     y,</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> key, <span class="literal">true</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// GenerateSharedSecret 通过自己的私钥和对方的公钥协商一个共享密码</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *ellipticECDH)</span> <span class="title">GenerateSharedSecret</span><span class="params">(privKey crypto.PrivateKey, pubKey crypto.PublicKey)</span> <span class="params">([]<span class="keyword">byte</span>, error)</span></span> &#123;</div><div class="line">	priv := privKey.(*ellipticPrivateKey)</div><div class="line">	pub := pubKey.(*ellipticPublicKey)</div><div class="line"></div><div class="line">	x, _ := e.curve.ScalarMult(pub.X, pub.Y, priv.D)</div><div class="line">	<span class="keyword">return</span> x.Bytes(), <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// NewCurve25519ECDH 使用密码学家Daniel J. Bernstein的椭圆曲线算法:Curve25519来创建ECDH实例</span></div><div class="line"><span class="comment">// 因为Curve25519独立于NIST之外, 没在标准库实现, 需要单独为期实现一套接口来支持ECDH</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewCurve25519ECDH</span><span class="params">()</span> <span class="title">ECDH</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> &amp;curve25519ECDH&#123;&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">type</span> curve25519ECDH <span class="keyword">struct</span> &#123;</div><div class="line">	ECDH</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// GenerateKey 基于curve25519椭圆曲线算法生成秘钥对</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *curve25519ECDH)</span> <span class="title">GenerateKey</span><span class="params">(rand io.Reader)</span> <span class="params">(crypto.PrivateKey, crypto.PublicKey, error)</span></span> &#123;</div><div class="line">	<span class="keyword">var</span> pub, priv [<span class="number">32</span>]<span class="keyword">byte</span></div><div class="line">	<span class="keyword">var</span> err error</div><div class="line"></div><div class="line">	_, err = io.ReadFull(rand, priv[:])</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">nil</span>, err</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	priv[<span class="number">0</span>] &amp;= <span class="number">248</span></div><div class="line">	priv[<span class="number">31</span>] &amp;= <span class="number">127</span></div><div class="line">	priv[<span class="number">31</span>] |= <span class="number">64</span></div><div class="line"></div><div class="line">	curve25519.ScalarBaseMult(&amp;pub, &amp;priv)</div><div class="line"></div><div class="line">	<span class="keyword">return</span> &amp;priv, &amp;pub, <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 实现公钥的序列化</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *curve25519ECDH)</span> <span class="title">Marshal</span><span class="params">(p crypto.PublicKey)</span> []<span class="title">byte</span></span> &#123;</div><div class="line">	pub := p.(*[<span class="number">32</span>]<span class="keyword">byte</span>)</div><div class="line">	<span class="keyword">return</span> pub[:]</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 实现公钥的反序列化</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *curve25519ECDH)</span> <span class="title">Unmarshal</span><span class="params">(data []<span class="keyword">byte</span>)</span> <span class="params">(crypto.PublicKey, <span class="keyword">bool</span>)</span></span> &#123;</div><div class="line">	<span class="keyword">var</span> pub [<span class="number">32</span>]<span class="keyword">byte</span></div><div class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(data) != <span class="number">32</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">false</span></div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="built_in">copy</span>(pub[:], data)</div><div class="line">	<span class="keyword">return</span> &amp;pub, <span class="literal">true</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 实现秘钥协商接口</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e *curve25519ECDH)</span> <span class="title">GenerateSharedSecret</span><span class="params">(privKey crypto.PrivateKey, pubKey crypto.PublicKey)</span> <span class="params">([]<span class="keyword">byte</span>, error)</span></span> &#123;</div><div class="line">	<span class="keyword">var</span> priv, pub, secret *[<span class="number">32</span>]<span class="keyword">byte</span></div><div class="line"></div><div class="line">	priv = privKey.(*[<span class="number">32</span>]<span class="keyword">byte</span>)</div><div class="line">	pub = pubKey.(*[<span class="number">32</span>]<span class="keyword">byte</span>)</div><div class="line">	secret = <span class="built_in">new</span>([<span class="number">32</span>]<span class="keyword">byte</span>)</div><div class="line"></div><div class="line">	curve25519.ScalarMult(secret, priv, pub)</div><div class="line">	<span class="keyword">return</span> secret[:], <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">test</span><span class="params">(e ECDH)</span></span> &#123;</div><div class="line">	<span class="keyword">var</span> privKey1, privKey2 crypto.PrivateKey</div><div class="line">	<span class="keyword">var</span> pubKey1, pubKey2 crypto.PublicKey</div><div class="line">	<span class="keyword">var</span> pubKey1Buf, pubKey2Buf []<span class="keyword">byte</span></div><div class="line">	<span class="keyword">var</span> err error</div><div class="line">	<span class="keyword">var</span> ok <span class="keyword">bool</span></div><div class="line">	<span class="keyword">var</span> secret1, secret2 []<span class="keyword">byte</span></div><div class="line"></div><div class="line">	<span class="comment">// 准备2对秘钥对,A: privKey1,pubKey1 B:privKey2,pubKey2</span></div><div class="line">	privKey1, pubKey1, err = e.GenerateKey(rand.Reader)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		fmt.Println(err)</div><div class="line">	&#125;</div><div class="line">	privKey2, pubKey2, err = e.GenerateKey(rand.Reader)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		fmt.Println(err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	pubKey1Buf = e.Marshal(pubKey1)</div><div class="line">	pubKey2Buf = e.Marshal(pubKey2)</div><div class="line"></div><div class="line">	pubKey1, ok = e.Unmarshal(pubKey1Buf)</div><div class="line">	<span class="keyword">if</span> !ok &#123;</div><div class="line">		fmt.Println(<span class="string">"Unmarshal does not work"</span>)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	pubKey2, ok = e.Unmarshal(pubKey2Buf)</div><div class="line">	<span class="keyword">if</span> !ok &#123;</div><div class="line">		fmt.Println(<span class="string">"Unmarshal does not work"</span>)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="comment">// A 通过B给的公钥协商共享密码</span></div><div class="line">	secret1, err = e.GenerateSharedSecret(privKey1, pubKey2)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		fmt.Println(err)</div><div class="line">	&#125;</div><div class="line">	<span class="comment">// B 通过A给的公钥协商共享密码</span></div><div class="line">	secret2, err = e.GenerateSharedSecret(privKey2, pubKey1)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		fmt.Println(err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="comment">// A B在没暴露直接的私钥的情况下, 协商出了一个共享密码</span></div><div class="line">	fmt.Printf(<span class="string">"The secret1 shared keys: %x\n"</span>, secret1)</div><div class="line">	fmt.Printf(<span class="string">"The secret2 shared keys: %x\n"</span>, secret2)</div><div class="line"></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	e1 := NewEllipticECDH(elliptic.P521())</div><div class="line">	e2 := NewCurve25519ECDH()</div><div class="line">	test(e1)</div><div class="line">	test(e2)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h3 id="总体结论"><a href="#总体结论" class="headerlink" title="总体结论"></a>总体结论</h3><p>以上综述了两种加密方法的原理，总体来说主要有下面几个方面的不同：</p>
+<ul>
+<li>管理方面：公钥密码算法只需要较少的资源就可以实现目的，在密钥的分配上，两者之间相差一个指数级别（一个是n一个是n2）。所以私钥密码算法不适应广域网的使用，而且更重要的一点是它不支持数字签名。</li>
+<li>安全方面：由于公钥密码算法基于未解决的数学难题，在破解上几乎不可能。对于私钥密码算法，到了AES虽说从理论来说是不可能破解的，但从计算机的发展角度来看。公钥更具有优越性。</li>
+<li>速度上来看：AES的软件实现速度已经达到了每秒数兆或数十兆比特。是公钥的100倍，如果用硬件来实现的话这个比值将扩大到1000倍。</li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://oiw1gzfww.bkt.clouddn.com/alipay.jpg" alt="紫川秀 Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/crypto/" rel="tag"># crypto</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/02/14/nodejs-accelerate/" rel="next" title="nodejs源加速">
+                <i class="fa fa-chevron-left"></i> nodejs源加速
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2017/02/19/go-crypto/"
+           data-title="密码学简介与Golang的加密库Crypto的使用" data-url="https://blog.yumaojun.net/2017/02/19/go-crypto/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://oiw1gzfww.bkt.clouddn.com/me.png"
+               alt="紫川秀" />
+          <p class="site-author-name" itemprop="name">紫川秀</p>
+          <p class="site-description motion-element" itemprop="description">喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。</p>
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">17</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">16</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/yumaojun03" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://douban.com/people/155892492" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/zi-chuan-xiu-86" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.liaoxuefeng.com/" title="廖雪峰官网" target="_blank">廖雪峰官网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://xiaorui.cc/" title="峰云,就她了" target="_blank">峰云,就她了</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#密码学的目的"><span class="nav-number">1.</span> <span class="nav-text">密码学的目的</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#密码学的应用"><span class="nav-number">2.</span> <span class="nav-text">密码学的应用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#加密算法介绍"><span class="nav-number">3.</span> <span class="nav-text">加密算法介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#对称加密算法"><span class="nav-number">3.1.</span> <span class="nav-text">对称加密算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#AES"><span class="nav-number">3.1.1.</span> <span class="nav-text">AES</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DES"><span class="nav-number">3.1.2.</span> <span class="nav-text">DES</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AES与3DES的比较"><span class="nav-number">3.1.3.</span> <span class="nav-text">AES与3DES的比较</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#破解历史"><span class="nav-number">3.1.4.</span> <span class="nav-text">破解历史</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#代码示例"><span class="nav-number">3.1.5.</span> <span class="nav-text">代码示例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#非对称算法"><span class="nav-number">3.2.</span> <span class="nav-text">非对称算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#DSA"><span class="nav-number">3.2.1.</span> <span class="nav-text">DSA</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RSA"><span class="nav-number">3.2.2.</span> <span class="nav-text">RSA</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ECC"><span class="nav-number">3.2.3.</span> <span class="nav-text">ECC</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ECDSA"><span class="nav-number">3.2.4.</span> <span class="nav-text">ECDSA</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ECC与RSA的比较"><span class="nav-number">3.2.5.</span> <span class="nav-text">ECC与RSA的比较</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#代码示例-1"><span class="nav-number">3.2.6.</span> <span class="nav-text">代码示例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#散列算法"><span class="nav-number">3.3.</span> <span class="nav-text">散列算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MD5"><span class="nav-number">3.3.1.</span> <span class="nav-text">MD5</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SHA-1"><span class="nav-number">3.3.2.</span> <span class="nav-text">SHA-1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HMac"><span class="nav-number">3.3.3.</span> <span class="nav-text">HMac</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SHA-1与MD5的比较"><span class="nav-number">3.3.4.</span> <span class="nav-text">SHA-1与MD5的比较</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#代码示例-2"><span class="nav-number">3.3.5.</span> <span class="nav-text">代码示例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#秘钥交换算法"><span class="nav-number">3.4.</span> <span class="nav-text">秘钥交换算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#DH"><span class="nav-number">3.4.1.</span> <span class="nav-text">DH</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ECDH"><span class="nav-number">3.4.2.</span> <span class="nav-text">ECDH</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#代码示例-3"><span class="nav-number">3.4.3.</span> <span class="nav-text">代码示例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总体结论"><span class="nav-number">3.5.</span> <span class="nav-text">总体结论</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">紫川秀</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i>本站访客数<span class="busuanzi-value" id="busuanzi_value_site_uv"></span>人次</span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i>本站总访问量<span class="busuanzi-value" id="busuanzi_value_site_pv"></span>次</span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"yumaojun"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+      
+      <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+      <script src="/js/src/hook-duoshuo.js?v=5.1.0"></script>
+    
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body").append('<div class="popoverlay">').css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".popoverlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("51RM6PwqfSuyOFX9MxLeq5yY-gzGzoHsz", "dNQYvnf4KlnN364JVGClL7bp");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+
+</body>
+</html>
