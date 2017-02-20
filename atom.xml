@@ -167,6 +167,146 @@
   </entry>
   
   <entry>
+    <title>跳板机系列(二)-ssh协议原理简介</title>
+    <link href="https://blog.yumaojun.net/2017/02/16/ssh-protocol/"/>
+    <id>https://blog.yumaojun.net/2017/02/16/ssh-protocol/</id>
+    <published>2017-02-16T02:09:31.000Z</published>
+    <updated>2017-02-20T15:35:44.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>SSH对于大多数人来说应该并不陌生, 无论你是开发还是测试还是运维, 只要你需要登录类Unix服务器都会用到, 他被用来提供链接的安全保障, 比如常见的客户端有命令行工具ssh, 以及周边的商业工具Xshell等。在这篇文章里我们不会教你如何使用xshell, 而是从协议层面全新的认识下ssh。<br><a id="more"></a></p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>虽然SSH使用起来很简单, 但是背后的原理特别不简单,关于以下问题, 你能否知晓其细节:</p>
+<ul>
+<li>SSH如何保证客户端与服务端通行的安全</li>
+<li>SSH采用什么加密协议</li>
+<li>SSH是通过对称加密还是非对称加密数据在传输过程的安全</li>
+<li>SSH如何保证数据完整性</li>
+<li>SSH的密码认证方式和密钥认证方式分别如何实现，有何差异</li>
+</ul>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>SSH(Secure Shell)是一个提供数据通信安全、远程登录、远程指令执行等功能的安全网络协议，由芬兰赫尔辛基大学研究员Tatu Ylönen,于1995年提出，其目的是用于替代非安全的Telnet、rsh、rexec等远程Shell协议。之后SSH发展了两个大版本SSH-1和SSH-2, 开源实现OpenSSH对2者都支持。<br>SSH的主要特性:</p>
+<ul>
+<li>加密: 避免数据内容泄漏</li>
+<li>通信的完整性: 避免数据被篡改，以及发送或接受地址伪装(检查数据是否被篡改，数据是否来自发送者而非攻击者） SSH-2通过MD5和SHA-1实现该功能，SSH-1使用CRC-32</li>
+<li>认证: 识别数据发送者和接收者身份 客户端验证SSH服务端的身份：防止攻击者仿冒SSH服务端身份，避免中介人攻击和重定向请求的攻击；OpenSSH通过在know-hosts中存储主机名和host key对服务端身份进行认证 服务端验证请求者身份：提供安全性较弱的用户密码方式，和安全性更强的per-user public-key signatures；此外SSH还支持与第三方安全服务系统的集成，如Kerberos等</li>
+<li>授权: 用户访问控制</li>
+<li>安全隧道: 转发或者为基于TCP/IP的回话提供加密隧道, 比如通过SSH为Telnet、FTP等提供通信安全保障，支持三种类型的Forwarding操作：Port Forwarding；X Forwarding；Agent Forwarding</li>
+</ul>
+<p>通过使用SSH，你可以把所有传输的数据进行加密，这样”中间人”这种攻击方式就不可能实现了，而且也能够防止DNS欺骗和IP欺骗。使用SSH，还有一个额外的好处就是传输的数据是经过压缩的，所以可以加快传输的速度。SSH有很多功能，它既可以代替Telnet，又可以为FTP、PoP、甚至为PPP提供一个安全的”通道”。</p>
+<h2 id="安全相关"><a href="#安全相关" class="headerlink" title="安全相关"></a>安全相关</h2><p>在SSH中涉及到很多加密算法, 关于加密算法的相关知识之前已经写过一遍博客做专门介绍:<a href="/2017/02/19/go-crypto/" title="密码学简介与Golang的加密库Crypto的使用">密码学简介与Golang的加密库Crypto的使用</a>, 以下是一个总结性的描述:</p>
+<ul>
+<li>对称加密: 高效，但安全性相对较低，Key的分发尤其不方便, 主要用于数据传输的加密(session加密), 常用AES系列</li>
+<li>非对称加密: 安全，但效率低，不适合大规模进行数据的加密和解密操作, 主要用于秘钥交换算法过程中用来协商Key和在数字签名时用来验证身份, 常用的是RSA/ECDSA</li>
+<li>秘钥交换算法: 用于协商对称加密的密码, ECDH用的比较多</li>
+<li>散列算法: 用于确保数据传输过程中的完整性, 为了安全一般使用Hmac<br>在golang的ssh包中使用ECDH的cure25519的进行密码的交换, 交换后的密码使用AES来加密数据. 如果使用密钥登录的话,一般使用ECDSA进行数字签名.</li>
+</ul>
+<h2 id="协议组成"><a href="#协议组成" class="headerlink" title="协议组成"></a>协议组成</h2><p><img src="http://oiw1gzfww.bkt.clouddn.com/ssh-portocol.gif" alt=""><br>从上图中可以看出SSH主要有三部分组成: 传输层协议, 用户认证协议, 连接协议</p>
+<h3 id="传输层协议-SSH-TRANS"><a href="#传输层协议-SSH-TRANS" class="headerlink" title="传输层协议[SSH-TRANS]"></a>传输层协议[SSH-TRANS]</h3><p>也叫:The Transport Layer Protocol, 提供了服务器认证，保密性及完整性。此外它有时还提供压缩功能。 SSH-TRANS通常运行在TCP/IP连接上，也可能用于其它可靠数据流上。 SSH-TRANS提供了强力的加密技术、密码主机认证及完整性保护。该协议中的认证基于主机，并且该协议不执行用户认证。更高层的用户认证协议可以设计为在此协议之上。</p>
+<h3 id="用户认证协议-SSH-USERAUTH"><a href="#用户认证协议-SSH-USERAUTH" class="headerlink" title="用户认证协议[SSH-USERAUTH]"></a>用户认证协议[SSH-USERAUTH]</h3><p>也叫:The User Authentication Protocol,  用于向服务器提供客户端用户鉴别功能。它运行在传输层协议SSH-TRANS上面。当SSH-USERAUTH开始后，它从低层协议那里接收会话标识符(从第一次密钥交换中的交换哈希H). 会话标识符唯一标识此会话并且适用于标记以证明私钥的所有权。 SSH-USERAUTH也需要知道低层协议是否提供保密性保护。</p>
+<h3 id="连接协议-SSH-CONNECT"><a href="#连接协议-SSH-CONNECT" class="headerlink" title="连接协议[SSH-CONNECT]"></a>连接协议[SSH-CONNECT]</h3><p>也叫: The Connection Protocol, 将多个加密隧道分成逻辑通道。它运行在用户认证协议上。它提供了交互式登录话路、远程命令执行、转发TCP/IP连接和转发X11连接。各种高层应用协议可以相对地独立于SSH基本体系之外，并依靠这个基本框架，通过连接协议使用SSH的安全机制。</p>
+<h2 id="工作过程"><a href="#工作过程" class="headerlink" title="工作过程"></a>工作过程</h2><p><img src="http://oiw1gzfww.bkt.clouddn.com/ssh-auth.png" alt=""><br>这张图描述了ssh交换的整个过程: </p>
+<ol>
+<li>Client端向Server端发起SSH连接请求。</li>
+<li>Server端向Client端发起版本协商。</li>
+<li>协商结束后Server端发送Host Key公钥 Server Key公钥，随机数等信息。到这里所有通信是不加密的。</li>
+<li>Client端返回确认信息，同时附带用公钥加密过的一个随机数，用于双方计算Session Key。</li>
+<li>进入认证阶段。从此以后所有通信均加密。</li>
+<li>认证成功后，进入交互阶段。</li>
+</ol>
+<p>针对这项阶段发生在协成的那一部分有一个简单的总结: 发生在传输层的: 版本协商和算法协商. 发生在用户认证层的: 用户认证. 发生在链接层的: 回话交互</p>
+<h3 id="版本协商"><a href="#版本协商" class="headerlink" title="版本协商"></a>版本协商</h3><ol>
+<li>服务器监听22端口，等待客户端连接。</li>
+<li>客户端向服务器端发起TCP初始连接请求，TCP连接建立后，服务器向客户端发送第一个报文，包括版本标志字符串，格式为“SSH－&lt;主协议版本号&gt;.&lt;次协议版本号&gt;－&lt;软件版本号&gt;”，协议版本号由主版本号和次版本号组成，软件版本号主要是为调试使用。</li>
+<li>客户端收到报文后，解析该数据包，如果服务器端的协议版本号比自己的低，且客户端能支持服务器端的低版本，就使用服务器端的低版本协议号，否则使用自己的协议版本号。</li>
+<li>客户端回应服务器一个报文，包含了客户端决定使用的协议版本号。服务器比较客户端发来的版本号，决定是否能同客户端一起工作。</li>
+<li>如果协商成功，则进入密钥和算法协商阶段，否则服务器端断开TCP连接。</li>
+</ol>
+<p>因为版本协商发生在为加密之前, 所以版本协商是明文的</p>
+<h3 id="算法协商"><a href="#算法协商" class="headerlink" title="算法协商"></a>算法协商</h3><ol>
+<li>服务器端和客户端分别发送算法协商报文给对端，报文中包含自己支持的公钥算法列表、加密算法列表、MAC(Message Authentication Code，消息验证码)算法列表、压缩算法列表等;</li>
+<li>服务器端和客户端根据对端和本端支持的算法列表得出最终使用的算法。</li>
+<li>服务器端和客户端利用ECDH交换算法、主机密钥对等参数，生成会话密钥和会话ID。</li>
+</ol>
+<p>通过以上步骤，服务器端和客户端就取得了相同的会话密钥和会话ID, 用于加密传输的数据, 到此链接加密完成。</p>
+<h3 id="用户认证"><a href="#用户认证" class="headerlink" title="用户认证"></a>用户认证</h3><ol>
+<li>客户端向服务器端发送认证请求，认证请求中包含用户名、认证方法、与该认证方法相关的内容（如：password认证时，内容为密码）。</li>
+<li>服务器端对客户端进行认证，如果认证失败，则向客户端发送认证失败消息，其中包含可以再次认证的方法列表。</li>
+<li>客户端从认证方法列表中选取一种认证方法再次进行认证。</li>
+<li>该过程反复进行， 直到认证成功或者认证次数达到上限， 服务器关闭连接为止。</li>
+</ol>
+<p>用户认证是在加密过会进行的, 所以用于认证的数据是不会暴露的,通常而言SSH提供2认证方式:</p>
+<ol>
+<li>password认证：客户端向服务器发出 password认证请求，将用户名和密码加密后发送给服务器；服务器将该信息解密后得到用户名和密码的明文，与设备上保存的用户名和密码进行比较，并返回认证成功或失败的消息。</li>
+<li>publickey 认证：采用数字签名的方法来认证客户端。目前，设备上可以利用RSA和 DSA两种公共密钥算法实现数字签名。客户端发送包含用户名、公共密钥和公共密钥算法的 publickey 认证请求给服务器端。服务器对公钥进行合法性检查，如果不合法，则直接发送失败消息；否则，服务器利用数字签名对客户端进行认证，并返回认证成功或失败的消息<br>SSH2.0还提供了 password-publickey 认证和 any 认证:</li>
+<li>password-publickey 认证：指定该用户的认证方式为 password 和 publickey认证同时满足。客户端版本为 SSH1的用户只要通过其中一种认证即可登录；客户端版本为 SSH2的用户必须两种认证都通过才能登录。</li>
+<li>any认证：指定该用户的认证方式可以是 password，也可以是 publickey。</li>
+</ol>
+<p>一般而言默认使用的any。<br>这张图描述了在加密过程上的认证:<br><img src="http://oiw1gzfww.bkt.clouddn.com/ssh-connection.png" alt=""></p>
+<h3 id="会话交互"><a href="#会话交互" class="headerlink" title="会话交互"></a>会话交互</h3><p>会话请求阶段： </p>
+<ol>
+<li>服务器等待客户端的请求；</li>
+<li>认证通过后，客户端向服务器发送会话请求；</li>
+<li>服务器处理客户端的请求。请求被成功处理后， 服务器会向客户端回应 SSH_SMSG_SUCCESS包，SSH进入交互会话阶段；否则回应 SSH_SMSG_FAILURE包，表示服务器处理请求失败或者不能识别请求。</li>
+</ol>
+<p>交互会话阶段，在这个模式下，数据被双向传送:</p>
+<ol>
+<li>客户端将要执行的命令加密后传给服务器;</li>
+<li>服务器接收到报文，解密后执行该命令,将执行的结果加密发还给客户端;</li>
+<li>客户端将接收到的结果解密后显示到终端上.</li>
+</ol>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;SSH对于大多数人来说应该并不陌生, 无论你是开发还是测试还是运维, 只要你需要登录类Unix服务器都会用到, 他被用来提供链接的安全保障, 比如常见的客户端有命令行工具ssh, 以及周边的商业工具Xshell等。在这篇文章里我们不会教你如何使用xshell, 而是从协议层面全新的认识下ssh。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="协议详解" scheme="https://blog.yumaojun.net/categories/%E5%8D%8F%E8%AE%AE%E8%AF%A6%E8%A7%A3/"/>
+    
+      <category term="ssh" scheme="https://blog.yumaojun.net/categories/%E5%8D%8F%E8%AE%AE%E8%AF%A6%E8%A7%A3/ssh/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>跳板机系列(一)-架构与简介</title>
+    <link href="https://blog.yumaojun.net/2017/02/15/go-ssh/"/>
+    <id>https://blog.yumaojun.net/2017/02/15/go-ssh/</id>
+    <published>2017-02-15T05:49:19.000Z</published>
+    <updated>2017-02-16T05:25:05.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>一直参与JumpServer的开发, 也一直在想如何设计一个相对完美的跳板机, 跳板机的本质是ssh协议的反向代理(主要还是ssh, 至于rdp还没想过), 虽然也经常使用ssh(做运维的时候还专门就ssh学习过), 但也仅仅是ssh客户端的使用以及服务端的配置, 我觉得一个完美的跳板机应该是从协议层面解决这个问题。因此打算以Golang为开发语言(因为ssh库完善，websocket编写简单),开发一个有基本功能的跳板机。<br><a id="more"></a></p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>这一系列的博客 包含很多篇, 主要目的是: 在之前的经验上, 把开发过程中涉及到的所有知识和感想记录下来(当然包含源码), 这一系列涉及如下文章, 由浅入深, 循序渐进的介绍开发过程中涉及到的各种知识:</p>
+<ul>
+<li><a href="/2017/02/15/go-ssh/" title="跳板机系列(一)-架构与简介">跳板机系列(一)-架构与简介</a></li>
+<li><a href="/2017/02/16/ssh-protocol/" title="跳板机系列(二)-ssh协议原理简介">跳板机系列(二)-ssh协议原理简介</a></li>
+<li></li>
+<li></li>
+<li>
+</li>
+</ul>
+<h2 id="简单架构"><a href="#简单架构" class="headerlink" title="简单架构"></a>简单架构</h2><p>之前JumpServer的核心是按照简单的架构来开发的, 一个简单的架构其实已经有很多不错的demo或者产品了, 比如这个项目<a href="http://git.oschina.net/shibingli/webconsole" target="_blank" rel="external">webconsole</a>, 当然他不完整仅仅实现了web，至于命令行并没有实现, 而jumpserver这2个都实现了。<br>为什么称之为简单的架构, 因为他的核心思想就是: 就是模拟一个终端(web端的xterm这个js库就是干这个事儿的, 而命令行同样模拟一个终端就行了, 比如golang的ssh/terminal这个库就可以完成这个事儿),然后通过一个ssh agent访问后面的真实的服务器，起到一个代理转发的作用。<br><img src="http://oiw1gzfww.bkt.clouddn.com/jump-design-simple.png" alt=""></p>
+<p>这种模式的缺陷主要体现在命令行终端上面, 因为此时终端后面接的就是ssh客户端, 因此这个终端是一个客户端和跳板机绑定在一起了, 用户只有先登录跳板机才能使用代理服务, 而这显然是不合理的,Jumpserver在此上进行了改进, 通过再添加一个ssh server监听, 实际上就是ssh-in-ssh。</p>
+<h2 id="架构改进"><a href="#架构改进" class="headerlink" title="架构改进"></a>架构改进</h2><p>改进过后主要加入一个ssh的代理服务,统一代理层, 抽离客户端。<br><img src="http://oiw1gzfww.bkt.clouddn.com/jump-design-update.png" alt=""></p>
+<h2 id="完美架构"><a href="#完美架构" class="headerlink" title="完美架构"></a>完美架构</h2><p>个人架构的能力还是很菜的, 对ssh协议的理解也不深, 当看到teleport这个开源产品的设计时, 完全被惊呆了。 这不就是我想要的架构嘛, 而且细节是做的那么的漂亮。<br><img src="http://gravitational.com/teleport/docs/img/everything.svg" alt=""><br>后期如果有时间的话, 打算写一个关于teleport源码解读的系列, 一点一个剖析这个完美架构的实现。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>写这一个系列不容易, 这是一个开篇和规划，希望最后能完美的收尾，有一个不错的demo展示给大家。<br>现在看来teleport已经很完善了, 也符合我心目中的跳板机的样子, 等读完teleport源码过后, 看其是否完善, 扩展是否方便, 因此很有可能是完善teleport,而不是从头开始。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;一直参与JumpServer的开发, 也一直在想如何设计一个相对完美的跳板机, 跳板机的本质是ssh协议的反向代理(主要还是ssh, 至于rdp还没想过), 虽然也经常使用ssh(做运维的时候还专门就ssh学习过), 但也仅仅是ssh客户端的使用以及服务端的配置, 我觉得一个完美的跳板机应该是从协议层面解决这个问题。因此打算以Golang为开发语言(因为ssh库完善，websocket编写简单),开发一个有基本功能的跳板机。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
+    
+      <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
+    
+    
+      <category term="ssh" scheme="https://blog.yumaojun.net/tags/ssh/"/>
+    
+  </entry>
+  
+  <entry>
     <title>nodejs源加速</title>
     <link href="https://blog.yumaojun.net/2017/02/14/nodejs-accelerate/"/>
     <id>https://blog.yumaojun.net/2017/02/14/nodejs-accelerate/</id>

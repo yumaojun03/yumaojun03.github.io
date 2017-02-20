@@ -433,9 +433,9 @@
 <ul>
 <li><a href="/2017/02/15/go-ssh/" title="跳板机系列(一)-架构与简介">跳板机系列(一)-架构与简介</a></li>
 <li><a href="/2017/02/16/ssh-protocol/" title="跳板机系列(二)-ssh协议原理简介">跳板机系列(二)-ssh协议原理简介</a></li>
-<li><a href="/2017/02/17/ssh-protocol-jumphost/" title="跳板机系列(三)-ssh协议支持的跳板机模式">跳板机系列(三)-ssh协议支持的跳板机模式</a></li>
-<li><a href="/2017/02/18/ssh-protocol-golang/" title="跳板机系列(四)-SSH包使用介绍">跳板机系列(四)-SSH包使用介绍</a></li>
-<li><a href="/2017/02/19/golang-jumphost-cli/" title="跳板机系列(五)-CLI的实现">跳板机系列(五)-CLI的实现</a>
+<li></li>
+<li></li>
+<li>
 </li>
 </ul>
 <h2 id="简单架构"><a href="#简单架构" class="headerlink" title="简单架构"></a>简单架构</h2><p>之前JumpServer的核心是按照简单的架构来开发的, 一个简单的架构其实已经有很多不错的demo或者产品了, 比如这个项目<a href="http://git.oschina.net/shibingli/webconsole" target="_blank" rel="external">webconsole</a>, 当然他不完整仅仅实现了web，至于命令行并没有实现, 而jumpserver这2个都实现了。<br>为什么称之为简单的架构, 因为他的核心思想就是: 就是模拟一个终端(web端的xterm这个js库就是干这个事儿的, 而命令行同样模拟一个终端就行了, 比如golang的ssh/terminal这个库就可以完成这个事儿),然后通过一个ssh agent访问后面的真实的服务器，起到一个代理转发的作用。<br><img src="http://oiw1gzfww.bkt.clouddn.com/jump-design-simple.png" alt=""></p>
@@ -577,7 +577,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">22</span>
+                <span class="site-state-item-count">19</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>

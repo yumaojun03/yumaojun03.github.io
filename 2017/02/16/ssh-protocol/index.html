@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="summary," />
+  <meta name="keywords" content="紫川秀, 博客" />
 
 
 
@@ -86,19 +86,20 @@
 
 
 
-<meta name="description" content="孔子曰:”吾日三省吾身”, 平时很少会静下心来反省和总结一段时间的功与过, 2016马上就要过去了，在这一年将要结束之时, 还是想回过一下这一年来的得与失, 顺便安排下来年的计划。
-记录下这一年来自己的变化, 同时也为来年再战作准备, 而且我这人记性不好, 留个底,照亮自己需要走的路。">
+<meta name="description" content="SSH对于大多数人来说应该并不陌生, 无论你是开发还是测试还是运维, 只要你需要登录类Unix服务器都会用到, 他被用来提供链接的安全保障, 比如常见的客户端有命令行工具ssh, 以及周边的商业工具Xshell等。在这篇文章里我们不会教你如何使用xshell, 而是从协议层面全新的认识下ssh。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="2016总结与2017计划">
-<meta property="og:url" content="https://blog.yumaojun.net/2016/12/31/2016-summary/index.html">
+<meta property="og:title" content="跳板机系列(二)-ssh协议原理简介">
+<meta property="og:url" content="https://blog.yumaojun.net/2017/02/16/ssh-protocol/index.html">
 <meta property="og:site_name" content="紫川秀的博客">
-<meta property="og:description" content="孔子曰:”吾日三省吾身”, 平时很少会静下心来反省和总结一段时间的功与过, 2016马上就要过去了，在这一年将要结束之时, 还是想回过一下这一年来的得与失, 顺便安排下来年的计划。
-记录下这一年来自己的变化, 同时也为来年再战作准备, 而且我这人记性不好, 留个底,照亮自己需要走的路。">
-<meta property="og:updated_time" content="2017-01-02T15:32:52.000Z">
+<meta property="og:description" content="SSH对于大多数人来说应该并不陌生, 无论你是开发还是测试还是运维, 只要你需要登录类Unix服务器都会用到, 他被用来提供链接的安全保障, 比如常见的客户端有命令行工具ssh, 以及周边的商业工具Xshell等。在这篇文章里我们不会教你如何使用xshell, 而是从协议层面全新的认识下ssh。">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/ssh-portocol.gif">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/ssh-auth.png">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/ssh-connection.png">
+<meta property="og:updated_time" content="2017-02-20T15:35:44.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="2016总结与2017计划">
-<meta name="twitter:description" content="孔子曰:”吾日三省吾身”, 平时很少会静下心来反省和总结一段时间的功与过, 2016马上就要过去了，在这一年将要结束之时, 还是想回过一下这一年来的得与失, 顺便安排下来年的计划。
-记录下这一年来自己的变化, 同时也为来年再战作准备, 而且我这人记性不好, 留个底,照亮自己需要走的路。">
+<meta name="twitter:title" content="跳板机系列(二)-ssh协议原理简介">
+<meta name="twitter:description" content="SSH对于大多数人来说应该并不陌生, 无论你是开发还是测试还是运维, 只要你需要登录类Unix服务器都会用到, 他被用来提供链接的安全保障, 比如常见的客户端有命令行工具ssh, 以及周边的商业工具Xshell等。在这篇文章里我们不会教你如何使用xshell, 而是从协议层面全新的认识下ssh。">
+<meta name="twitter:image" content="http://oiw1gzfww.bkt.clouddn.com/ssh-portocol.gif">
 
 
 
@@ -126,13 +127,13 @@
 
 
 
-  <link rel="canonical" href="https://blog.yumaojun.net/2016/12/31/2016-summary/"/>
+  <link rel="canonical" href="https://blog.yumaojun.net/2017/02/16/ssh-protocol/"/>
 
 
 
 
 
-  <title> 2016总结与2017计划 | 紫川秀的博客 </title>
+  <title> 跳板机系列(二)-ssh协议原理简介 | 紫川秀的博客 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -298,7 +299,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-  <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2016/12/31/2016-summary/">
+  <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/02/16/ssh-protocol/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
     <meta itemprop="name" content="紫川秀">
@@ -322,7 +323,7 @@
             
             
               
-                2016总结与2017计划
+                跳板机系列(二)-ssh协议原理简介
               
             
           </h1>
@@ -337,8 +338,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-12-31T20:03:29+08:00">
-                2016-12-31
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-02-16T10:09:31+08:00">
+                2017-02-16
               </time>
             
 
@@ -360,8 +361,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/杂谈/" itemprop="url" rel="index">
-                    <span itemprop="name">杂谈</span>
+                  <a href="/categories/协议详解/" itemprop="url" rel="index">
+                    <span itemprop="name">协议详解</span>
                   </a>
                 </span>
 
@@ -371,8 +372,8 @@
                 
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/杂谈/年终总结/" itemprop="url" rel="index">
-                    <span itemprop="name">年终总结</span>
+                  <a href="/categories/协议详解/ssh/" itemprop="url" rel="index">
+                    <span itemprop="name">ssh</span>
                   </a>
                 </span>
 
@@ -389,8 +390,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2016/12/31/2016-summary/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/12/31/2016-summary/" itemprop="commentCount"></span>
+                <a href="/2017/02/16/ssh-protocol/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/02/16/ssh-protocol/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -400,7 +401,7 @@
 
           
           
-             <span id="/2016/12/31/2016-summary/" class="leancloud_visitors" data-flag-title="2016总结与2017计划">
+             <span id="/2017/02/16/ssh-protocol/" class="leancloud_visitors" data-flag-title="跳板机系列(二)-ssh协议原理简介">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -427,69 +428,85 @@
       
 
       
-        <p>孔子曰:”吾日三省吾身”, 平时很少会静下心来反省和总结一段时间的功与过, 2016马上就要过去了，在这一年将要结束之时, 还是想回过一下这一年来的得与失, 顺便安排下来年的计划。</p>
-<p>记录下这一年来自己的变化, 同时也为来年再战作准备, 而且我这人记性不好, 留个底,照亮自己需要走的路。</p>
-<a id="more"></a>
-<h2 id="转瞬即逝的2016"><a href="#转瞬即逝的2016" class="headerlink" title="转瞬即逝的2016"></a>转瞬即逝的2016</h2><p>2016是繁忙的一年，工作上处处充满挑战，有些挑战是自己喜欢的，有些挑战也是自己比较抵触的，我喜欢开发，从运维开发转而参与大型系统开发，这的确是一个不小的挑战，我是一个对技术有点激情的人，因此这个挑战对我而言还是比较喜欢的。后来同时做起了产品设计, 每天扣脑袋, 看别人的产品，画产品设计图， 这些在当时的我是很抵触的, 当时我还处于单纯的想积累技术的阶段。现在看来这段经历也是我宝贵的财富, 毕竟产品决定东西的价值，用再牛叉的技术,做一个没有价值的东西, 这是一件愚蠢的行为，我这里说的价值是长远价值，而不是当下看起来有价值, 这个说起来很悬，以后有机会深入讨论这个。</p>
-<p>2016这一年也在和JumpServer一同成长的一年，感触也蛮多的，首先是技术的成长，一个开源产品的技术的迭代，我们致力于设计NB的产品和写出漂亮的代码。其次为有可能的融资谈判而兴奋过，然而最后还是平静下来, 慢慢做一个自己认可的能力范围之内的产品。</p>
-<p>工作上的事儿, 总是有那么点紧绷, 其实生活上也有很多值得高兴的事儿，我们有了自己的房子，并且搬进去了，告别了租房的日子，这一切多谢我的老婆打理，我基本是啥心都没操过。其次，我女儿和我关系也很不错，虽然她生气的时候只找她妈妈，但是我在她心中的地位也仅次于她妈妈，我也心有愧疚，作为一个父亲我陪伴她的时候是有点少了。还有我的好搭档，在我最需要钱的时候, 一身不吭的直接转我支付宝上,人生中能交到一个这样的朋友，是我的莫大的荣幸。</p>
-<p>还有一个事儿，我终于用上Mac了，虽然是一个二手的MBP，但是这对满足一个屌丝的虚荣心完全受用了, 说岔了, 我再也不用在Windows上装Ubuntu开发了。</p>
-<h2 id="瞬息万变的2017"><a href="#瞬息万变的2017" class="headerlink" title="瞬息万变的2017"></a>瞬息万变的2017</h2><p>变化和革新是很快的, 比如OpenStack没有那么热了, 容器技术也基本成了开发的必备技能, 无论你作为一个前端开发还是后端开发JavaScript都快成为一门必备语言了。前后端的完全分离也愈演愈烈, 各种前段框架的变化。<br>伴随而来的是微服务+容器技术的紧密结合。在最后DDD也随着微服务的出现，对开发人员提出了更高的需求, 以后那种只会写代码的人将愈来愈少了。</p>
-<p>我Hold不住这些，因此在技术方面我仅能列出我需要提升的书单:</p>
-<h3 id="Python提升书单-今年主力"><a href="#Python提升书单-今年主力" class="headerlink" title="Python提升书单(今年主力)"></a>Python提升书单(今年主力)</h3><ol>
-<li>基础回过<ul>
-<li><a href="http://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000" target="_blank" rel="external">廖雪峰官网</a></li>
-<li>Think Python 2ed 中译版精校  PDF 电子书</li>
+        <p>SSH对于大多数人来说应该并不陌生, 无论你是开发还是测试还是运维, 只要你需要登录类Unix服务器都会用到, 他被用来提供链接的安全保障, 比如常见的客户端有命令行工具ssh, 以及周边的商业工具Xshell等。在这篇文章里我们不会教你如何使用xshell, 而是从协议层面全新的认识下ssh。<br><a id="more"></a></p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>虽然SSH使用起来很简单, 但是背后的原理特别不简单,关于以下问题, 你能否知晓其细节:</p>
+<ul>
+<li>SSH如何保证客户端与服务端通行的安全</li>
+<li>SSH采用什么加密协议</li>
+<li>SSH是通过对称加密还是非对称加密数据在传输过程的安全</li>
+<li>SSH如何保证数据完整性</li>
+<li>SSH的密码认证方式和密钥认证方式分别如何实现，有何差异</li>
 </ul>
-</li>
-<li>进阶深<ul>
-<li><a href="http://python3-cookbook.readthedocs.io/zh_CN/latest/preface.html" target="_blank" rel="external">python3-cookbook</a></li>
-<li>电子书Python高手之路</li>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>SSH(Secure Shell)是一个提供数据通信安全、远程登录、远程指令执行等功能的安全网络协议，由芬兰赫尔辛基大学研究员Tatu Ylönen,于1995年提出，其目的是用于替代非安全的Telnet、rsh、rexec等远程Shell协议。之后SSH发展了两个大版本SSH-1和SSH-2, 开源实现OpenSSH对2者都支持。<br>SSH的主要特性:</p>
+<ul>
+<li>加密: 避免数据内容泄漏</li>
+<li>通信的完整性: 避免数据被篡改，以及发送或接受地址伪装(检查数据是否被篡改，数据是否来自发送者而非攻击者） SSH-2通过MD5和SHA-1实现该功能，SSH-1使用CRC-32</li>
+<li>认证: 识别数据发送者和接收者身份 客户端验证SSH服务端的身份：防止攻击者仿冒SSH服务端身份，避免中介人攻击和重定向请求的攻击；OpenSSH通过在know-hosts中存储主机名和host key对服务端身份进行认证 服务端验证请求者身份：提供安全性较弱的用户密码方式，和安全性更强的per-user public-key signatures；此外SSH还支持与第三方安全服务系统的集成，如Kerberos等</li>
+<li>授权: 用户访问控制</li>
+<li>安全隧道: 转发或者为基于TCP/IP的回话提供加密隧道, 比如通过SSH为Telnet、FTP等提供通信安全保障，支持三种类型的Forwarding操作：Port Forwarding；X Forwarding；Agent Forwarding</li>
 </ul>
-</li>
-<li>常见的一些代码实现<ul>
-<li><a href="https://github.com/liquanzhou/ops_doc/blob/master/python%E5%AE%9E%E4%BE%8B%E6%89%8B%E5%86%8C.py" target="_blank" rel="external">python实例手册</a>  </li>
-<li><a href="https://segmentfault.com/t/python/blogs" target="_blank" rel="external">网站上的文章</a></li>
+<p>通过使用SSH，你可以把所有传输的数据进行加密，这样”中间人”这种攻击方式就不可能实现了，而且也能够防止DNS欺骗和IP欺骗。使用SSH，还有一个额外的好处就是传输的数据是经过压缩的，所以可以加快传输的速度。SSH有很多功能，它既可以代替Telnet，又可以为FTP、PoP、甚至为PPP提供一个安全的”通道”。</p>
+<h2 id="安全相关"><a href="#安全相关" class="headerlink" title="安全相关"></a>安全相关</h2><p>在SSH中涉及到很多加密算法, 关于加密算法的相关知识之前已经写过一遍博客做专门介绍:<a href="/2017/02/19/go-crypto/" title="密码学简介与Golang的加密库Crypto的使用">密码学简介与Golang的加密库Crypto的使用</a>, 以下是一个总结性的描述:</p>
+<ul>
+<li>对称加密: 高效，但安全性相对较低，Key的分发尤其不方便, 主要用于数据传输的加密(session加密), 常用AES系列</li>
+<li>非对称加密: 安全，但效率低，不适合大规模进行数据的加密和解密操作, 主要用于秘钥交换算法过程中用来协商Key和在数字签名时用来验证身份, 常用的是RSA/ECDSA</li>
+<li>秘钥交换算法: 用于协商对称加密的密码, ECDH用的比较多</li>
+<li>散列算法: 用于确保数据传输过程中的完整性, 为了安全一般使用Hmac<br>在golang的ssh包中使用ECDH的cure25519的进行密码的交换, 交换后的密码使用AES来加密数据. 如果使用密钥登录的话,一般使用ECDSA进行数字签名.</li>
 </ul>
-</li>
-<li>设计模式<ul>
-<li><a href="http://www.cnblogs.com/wuyuegb2312/archive/2013/04/09/3008320.html" target="_blank" rel="external">快速版大话设计模式</a></li>
-<li><a href="https://github.com/faif/python-patterns" target="_blank" rel="external">一些最新的例子</a></li>
-<li><a href="http://www.ituring.com.cn/book/1715" target="_blank" rel="external">精通Python设计模式</a></li>
-</ul>
-</li>
-<li>数据结构与算法<ul>
-<li><a href="http://top.jobbole.com/4681/" target="_blank" rel="external">快速阅读总结</a></li>
-<li>电子书：Data Structures and Algorithms with Python-2015</li>
-</ul>
-</li>
-<li>源码阅读<ul>
-<li>Django Class Based View </li>
-<li>Flask 源码阅读</li>
-<li>Openstack KeyStone 源码阅读</li>
-</ul>
-</li>
-<li>理解Python解释器<ul>
-<li><a href="http://mt.sohu.com/20161030/n471778650.shtml" target="_blank" rel="external">用Python实现一个Python解释器</a></li>
-</ul>
-</li>
+<h2 id="协议组成"><a href="#协议组成" class="headerlink" title="协议组成"></a>协议组成</h2><p><img src="http://oiw1gzfww.bkt.clouddn.com/ssh-portocol.gif" alt=""><br>从上图中可以看出SSH主要有三部分组成: 传输层协议, 用户认证协议, 连接协议</p>
+<h3 id="传输层协议-SSH-TRANS"><a href="#传输层协议-SSH-TRANS" class="headerlink" title="传输层协议[SSH-TRANS]"></a>传输层协议[SSH-TRANS]</h3><p>也叫:The Transport Layer Protocol, 提供了服务器认证，保密性及完整性。此外它有时还提供压缩功能。 SSH-TRANS通常运行在TCP/IP连接上，也可能用于其它可靠数据流上。 SSH-TRANS提供了强力的加密技术、密码主机认证及完整性保护。该协议中的认证基于主机，并且该协议不执行用户认证。更高层的用户认证协议可以设计为在此协议之上。</p>
+<h3 id="用户认证协议-SSH-USERAUTH"><a href="#用户认证协议-SSH-USERAUTH" class="headerlink" title="用户认证协议[SSH-USERAUTH]"></a>用户认证协议[SSH-USERAUTH]</h3><p>也叫:The User Authentication Protocol,  用于向服务器提供客户端用户鉴别功能。它运行在传输层协议SSH-TRANS上面。当SSH-USERAUTH开始后，它从低层协议那里接收会话标识符(从第一次密钥交换中的交换哈希H). 会话标识符唯一标识此会话并且适用于标记以证明私钥的所有权。 SSH-USERAUTH也需要知道低层协议是否提供保密性保护。</p>
+<h3 id="连接协议-SSH-CONNECT"><a href="#连接协议-SSH-CONNECT" class="headerlink" title="连接协议[SSH-CONNECT]"></a>连接协议[SSH-CONNECT]</h3><p>也叫: The Connection Protocol, 将多个加密隧道分成逻辑通道。它运行在用户认证协议上。它提供了交互式登录话路、远程命令执行、转发TCP/IP连接和转发X11连接。各种高层应用协议可以相对地独立于SSH基本体系之外，并依靠这个基本框架，通过连接协议使用SSH的安全机制。</p>
+<h2 id="工作过程"><a href="#工作过程" class="headerlink" title="工作过程"></a>工作过程</h2><p><img src="http://oiw1gzfww.bkt.clouddn.com/ssh-auth.png" alt=""><br>这张图描述了ssh交换的整个过程: </p>
+<ol>
+<li>Client端向Server端发起SSH连接请求。</li>
+<li>Server端向Client端发起版本协商。</li>
+<li>协商结束后Server端发送Host Key公钥 Server Key公钥，随机数等信息。到这里所有通信是不加密的。</li>
+<li>Client端返回确认信息，同时附带用公钥加密过的一个随机数，用于双方计算Session Key。</li>
+<li>进入认证阶段。从此以后所有通信均加密。</li>
+<li>认证成功后，进入交互阶段。</li>
 </ol>
-<h3 id="Golang提升书单"><a href="#Golang提升书单" class="headerlink" title="Golang提升书单"></a>Golang提升书单</h3><ol>
-<li>回过基础：<ul>
-<li><a href="http://mt.sohu.com/20161030/n471778650.shtml" target="_blank" rel="external">Go Web 编程</a></li>
-<li><a href="https://hotsnow.gitbooks.io/the-way-to-go_zh_cn/content/" target="_blank" rel="external">Go入门指南</a></li>
-</ul>
-</li>
+<p>针对这项阶段发生在协成的那一部分有一个简单的总结: 发生在传输层的: 版本协商和算法协商. 发生在用户认证层的: 用户认证. 发生在链接层的: 回话交互</p>
+<h3 id="版本协商"><a href="#版本协商" class="headerlink" title="版本协商"></a>版本协商</h3><ol>
+<li>服务器监听22端口，等待客户端连接。</li>
+<li>客户端向服务器端发起TCP初始连接请求，TCP连接建立后，服务器向客户端发送第一个报文，包括版本标志字符串，格式为“SSH－&lt;主协议版本号&gt;.&lt;次协议版本号&gt;－&lt;软件版本号&gt;”，协议版本号由主版本号和次版本号组成，软件版本号主要是为调试使用。</li>
+<li>客户端收到报文后，解析该数据包，如果服务器端的协议版本号比自己的低，且客户端能支持服务器端的低版本，就使用服务器端的低版本协议号，否则使用自己的协议版本号。</li>
+<li>客户端回应服务器一个报文，包含了客户端决定使用的协议版本号。服务器比较客户端发来的版本号，决定是否能同客户端一起工作。</li>
+<li>如果协商成功，则进入密钥和算法协商阶段，否则服务器端断开TCP连接。</li>
 </ol>
-<h3 id="JavaScript提升书单"><a href="#JavaScript提升书单" class="headerlink" title="JavaScript提升书单"></a>JavaScript提升书单</h3><ol>
-<li>回过基础：<ul>
-<li><a href="http://www.liaoxuefeng.com/wiki/001434446689867b27157e896e74d51a89c25cc8b43bdb3000" target="_blank" rel="external">廖雪峰官网</a></li>
-<li><a href="http://javascript.ruanyifeng.com/#nodejs" target="_blank" rel="external">阮一峰的javascript教程 </a></li>
-<li><a href="http://es6.ruanyifeng.com/" target="_blank" rel="external">ECMAScript 6 入门</a></li>
-</ul>
-</li>
+<p>因为版本协商发生在为加密之前, 所以版本协商是明文的</p>
+<h3 id="算法协商"><a href="#算法协商" class="headerlink" title="算法协商"></a>算法协商</h3><ol>
+<li>服务器端和客户端分别发送算法协商报文给对端，报文中包含自己支持的公钥算法列表、加密算法列表、MAC(Message Authentication Code，消息验证码)算法列表、压缩算法列表等;</li>
+<li>服务器端和客户端根据对端和本端支持的算法列表得出最终使用的算法。</li>
+<li>服务器端和客户端利用ECDH交换算法、主机密钥对等参数，生成会话密钥和会话ID。</li>
 </ol>
-<p>除了技术, 还应该有生活。而生活就是: <strong><em>赶紧把账还完</em></strong></p>
+<p>通过以上步骤，服务器端和客户端就取得了相同的会话密钥和会话ID, 用于加密传输的数据, 到此链接加密完成。</p>
+<h3 id="用户认证"><a href="#用户认证" class="headerlink" title="用户认证"></a>用户认证</h3><ol>
+<li>客户端向服务器端发送认证请求，认证请求中包含用户名、认证方法、与该认证方法相关的内容（如：password认证时，内容为密码）。</li>
+<li>服务器端对客户端进行认证，如果认证失败，则向客户端发送认证失败消息，其中包含可以再次认证的方法列表。</li>
+<li>客户端从认证方法列表中选取一种认证方法再次进行认证。</li>
+<li>该过程反复进行， 直到认证成功或者认证次数达到上限， 服务器关闭连接为止。</li>
+</ol>
+<p>用户认证是在加密过会进行的, 所以用于认证的数据是不会暴露的,通常而言SSH提供2认证方式:</p>
+<ol>
+<li>password认证：客户端向服务器发出 password认证请求，将用户名和密码加密后发送给服务器；服务器将该信息解密后得到用户名和密码的明文，与设备上保存的用户名和密码进行比较，并返回认证成功或失败的消息。</li>
+<li>publickey 认证：采用数字签名的方法来认证客户端。目前，设备上可以利用RSA和 DSA两种公共密钥算法实现数字签名。客户端发送包含用户名、公共密钥和公共密钥算法的 publickey 认证请求给服务器端。服务器对公钥进行合法性检查，如果不合法，则直接发送失败消息；否则，服务器利用数字签名对客户端进行认证，并返回认证成功或失败的消息<br>SSH2.0还提供了 password-publickey 认证和 any 认证:</li>
+<li>password-publickey 认证：指定该用户的认证方式为 password 和 publickey认证同时满足。客户端版本为 SSH1的用户只要通过其中一种认证即可登录；客户端版本为 SSH2的用户必须两种认证都通过才能登录。</li>
+<li>any认证：指定该用户的认证方式可以是 password，也可以是 publickey。</li>
+</ol>
+<p>一般而言默认使用的any。<br>这张图描述了在加密过程上的认证:<br><img src="http://oiw1gzfww.bkt.clouddn.com/ssh-connection.png" alt=""></p>
+<h3 id="会话交互"><a href="#会话交互" class="headerlink" title="会话交互"></a>会话交互</h3><p>会话请求阶段： </p>
+<ol>
+<li>服务器等待客户端的请求；</li>
+<li>认证通过后，客户端向服务器发送会话请求；</li>
+<li>服务器处理客户端的请求。请求被成功处理后， 服务器会向客户端回应 SSH_SMSG_SUCCESS包，SSH进入交互会话阶段；否则回应 SSH_SMSG_FAILURE包，表示服务器处理请求失败或者不能识别请求。</li>
+</ol>
+<p>交互会话阶段，在这个模式下，数据被双向传送:</p>
+<ol>
+<li>客户端将要执行的命令加密后传给服务器;</li>
+<li>服务器接收到报文，解密后执行该命令,将执行的结果加密发还给客户端;</li>
+<li>客户端将接收到的结果解密后显示到终端上.</li>
+</ol>
 
       
     </div>
@@ -527,19 +544,13 @@
 
     <footer class="post-footer">
       
-        <div class="post-tags">
-          
-            <a href="/tags/summary/" rel="tag"># summary</a>
-          
-        </div>
-      
 
       
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/12/30/go-cobra/" rel="next" title="如何使用golang编写漂亮的命令行工具">
-                <i class="fa fa-chevron-left"></i> 如何使用golang编写漂亮的命令行工具
+              <a href="/2017/02/15/go-ssh/" rel="next" title="跳板机系列(一)-架构与简介">
+                <i class="fa fa-chevron-left"></i> 跳板机系列(一)-架构与简介
               </a>
             
           </div>
@@ -548,8 +559,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2017/01/01/nodejs-vscode/" rel="prev" title="使用VSCode快速搭建NodeJS开发环境">
-                使用VSCode快速搭建NodeJS开发环境 <i class="fa fa-chevron-right"></i>
+              <a href="/2017/02/19/go-crypto/" rel="prev" title="密码学简介与Golang的加密库Crypto的使用">
+                密码学简介与Golang的加密库Crypto的使用 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -576,8 +587,8 @@
           
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/12/31/2016-summary/"
-           data-title="2016总结与2017计划" data-url="https://blog.yumaojun.net/2016/12/31/2016-summary/">
+      <div class="ds-thread" data-thread-key="2017/02/16/ssh-protocol/"
+           data-title="跳板机系列(二)-ssh协议原理简介" data-url="https://blog.yumaojun.net/2017/02/16/ssh-protocol/">
       </div>
     
   </div>
@@ -731,7 +742,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#转瞬即逝的2016"><span class="nav-number">1.</span> <span class="nav-text">转瞬即逝的2016</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#瞬息万变的2017"><span class="nav-number">2.</span> <span class="nav-text">瞬息万变的2017</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Python提升书单-今年主力"><span class="nav-number">2.1.</span> <span class="nav-text">Python提升书单(今年主力)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Golang提升书单"><span class="nav-number">2.2.</span> <span class="nav-text">Golang提升书单</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JavaScript提升书单"><span class="nav-number">2.3.</span> <span class="nav-text">JavaScript提升书单</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">2.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安全相关"><span class="nav-number">3.</span> <span class="nav-text">安全相关</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#协议组成"><span class="nav-number">4.</span> <span class="nav-text">协议组成</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#传输层协议-SSH-TRANS"><span class="nav-number">4.1.</span> <span class="nav-text">传输层协议[SSH-TRANS]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#用户认证协议-SSH-USERAUTH"><span class="nav-number">4.2.</span> <span class="nav-text">用户认证协议[SSH-USERAUTH]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#连接协议-SSH-CONNECT"><span class="nav-number">4.3.</span> <span class="nav-text">连接协议[SSH-CONNECT]</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#工作过程"><span class="nav-number">5.</span> <span class="nav-text">工作过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#版本协商"><span class="nav-number">5.1.</span> <span class="nav-text">版本协商</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#算法协商"><span class="nav-number">5.2.</span> <span class="nav-text">算法协商</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#用户认证"><span class="nav-number">5.3.</span> <span class="nav-text">用户认证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#会话交互"><span class="nav-number">5.4.</span> <span class="nav-text">会话交互</span></a></li></ol></li></ol></div>
             
 
           </div>
