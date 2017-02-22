@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="ssh," />
+  <meta name="keywords" content="ssh-jumphost," />
 
 
 
@@ -95,7 +95,7 @@
 <meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/jump-design-simple.png">
 <meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/jump-design-update.png">
 <meta property="og:image" content="http://gravitational.com/teleport/docs/img/everything.svg">
-<meta property="og:updated_time" content="2017-02-16T05:25:05.000Z">
+<meta property="og:updated_time" content="2017-02-22T15:50:40.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="跳板机系列(一)-架构与简介">
 <meta name="twitter:description" content="一直参与JumpServer的开发, 也一直在想如何设计一个相对完美的跳板机, 跳板机的本质是ssh协议的反向代理(主要还是ssh, 至于rdp还没想过), 虽然也经常使用ssh(做运维的时候还专门就ssh学习过), 但也仅仅是ssh客户端的使用以及服务端的配置, 我觉得一个完美的跳板机应该是从协议层面解决这个问题。因此打算以Golang为开发语言(因为ssh库完善，websocket编写简单),">
@@ -433,9 +433,7 @@
 <ul>
 <li><a href="/2017/02/15/go-ssh/" title="跳板机系列(一)-架构与简介">跳板机系列(一)-架构与简介</a></li>
 <li><a href="/2017/02/16/ssh-protocol/" title="跳板机系列(二)-ssh协议原理简介">跳板机系列(二)-ssh协议原理简介</a></li>
-<li></li>
-<li></li>
-<li>
+<li><a href="/2017/02/22/ssh-protocol-go/" title="跳板机系列(三)-SSH在Golang中的使用">跳板机系列(三)-SSH在Golang中的使用</a>
 </li>
 </ul>
 <h2 id="简单架构"><a href="#简单架构" class="headerlink" title="简单架构"></a>简单架构</h2><p>之前JumpServer的核心是按照简单的架构来开发的, 一个简单的架构其实已经有很多不错的demo或者产品了, 比如这个项目<a href="http://git.oschina.net/shibingli/webconsole" target="_blank" rel="external">webconsole</a>, 当然他不完整仅仅实现了web，至于命令行并没有实现, 而jumpserver这2个都实现了。<br>为什么称之为简单的架构, 因为他的核心思想就是: 就是模拟一个终端(web端的xterm这个js库就是干这个事儿的, 而命令行同样模拟一个终端就行了, 比如golang的ssh/terminal这个库就可以完成这个事儿),然后通过一个ssh agent访问后面的真实的服务器，起到一个代理转发的作用。<br><img src="http://oiw1gzfww.bkt.clouddn.com/jump-design-simple.png" alt=""></p>
@@ -482,7 +480,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/ssh/" rel="tag"># ssh</a>
+            <a href="/tags/ssh-jumphost/" rel="tag"># ssh-jumphost</a>
           
         </div>
       
@@ -577,7 +575,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-count">20</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
