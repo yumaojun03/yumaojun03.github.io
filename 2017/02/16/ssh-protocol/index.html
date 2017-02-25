@@ -95,7 +95,7 @@
 <meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/ssh-portocol.gif">
 <meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/ssh-auth.png">
 <meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/ssh-connection.png">
-<meta property="og:updated_time" content="2017-02-22T15:24:06.000Z">
+<meta property="og:updated_time" content="2017-02-25T03:14:20.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="跳板机系列(二)-ssh协议原理简介">
 <meta name="twitter:description" content="SSH对于大多数人来说应该并不陌生, 无论你是开发还是测试还是运维, 只要你需要登录类Unix服务器都会用到, 他被用来提供链接的安全保障, 比如常见的客户端有命令行工具ssh, 以及周边的商业工具Xshell等。在这篇文章里我们不会教你如何使用xshell, 而是从协议层面全新的认识下ssh。">
@@ -344,7 +344,19 @@
             
 
             
+              <span class="post-meta-divider">|</span>
+            
 
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2017-02-25T11:14:20+08:00">
+                2017-02-25
+              </time>
             
           </span>
 
@@ -437,7 +449,7 @@
 <li>SSH如何保证数据完整性</li>
 <li>SSH的密码认证方式和密钥认证方式分别如何实现，有何差异</li>
 </ul>
-<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>SSH(Secure Shell)是一个提供数据通信安全、远程登录、远程指令执行等功能的安全网络协议，由芬兰赫尔辛基大学研究员Tatu Ylönen,于1995年提出，其目的是用于替代非安全的Telnet、rsh、rexec等远程Shell协议。之后SSH发展了两个大版本SSH-1和SSH-2, 开源实现OpenSSH对2者都支持。<br>SSH的主要特性:</p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>SSH全称<a href="https://zh.wikipedia.org/wiki/Secure_Shell" target="_blank" rel="external">Secure Shell</a>是一种工作在应用层和传输层上的安全协议，能在非安全通道上建立安全通道。提供身份认证、密钥更新、数据校验、通道复用等功能，同时具有良好的可扩展性,由芬兰赫尔辛基大学研究员Tatu Ylönen,于1995年提出，其目的是用于替代非安全的Telnet、rsh、rexec等远程Shell协议。之后SSH发展了两个大版本,SSH-1和SSH-2, 开源实现OpenSSH对2者都支持。<br>SSH的主要特性:</p>
 <ul>
 <li>加密: 避免数据内容泄漏</li>
 <li>通信的完整性: 避免数据被篡改，以及发送或接受地址伪装(检查数据是否被篡改，数据是否来自发送者而非攻击者） SSH-2通过MD5和SHA-1实现该功能，SSH-1使用CRC-32</li>
@@ -641,7 +653,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-count">21</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
