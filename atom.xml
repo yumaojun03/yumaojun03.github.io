@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog.yumaojun.net/"/>
-  <updated>2017-02-25T06:34:59.000Z</updated>
+  <updated>2017-03-12T06:07:30.000Z</updated>
   <id>https://blog.yumaojun.net/</id>
   
   <author>
@@ -14,6 +14,163 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>时序数据库之InfluxDB</title>
+    <link href="https://blog.yumaojun.net/2017/03/10/opentsdb-vs-influxdb/"/>
+    <id>https://blog.yumaojun.net/2017/03/10/opentsdb-vs-influxdb/</id>
+    <published>2017-03-10T11:33:53.000Z</published>
+    <updated>2017-03-12T06:07:30.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>最近公司业务重度依赖时序数据库, 公司上个版本选择了OpenTSDB, 在1-2年前，他的确很流行。 但是在做软件重构时, 业务层反馈的一些问题, OpenTSDB暂时无法解决,成为了一个痛点, 让我需要考虑其他方案, 由于之前使用过InfluxDB, 也一直在关注, 它给了我惊艳的感觉,所以记忆犹新.<br><a id="more"></a></p>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>之前做运维时,重度使用过zabbix, 关系型数据库的优化,根本无法解决高IO, 后面又使用过Graphite, 这个安装像迷一样的工具, 它后端在RRD上面设计出了一个简单的时序数据库, 但是配置繁杂,容量完全靠规划。直到使用了InfluxDB, 部署简单,使用方便,高压缩, 对它印象很不错, 但是0.12过后不支持集群。</p>
+<p>之前InfluxDB切换了2次存储引擎(它的存储是插件式的), 也没去了解过它切换的原因, 直到看到InfoQ上七牛的演讲<a href="http://www.infoq.com/cn/presentations/see-the-timing-of-data-processing-from-influxdb" target="_blank" rel="external">从InfluxDB看时序数据的处</a>, 他道出了了原因: </p>
+<ol>
+<li>LevelDB不支持热备份, influxDB设计的shard会消耗大量文件描述符，将系统资源耗尽。</li>
+<li>BoltDB解决了热备, 解决了消耗大量文件描述符的问题, 但是引入了一个更致命的问题:容量达到数GB级别时,会产生大量随机写, 造成高IOPS。</li>
+<li>放弃了他们, 在他们的经验上开始自己实现一个存储引擎: TSM(Time-Structured Merge Tree), 它截取了OpenTSDB的一些设计经验,根据<code>LSM Tree</code>针对时间序列数据进行优化</li>
+</ol>
+<p>我认为像这样的针对特殊场景进行优化的数据库会是今后数据库领域发展的主流, 另一个证明就是EleasticSearch一个针对文本解索而设计的数据库, 虽然OpenTSDB也针对时序数据做了优化,但是由于存储系统依然依赖HBase, 所以力度上面感觉没InfluxDB给力。</p>
+<p>社区一路走来之艰辛,但是却激情洋溢,他们是先行者. 我对它集群的闭源并不反感, 这群激情洋溢的人需要有商业支持。</p>
+<h2 id="时序数据库热度排名"><a href="#时序数据库热度排名" class="headerlink" title="时序数据库热度排名"></a>时序数据库热度排名</h2><p>这是DB Engine的时序数据库2017的排行榜, 截图是2017-3月的，最新的可以点<a href="http://db-engines.com/en/ranking/time+series+dbms" target="_blank" rel="external">DB-Engines Ranking of Time Series DBMS</a><br><img src="http://oiw1gzfww.bkt.clouddn.com/ts-top.png" alt=""><br>上图可以看出InfluxDB最近很热, 领先优势明显<br>下面是对比InfluxDB, OpenTSDB, Graphite的变化趋势。<br><img src="http://oiw1gzfww.bkt.clouddn.com/tsdb-top.png" alt=""><br>对于一个设计精良，部署简单，使用方便，而且还高性能的时序数据库而言, 想不热都难。</p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>基于Go语言开发，社区非常活跃，项目更新速度很快，日新月异，关注度高, 1.0发布过后, 稳定性也非常高。官方是这样介绍InfluxDB的：</p>
+<blockquote>
+<p>influxdb是一个从底层一步一步成长为能处理高写入,高查询的时序数据库, 它专门针对时序数据做了优化,让其更高性能, 他可以用来存储任何时序数据,  包括DevOps的监控、应用指标、物联网传感器的数据, 并实时分析</p>
+</blockquote>
+<p>这是它github上给出的<a href="https://github.com/influxdata/influxdb" target="_blank" rel="external">特性说明</a>:</p>
+<ul>
+<li>内建HTTP API, 无需自己实现</li>
+<li>数据高压缩, 支持非常灵活的查询访问</li>
+<li>支持类SQL查询, 学习成本低, 方便使用</li>
+<li>安装和管理都十分简单, 数据写入和读取的速度快</li>
+<li>为实时查询而生, 对每一个点位都建立索引, 及时查询响应速度小于100ms</li>
+</ul>
+<h2 id="业务问题"><a href="#业务问题" class="headerlink" title="业务问题"></a>业务问题</h2><p>我们需要一个时序数据库, 他需要能解决我们以下这些问题:</p>
+<ol>
+<li><p>一个测试指标多值<br>一个指标往往有多个维度来描述其变化状态,并不仅仅是值, 比如对于CPU的而言, 应该有中断，负载, 使用率等。</p>
+</li>
+<li><p>多Tag支持<br>tag是对一个指标的描述,是一个标签, 在业务上Tag对于分组过滤非常有意义, 用于标示一个指标在业务上的意义, 比如对于IOT来说, 传感器的指标往往是一个无意义的id, 因此需求给它打上name标签, 标示他的特殊意义, 打上设备ID, 标示它属于哪个设备, 打上位置标签, 标示该指标来源于哪个地方。</p>
+</li>
+<li><p>在指标的值上能做一些基本的比较运算<br>作为一个数据库,在功能层面需要解决一些基本的运算, 比如求和，求最小，求最大, 但这还不够, 需要支持条件过滤, 支持Tag的条件过滤, 支持值的条件过滤, 支持值的条件过滤是关键, 不然会产生巨大的数据复制, 比如我们需要过滤出 CPU &gt; 90的机器, 如果数据库不支持, 那么我需要将这些数据从数据库中查出来,复制给我的程序处理。 这带来了巨大的问题: 1. 数据库要吐出如此大量的数据, 负载升高, 出口流量暴增 2.程序拿到如此大量的数据, 给处理方带来了巨大的计算压力, 如果前段采用Angular或者React来写, 一个运行在pc上的小小的浏览器,根本处理不了。3. 处理效率低，数据的处理本该在数据存储的地方进行, 比如Hadoop, 完全没必要复制。</p>
+</li>
+<li><p>指标计算的中间结果需要存会指标<br>这是一个比较常见的场景, 使用RDD时更是常用,比如数据是按照30秒存储的，但是我需要 这样一个聚合维度 5m, 15m, 1h, 3h, 12h, 然后我平时只使用这些维度的数据, 不用每次临时计算。</p>
+</li>
+</ol>
+<h2 id="概念介绍"><a href="#概念介绍" class="headerlink" title="概念介绍"></a>概念介绍</h2><p>influxDB的核心概念包含: Line Protocol, Retention Policy, Series, Point, Continuous Query.</p>
+<h3 id="Line-Protocol"><a href="#Line-Protocol" class="headerlink" title="Line Protocol"></a>Line Protocol</h3><p>Line Protocol用于描述存入数据库的数据格式, 也可以说式数据协议, 相比于JSON格式，Line Protocol无需序列化，更加高效, 官方对它做了全面的介绍<a href="https://docs.influxdata.com/influxdb/v1.2/write_protocols/line_protocol_tutorial/" target="_blank" rel="external">Line Protocol</a>, 下面摘取语法部分做简要说明：<br>Line Protocol里面的一行就是InfluxDB里面的一个点位, 他将一个点分割成measurement, tag_set, field_set, timestamp4个部分, 例如:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">语法格式: measurement[,tag_key1=tag_value1...] field_key=field_value[,field_key2=field_value2] [timestamp]</div><div class="line"></div><div class="line">栗子:</div><div class="line">weather,location=us-midwest temperature=82 1465839830100400200</div><div class="line">  |    -------------------- --------------  |</div><div class="line">  |             |             |             |</div><div class="line">  |             |             |             |</div><div class="line">+-----------+--------+-+---------+-+---------+</div><div class="line">|measurement|,tag_set| |field_set| |timestamp|</div><div class="line">+-----------+--------+-+---------+-+---------+</div></pre></td></tr></table></figure></p>
+<ul>
+<li>measurement: metric name, 需要监控的指标的名称, 比如上面的weather</li>
+<li>tag_set: 使用”,”与measurement隔开, 表示一组Tag的集合, 用于保存点位的元数据, 为可选项, 会进行索引，方便查询时用于过滤条件， 格式: <tag_key>=<tag_value>,<tag_key>=<tag_value>, 比如上面的location=us-midwest</tag_value></tag_key></tag_value></tag_key></li>
+<li>field_set: 使用空格与tag_set隔开, 标示一组Field的集合, 用于保存该点位多维度的值, 支持各种类型，数据存储时不会进行索引,格式: <field_key>=<field_value>,<field_key>=<field_value>, 比如上面的temperature=82</field_value></field_key></field_value></field_key></li>
+<li>timestamp: 采集该点位的时间戳, 时间的默认精度是纳秒.</li>
+</ul>
+<p>存储策略:measurements,tag keys,field keys,tag values全局存一份。field values和timestamps每条数据存一份。</p>
+<h3 id="Retention-Policy"><a href="#Retention-Policy" class="headerlink" title="Retention Policy"></a>Retention Policy</h3><p>指数据的保存策略, 包含数据的保存时间和副本数(集群中的概念),默认保存时间是永久，副本式1个, 但是我们可以修改, 也可以创建新的保存策略</p>
+<h3 id="Series"><a href="#Series" class="headerlink" title="Series"></a>Series</h3><p>InfluxDB中元数据的数据结构体, series相当于是InfluxDB中元数据的集合，在同一个database中，retention policy、measurement、tag sets完全相同的数据同属于一个series，同一个series的数据在物理上会按照时间顺序排列存储在一起。<br>series 的key为 measurement+所有tags的序列化字符串, 他保存着该series的Retention policy, Measurement,Tag set<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">|--------------------------------------------------------------------------------------------------|</div><div class="line">|Arbitrary series number | Retention policy | Measurement    | Tag set                             |</div><div class="line">|series 1                | autogen          | census         | location = 1,scientist = langstroth |</div><div class="line">|series 2                | autogen          | census         | location = 2,scientist = langstroth |</div><div class="line">|series 3                | autogen          | census         | location = 1,scientist = perpetua   |</div><div class="line">|--------------------------------------------------------------------------------------------------|</div></pre></td></tr></table></figure></p>
+<h3 id="Point"><a href="#Point" class="headerlink" title="Point"></a>Point</h3><p>InfluxDB中单条插入语句的数据结构体, 用于保存点位的值的集合, 每一个Point通过series和timestamp进行唯一标示:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">name: census</div><div class="line">-----------------</div><div class="line">time                      butterflies     honeybees   location    scientist</div><div class="line">2015-08-18T00:00:00Z      1               30          1           perpetua</div></pre></td></tr></table></figure></p>
+<h3 id="Schema"><a href="#Schema" class="headerlink" title="Schema"></a>Schema</h3><p>用于描述数据在InfluxDB的组织形式, InfluxDB的Schema十分简单由 这些概念组成: </p>
+<ul>
+<li>databases</li>
+<li>retention policies</li>
+<li>series</li>
+<li>measurements </li>
+<li>tag keys</li>
+<li>tag values</li>
+<li>field keys<br>在操作数据库的时候，需要知道这些概念。</li>
+</ul>
+<h3 id="Continuous-Query"><a href="#Continuous-Query" class="headerlink" title="Continuous Query"></a>Continuous Query</h3><p>简称CQ, 是预先配置好的一些查询命令，SELECT语句必须包含GROUP BY time()，influxdb会定期自动执行这些命令并将查询结果写入指定的另外的measurement中。<br>利用这个特性并结合RP我们可以方便地保存不同粒度的数据，根据数据粒度的不同设置不同的保存时间，这样不仅节约了存储空间，而且加速了时间间隔较长的数据查询效率，避免查询时再进行聚合计算。</p>
+<h3 id="存储引擎"><a href="#存储引擎" class="headerlink" title="存储引擎"></a>存储引擎</h3><p>从 LevelDB（LSM Tree），到 BoltDB（mmap B+树），现在是自己实现的 TSM Tree 的算法，类似 LSM Tree，针对 InfluxDB 的使用做了特殊优化。</p>
+<h4 id="Shard"><a href="#Shard" class="headerlink" title="Shard"></a>Shard</h4><p>Shard 这个概念并不对普通用户开放，Shard也不是存储引擎, 它在存储引擎之上的一个概念, 存储引擎负责存储shard, 因此在讲存储引擎之前先讲明shard。</p>
+<p>在InfluxDB中按照数据的时间戳所在的范围，会去创建不同的shard，每一个shard都有自己的存储引擎相关文件，这样做的目的就是为了可以通过时间来快速定位到要查询数据的相关资源，加速查询的过程，并且也让之后的批量删除数据的操作变得非常简单且高效。</p>
+<p>它和retention policy相关联。每一个存储策略下会存在许多shard，每一个shard存储一个指定时间段内的数据，并且不重复，例如7点-8点的数据落入shard0 中，8点-9点的数据则落入shard1中。每一个shard都对应一个底层的存储引擎。</p>
+<p>当检测到一个shard中的数据过期后，只需要将这个shard的资源释放，相关文件删除即可，这样的做法使得删除过期数据变得非常高效。</p>
+<h4 id="LevelDB"><a href="#LevelDB" class="headerlink" title="LevelDB"></a>LevelDB</h4><h4 id="BoltDB"><a href="#BoltDB" class="headerlink" title="BoltDB"></a>BoltDB</h4><h4 id="TSM-Tree"><a href="#TSM-Tree" class="headerlink" title="TSM Tree"></a>TSM Tree</h4><h2 id="功能使用"><a href="#功能使用" class="headerlink" title="功能使用"></a>功能使用</h2><h3 id="安装与部署"><a href="#安装与部署" class="headerlink" title="安装与部署"></a>安装与部署</h3><p>我这里主要做功能测试, 后面会有机会专门做性能测试, 因此这里使用官方提供的docker镜像部署,官方镜像最新也式1.2版本<br>配置Daocloud的镜像加速源或者阿里的加速源 然后直接<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker pull influxdb</div></pre></td></tr></table></figure></p>
+<p>由于influxDB开发时就设计好了, 官方也给出了环境配置变量,启动时可以通过这些环境变量对influxdb进行配置<a href="https://docs.influxdata.com/influxdb/v1.2/administration/config" target="_blank" rel="external">InfluxDB配置</a></p>
+<h3 id="常见操作-SQL"><a href="#常见操作-SQL" class="headerlink" title="常见操作(SQL)"></a>常见操作(SQL)</h3><p>内部提供很多函数,方便一些基本操作<a href="https://docs.influxdata.com/influxdb/v1.2/query_language/functions/" target="_blank" rel="external">InfluxQL Functions</a></p>
+<h3 id="用户认证和权限"><a href="#用户认证和权限" class="headerlink" title="用户认证和权限"></a>用户认证和权限</h3><h3 id="Retention-Policy-1"><a href="#Retention-Policy-1" class="headerlink" title="Retention Policy"></a>Retention Policy</h3><h3 id="Cotinuous-Query"><a href="#Cotinuous-Query" class="headerlink" title="Cotinuous Query"></a>Cotinuous Query</h3><h2 id="性能建议"><a href="#性能建议" class="headerlink" title="性能建议"></a>性能建议</h2><p>官方有很详解的说明,我这里仅截取出单节点部分:<a href="chttps://docs.influxdata.com/influxdb/v1.2/guides/hardware_sizing/#general-hardware-guidelines-for-a-single-node" target="_blank" rel="external">官方推荐硬件配置</a></p>
+<table>
+<thead>
+<tr>
+<th>Load</th>
+<th style="text-align:center">Field writes per second</th>
+<th style="text-align:center">MOderate queries per second</th>
+<th style="text-align:right">Unique series</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Low</td>
+<td style="text-align:center">&lt; 5 thousand</td>
+<td style="text-align:center">&lt; 5</td>
+<td style="text-align:right">&lt; 100 thousand</td>
+</tr>
+<tr>
+<td>Moderate</td>
+<td style="text-align:center">&lt; 250 thousand</td>
+<td style="text-align:center">&lt; 25</td>
+<td style="text-align:right">&lt; 1 million</td>
+</tr>
+<tr>
+<td>High</td>
+<td style="text-align:center">&gt; 250</td>
+<td style="text-align:center">&gt; 25</td>
+<td style="text-align:right">&gt; 1 million</td>
+</tr>
+<tr>
+<td>Probobly infeasible</td>
+<td style="text-align:center">&gt; 750 thousand</td>
+<td style="text-align:center">&gt; 100</td>
+<td style="text-align:right">&gt; 10 million</td>
+</tr>
+</tbody>
+</table>
+<p>根据负载情况官方推荐的硬件需求:</p>
+<table>
+<thead>
+<tr>
+<th>Load</th>
+<th style="text-align:center">CPU</th>
+<th style="text-align:center">RAM</th>
+<th style="text-align:right">IOPS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Low</td>
+<td style="text-align:center">2-4 cores</td>
+<td style="text-align:center">2-4 G</td>
+<td style="text-align:right">500</td>
+</tr>
+<tr>
+<td>Moderate</td>
+<td style="text-align:center">4-6 cores</td>
+<td style="text-align:center">8-32 G</td>
+<td style="text-align:right">500-1000</td>
+</tr>
+<tr>
+<td>High</td>
+<td style="text-align:center">8 cores</td>
+<td style="text-align:center">32+ G</td>
+<td style="text-align:right">1000+</td>
+</tr>
+</tbody>
+</table>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;最近公司业务重度依赖时序数据库, 公司上个版本选择了OpenTSDB, 在1-2年前，他的确很流行。 但是在做软件重构时, 业务层反馈的一些问题, OpenTSDB暂时无法解决,成为了一个痛点, 让我需要考虑其他方案, 由于之前使用过InfluxDB, 也一直在关注, 它给了我惊艳的感觉,所以记忆犹新.&lt;br&gt;
+    
+    </summary>
+    
+      <category term="数据库" scheme="https://blog.yumaojun.net/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
+    
+      <category term="时序数据库" scheme="https://blog.yumaojun.net/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/%E6%97%B6%E5%BA%8F%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
+    
+    
+      <category term="influxdb" scheme="https://blog.yumaojun.net/tags/influxdb/"/>
+    
+  </entry>
   
   <entry>
     <title>跳板机系列(四)-Golang中SSH服务端的实现</title>
@@ -1339,94 +1496,6 @@
     
     
       <category term="vscode" scheme="https://blog.yumaojun.net/tags/vscode/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>2016总结与2017计划</title>
-    <link href="https://blog.yumaojun.net/2016/12/31/2016-summary/"/>
-    <id>https://blog.yumaojun.net/2016/12/31/2016-summary/</id>
-    <published>2016-12-31T12:03:29.000Z</published>
-    <updated>2017-01-02T15:32:52.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>孔子曰:”吾日三省吾身”, 平时很少会静下心来反省和总结一段时间的功与过, 2016马上就要过去了，在这一年将要结束之时, 还是想回过一下这一年来的得与失, 顺便安排下来年的计划。</p>
-<p>记录下这一年来自己的变化, 同时也为来年再战作准备, 而且我这人记性不好, 留个底,照亮自己需要走的路。</p>
-<a id="more"></a>
-<h2 id="转瞬即逝的2016"><a href="#转瞬即逝的2016" class="headerlink" title="转瞬即逝的2016"></a>转瞬即逝的2016</h2><p>2016是繁忙的一年，工作上处处充满挑战，有些挑战是自己喜欢的，有些挑战也是自己比较抵触的，我喜欢开发，从运维开发转而参与大型系统开发，这的确是一个不小的挑战，我是一个对技术有点激情的人，因此这个挑战对我而言还是比较喜欢的。后来同时做起了产品设计, 每天扣脑袋, 看别人的产品，画产品设计图， 这些在当时的我是很抵触的, 当时我还处于单纯的想积累技术的阶段。现在看来这段经历也是我宝贵的财富, 毕竟产品决定东西的价值，用再牛叉的技术,做一个没有价值的东西, 这是一件愚蠢的行为，我这里说的价值是长远价值，而不是当下看起来有价值, 这个说起来很悬，以后有机会深入讨论这个。</p>
-<p>2016这一年也在和JumpServer一同成长的一年，感触也蛮多的，首先是技术的成长，一个开源产品的技术的迭代，我们致力于设计NB的产品和写出漂亮的代码。其次为有可能的融资谈判而兴奋过，然而最后还是平静下来, 慢慢做一个自己认可的能力范围之内的产品。</p>
-<p>工作上的事儿, 总是有那么点紧绷, 其实生活上也有很多值得高兴的事儿，我们有了自己的房子，并且搬进去了，告别了租房的日子，这一切多谢我的老婆打理，我基本是啥心都没操过。其次，我女儿和我关系也很不错，虽然她生气的时候只找她妈妈，但是我在她心中的地位也仅次于她妈妈，我也心有愧疚，作为一个父亲我陪伴她的时候是有点少了。还有我的好搭档，在我最需要钱的时候, 一身不吭的直接转我支付宝上,人生中能交到一个这样的朋友，是我的莫大的荣幸。</p>
-<p>还有一个事儿，我终于用上Mac了，虽然是一个二手的MBP，但是这对满足一个屌丝的虚荣心完全受用了, 说岔了, 我再也不用在Windows上装Ubuntu开发了。</p>
-<h2 id="瞬息万变的2017"><a href="#瞬息万变的2017" class="headerlink" title="瞬息万变的2017"></a>瞬息万变的2017</h2><p>变化和革新是很快的, 比如OpenStack没有那么热了, 容器技术也基本成了开发的必备技能, 无论你作为一个前端开发还是后端开发JavaScript都快成为一门必备语言了。前后端的完全分离也愈演愈烈, 各种前段框架的变化。<br>伴随而来的是微服务+容器技术的紧密结合。在最后DDD也随着微服务的出现，对开发人员提出了更高的需求, 以后那种只会写代码的人将愈来愈少了。</p>
-<p>我Hold不住这些，因此在技术方面我仅能列出我需要提升的书单:</p>
-<h3 id="Python提升书单-今年主力"><a href="#Python提升书单-今年主力" class="headerlink" title="Python提升书单(今年主力)"></a>Python提升书单(今年主力)</h3><ol>
-<li>基础回过<ul>
-<li><a href="http://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000" target="_blank" rel="external">廖雪峰官网</a></li>
-<li>Think Python 2ed 中译版精校  PDF 电子书</li>
-</ul>
-</li>
-<li>进阶深<ul>
-<li><a href="http://python3-cookbook.readthedocs.io/zh_CN/latest/preface.html" target="_blank" rel="external">python3-cookbook</a></li>
-<li>电子书Python高手之路</li>
-</ul>
-</li>
-<li>常见的一些代码实现<ul>
-<li><a href="https://github.com/liquanzhou/ops_doc/blob/master/python%E5%AE%9E%E4%BE%8B%E6%89%8B%E5%86%8C.py" target="_blank" rel="external">python实例手册</a>  </li>
-<li><a href="https://segmentfault.com/t/python/blogs" target="_blank" rel="external">网站上的文章</a></li>
-</ul>
-</li>
-<li>设计模式<ul>
-<li><a href="http://www.cnblogs.com/wuyuegb2312/archive/2013/04/09/3008320.html" target="_blank" rel="external">快速版大话设计模式</a></li>
-<li><a href="https://github.com/faif/python-patterns" target="_blank" rel="external">一些最新的例子</a></li>
-<li><a href="http://www.ituring.com.cn/book/1715" target="_blank" rel="external">精通Python设计模式</a></li>
-</ul>
-</li>
-<li>数据结构与算法<ul>
-<li><a href="http://top.jobbole.com/4681/" target="_blank" rel="external">快速阅读总结</a></li>
-<li>电子书：Data Structures and Algorithms with Python-2015</li>
-</ul>
-</li>
-<li>源码阅读<ul>
-<li>Django Class Based View </li>
-<li>Flask 源码阅读</li>
-<li>Openstack KeyStone 源码阅读</li>
-</ul>
-</li>
-<li>理解Python解释器<ul>
-<li><a href="http://mt.sohu.com/20161030/n471778650.shtml" target="_blank" rel="external">用Python实现一个Python解释器</a></li>
-</ul>
-</li>
-</ol>
-<h3 id="Golang提升书单"><a href="#Golang提升书单" class="headerlink" title="Golang提升书单"></a>Golang提升书单</h3><ol>
-<li>回过基础：<ul>
-<li><a href="http://mt.sohu.com/20161030/n471778650.shtml" target="_blank" rel="external">Go Web 编程</a></li>
-<li><a href="https://hotsnow.gitbooks.io/the-way-to-go_zh_cn/content/" target="_blank" rel="external">Go入门指南</a></li>
-</ul>
-</li>
-</ol>
-<h3 id="JavaScript提升书单"><a href="#JavaScript提升书单" class="headerlink" title="JavaScript提升书单"></a>JavaScript提升书单</h3><ol>
-<li>回过基础：<ul>
-<li><a href="http://www.liaoxuefeng.com/wiki/001434446689867b27157e896e74d51a89c25cc8b43bdb3000" target="_blank" rel="external">廖雪峰官网</a></li>
-<li><a href="http://javascript.ruanyifeng.com/#nodejs" target="_blank" rel="external">阮一峰的javascript教程 </a></li>
-<li><a href="http://es6.ruanyifeng.com/" target="_blank" rel="external">ECMAScript 6 入门</a></li>
-</ul>
-</li>
-</ol>
-<p>除了技术, 还应该有生活。而生活就是: <strong><em>赶紧把账还完</em></strong></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;孔子曰:”吾日三省吾身”, 平时很少会静下心来反省和总结一段时间的功与过, 2016马上就要过去了，在这一年将要结束之时, 还是想回过一下这一年来的得与失, 顺便安排下来年的计划。&lt;/p&gt;
-&lt;p&gt;记录下这一年来自己的变化, 同时也为来年再战作准备, 而且我这人记性不好, 留个底,照亮自己需要走的路。&lt;/p&gt;
-    
-    </summary>
-    
-      <category term="杂谈" scheme="https://blog.yumaojun.net/categories/%E6%9D%82%E8%B0%88/"/>
-    
-      <category term="年终总结" scheme="https://blog.yumaojun.net/categories/%E6%9D%82%E8%B0%88/%E5%B9%B4%E7%BB%88%E6%80%BB%E7%BB%93/"/>
-    
-    
-      <category term="summary" scheme="https://blog.yumaojun.net/tags/summary/"/>
     
   </entry>
   
