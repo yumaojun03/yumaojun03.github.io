@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="summary," />
+  <meta name="keywords" content="vendor," />
 
 
 
@@ -86,19 +86,16 @@
 
 
 
-<meta name="description" content="孔子曰:”吾日三省吾身”, 平时很少会静下心来反省和总结一段时间的功与过, 2016马上就要过去了，在这一年将要结束之时, 还是想回过一下这一年来的得与失, 顺便安排下来年的计划。
-记录下这一年来自己的变化, 同时也为来年再战作准备, 而且我这人记性不好, 留个底,照亮自己需要走的路。">
+<meta name="description" content="在使用Golang过程中，有一个非常令人头大的问题: 缺少依赖库版本功能管理, 比如某些依赖在某个commit之后发生了API变更之后，如果不修改代码很难兼容，然而开发者之间很有可能因为参与的时间不同，导致执行go get命令获取的版本不同，而导致各种问题, 甚至是编译不通过。因此需要有一个包依赖的版本控制工具。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="2016总结与2017计划">
-<meta property="og:url" content="https://blog.yumaojun.net/2016/12/31/2016-summary/index.html">
+<meta property="og:title" content="golang包管理之vendor">
+<meta property="og:url" content="https://blog.yumaojun.net/2017/03/13/golang-pkg-management-tool/index.html">
 <meta property="og:site_name" content="紫川秀的博客">
-<meta property="og:description" content="孔子曰:”吾日三省吾身”, 平时很少会静下心来反省和总结一段时间的功与过, 2016马上就要过去了，在这一年将要结束之时, 还是想回过一下这一年来的得与失, 顺便安排下来年的计划。
-记录下这一年来自己的变化, 同时也为来年再战作准备, 而且我这人记性不好, 留个底,照亮自己需要走的路。">
-<meta property="og:updated_time" content="2017-01-02T15:32:52.000Z">
+<meta property="og:description" content="在使用Golang过程中，有一个非常令人头大的问题: 缺少依赖库版本功能管理, 比如某些依赖在某个commit之后发生了API变更之后，如果不修改代码很难兼容，然而开发者之间很有可能因为参与的时间不同，导致执行go get命令获取的版本不同，而导致各种问题, 甚至是编译不通过。因此需要有一个包依赖的版本控制工具。">
+<meta property="og:updated_time" content="2017-03-13T09:37:23.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="2016总结与2017计划">
-<meta name="twitter:description" content="孔子曰:”吾日三省吾身”, 平时很少会静下心来反省和总结一段时间的功与过, 2016马上就要过去了，在这一年将要结束之时, 还是想回过一下这一年来的得与失, 顺便安排下来年的计划。
-记录下这一年来自己的变化, 同时也为来年再战作准备, 而且我这人记性不好, 留个底,照亮自己需要走的路。">
+<meta name="twitter:title" content="golang包管理之vendor">
+<meta name="twitter:description" content="在使用Golang过程中，有一个非常令人头大的问题: 缺少依赖库版本功能管理, 比如某些依赖在某个commit之后发生了API变更之后，如果不修改代码很难兼容，然而开发者之间很有可能因为参与的时间不同，导致执行go get命令获取的版本不同，而导致各种问题, 甚至是编译不通过。因此需要有一个包依赖的版本控制工具。">
 
 
 
@@ -126,13 +123,13 @@
 
 
 
-  <link rel="canonical" href="https://blog.yumaojun.net/2016/12/31/2016-summary/"/>
+  <link rel="canonical" href="https://blog.yumaojun.net/2017/03/13/golang-pkg-management-tool/"/>
 
 
 
 
 
-  <title> 2016总结与2017计划 | 紫川秀的博客 </title>
+  <title> golang包管理之vendor | 紫川秀的博客 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -298,7 +295,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-  <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2016/12/31/2016-summary/">
+  <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/03/13/golang-pkg-management-tool/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
     <meta itemprop="name" content="紫川秀">
@@ -322,7 +319,7 @@
             
             
               
-                2016总结与2017计划
+                golang包管理之vendor
               
             
           </h1>
@@ -337,8 +334,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-12-31T20:03:29+08:00">
-                2016-12-31
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-03-13T14:33:33+08:00">
+                2017-03-13
               </time>
             
 
@@ -353,8 +350,8 @@
               
                 <span class="post-meta-item-text">更新于</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2017-01-02T23:32:52+08:00">
-                2017-01-02
+              <time title="更新于" itemprop="dateModified" datetime="2017-03-13T17:37:23+08:00">
+                2017-03-13
               </time>
             
           </span>
@@ -372,8 +369,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/杂谈/" itemprop="url" rel="index">
-                    <span itemprop="name">杂谈</span>
+                  <a href="/categories/开发语言/" itemprop="url" rel="index">
+                    <span itemprop="name">开发语言</span>
                   </a>
                 </span>
 
@@ -383,8 +380,8 @@
                 
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/杂谈/年终总结/" itemprop="url" rel="index">
-                    <span itemprop="name">年终总结</span>
+                  <a href="/categories/开发语言/golang/" itemprop="url" rel="index">
+                    <span itemprop="name">golang</span>
                   </a>
                 </span>
 
@@ -401,8 +398,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2016/12/31/2016-summary/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/12/31/2016-summary/" itemprop="commentCount"></span>
+                <a href="/2017/03/13/golang-pkg-management-tool/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/03/13/golang-pkg-management-tool/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -412,7 +409,7 @@
 
           
           
-             <span id="/2016/12/31/2016-summary/" class="leancloud_visitors" data-flag-title="2016总结与2017计划">
+             <span id="/2017/03/13/golang-pkg-management-tool/" class="leancloud_visitors" data-flag-title="golang包管理之vendor">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -439,69 +436,44 @@
       
 
       
-        <p>孔子曰:”吾日三省吾身”, 平时很少会静下心来反省和总结一段时间的功与过, 2016马上就要过去了，在这一年将要结束之时, 还是想回过一下这一年来的得与失, 顺便安排下来年的计划。</p>
-<p>记录下这一年来自己的变化, 同时也为来年再战作准备, 而且我这人记性不好, 留个底,照亮自己需要走的路。</p>
-<a id="more"></a>
-<h2 id="转瞬即逝的2016"><a href="#转瞬即逝的2016" class="headerlink" title="转瞬即逝的2016"></a>转瞬即逝的2016</h2><p>2016是繁忙的一年，工作上处处充满挑战，有些挑战是自己喜欢的，有些挑战也是自己比较抵触的，我喜欢开发，从运维开发转而参与大型系统开发，这的确是一个不小的挑战，我是一个对技术有点激情的人，因此这个挑战对我而言还是比较喜欢的。后来同时做起了产品设计, 每天扣脑袋, 看别人的产品，画产品设计图， 这些在当时的我是很抵触的, 当时我还处于单纯的想积累技术的阶段。现在看来这段经历也是我宝贵的财富, 毕竟产品决定东西的价值，用再牛叉的技术,做一个没有价值的东西, 这是一件愚蠢的行为，我这里说的价值是长远价值，而不是当下看起来有价值, 这个说起来很悬，以后有机会深入讨论这个。</p>
-<p>2016这一年也在和JumpServer一同成长的一年，感触也蛮多的，首先是技术的成长，一个开源产品的技术的迭代，我们致力于设计NB的产品和写出漂亮的代码。其次为有可能的融资谈判而兴奋过，然而最后还是平静下来, 慢慢做一个自己认可的能力范围之内的产品。</p>
-<p>工作上的事儿, 总是有那么点紧绷, 其实生活上也有很多值得高兴的事儿，我们有了自己的房子，并且搬进去了，告别了租房的日子，这一切多谢我的老婆打理，我基本是啥心都没操过。其次，我女儿和我关系也很不错，虽然她生气的时候只找她妈妈，但是我在她心中的地位也仅次于她妈妈，我也心有愧疚，作为一个父亲我陪伴她的时候是有点少了。还有我的好搭档，在我最需要钱的时候, 一身不吭的直接转我支付宝上,人生中能交到一个这样的朋友，是我的莫大的荣幸。</p>
-<p>还有一个事儿，我终于用上Mac了，虽然是一个二手的MBP，但是这对满足一个屌丝的虚荣心完全受用了, 说岔了, 我再也不用在Windows上装Ubuntu开发了。</p>
-<h2 id="瞬息万变的2017"><a href="#瞬息万变的2017" class="headerlink" title="瞬息万变的2017"></a>瞬息万变的2017</h2><p>变化和革新是很快的, 比如OpenStack没有那么热了, 容器技术也基本成了开发的必备技能, 无论你作为一个前端开发还是后端开发JavaScript都快成为一门必备语言了。前后端的完全分离也愈演愈烈, 各种前段框架的变化。<br>伴随而来的是微服务+容器技术的紧密结合。在最后DDD也随着微服务的出现，对开发人员提出了更高的需求, 以后那种只会写代码的人将愈来愈少了。</p>
-<p>我Hold不住这些，因此在技术方面我仅能列出我需要提升的书单:</p>
-<h3 id="Python提升书单-今年主力"><a href="#Python提升书单-今年主力" class="headerlink" title="Python提升书单(今年主力)"></a>Python提升书单(今年主力)</h3><ol>
-<li>基础回过<ul>
-<li><a href="http://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000" target="_blank" rel="external">廖雪峰官网</a></li>
-<li>Think Python 2ed 中译版精校  PDF 电子书</li>
+        <p>在使用Golang过程中，有一个非常令人头大的问题: 缺少依赖库版本功能管理, 比如某些依赖在某个commit之后发生了API变更之后，如果不修改代码很难兼容，然而开发者之间很有可能因为参与的时间不同，导致执行go get命令获取的版本不同，而导致各种问题, 甚至是编译不通过。因此需要有一个包依赖的版本控制工具。<br><a id="more"></a></p>
+<h2 id="vendor之前"><a href="#vendor之前" class="headerlink" title="vendor之前"></a>vendor之前</h2><p>在vendor出来之前, 以godep为主比较流行, godep的原理非常简单:<br>godep把第三包的版本依赖信息记录在Godeps.json下，并且把第三包完整拷贝一份到vendor下面。通过对Godeps.json文件进行版本管理即可以管理整个项目的第三方包依赖信息。</p>
+<p>可以看到godep只是把第三方包进行单独到依赖管理，而新增到第三包还是会被get到GOPATH中, 如果多个项目用同一个第三包的不同版本时, 那就完蛋了</p>
+<h2 id="vendor的历史"><a href="#vendor的历史" class="headerlink" title="vendor的历史"></a>vendor的历史</h2><p>vendor机制就是用来解决第三方包依赖问题: </p>
+<ul>
+<li>golang 1.5引入, 默认是关闭的, 通过手动设置环境变量:GO15VENDOREXPERIMENT=1开启</li>
+<li>golang 1.6默认开启</li>
+<li>goalng 1.7 vendor作为功能支持,取消GO15VENDOREXPERIMENT环境变量</li>
 </ul>
-</li>
-<li>进阶深<ul>
-<li><a href="http://python3-cookbook.readthedocs.io/zh_CN/latest/preface.html" target="_blank" rel="external">python3-cookbook</a></li>
-<li>电子书Python高手之路</li>
-</ul>
-</li>
-<li>常见的一些代码实现<ul>
-<li><a href="https://github.com/liquanzhou/ops_doc/blob/master/python%E5%AE%9E%E4%BE%8B%E6%89%8B%E5%86%8C.py" target="_blank" rel="external">python实例手册</a>  </li>
-<li><a href="https://segmentfault.com/t/python/blogs" target="_blank" rel="external">网站上的文章</a></li>
-</ul>
-</li>
-<li>设计模式<ul>
-<li><a href="http://www.cnblogs.com/wuyuegb2312/archive/2013/04/09/3008320.html" target="_blank" rel="external">快速版大话设计模式</a></li>
-<li><a href="https://github.com/faif/python-patterns" target="_blank" rel="external">一些最新的例子</a></li>
-<li><a href="http://www.ituring.com.cn/book/1715" target="_blank" rel="external">精通Python设计模式</a></li>
-</ul>
-</li>
-<li>数据结构与算法<ul>
-<li><a href="http://top.jobbole.com/4681/" target="_blank" rel="external">快速阅读总结</a></li>
-<li>电子书：Data Structures and Algorithms with Python-2015</li>
-</ul>
-</li>
-<li>源码阅读<ul>
-<li>Django Class Based View </li>
-<li>Flask 源码阅读</li>
-<li>Openstack KeyStone 源码阅读</li>
-</ul>
-</li>
-<li>理解Python解释器<ul>
-<li><a href="http://mt.sohu.com/20161030/n471778650.shtml" target="_blank" rel="external">用Python实现一个Python解释器</a></li>
-</ul>
-</li>
-</ol>
-<h3 id="Golang提升书单"><a href="#Golang提升书单" class="headerlink" title="Golang提升书单"></a>Golang提升书单</h3><ol>
-<li>回过基础：<ul>
-<li><a href="http://mt.sohu.com/20161030/n471778650.shtml" target="_blank" rel="external">Go Web 编程</a></li>
-<li><a href="https://hotsnow.gitbooks.io/the-way-to-go_zh_cn/content/" target="_blank" rel="external">Go入门指南</a></li>
-</ul>
-</li>
-</ol>
-<h3 id="JavaScript提升书单"><a href="#JavaScript提升书单" class="headerlink" title="JavaScript提升书单"></a>JavaScript提升书单</h3><ol>
-<li>回过基础：<ul>
-<li><a href="http://www.liaoxuefeng.com/wiki/001434446689867b27157e896e74d51a89c25cc8b43bdb3000" target="_blank" rel="external">廖雪峰官网</a></li>
-<li><a href="http://javascript.ruanyifeng.com/#nodejs" target="_blank" rel="external">阮一峰的javascript教程 </a></li>
-<li><a href="http://es6.ruanyifeng.com/" target="_blank" rel="external">ECMAScript 6 入门</a></li>
-</ul>
-</li>
-</ol>
-<p>除了技术, 还应该有生活。而生活就是: <strong><em>赶紧把账还完</em></strong></p>
+<p>vendor的原理很简单: 将第三方依赖放入当前项目vendor目录中， 编译的时候从vendor目录中查找依赖而不从GOPATH/src中对应目录中查找。<br>新增的第三方包直接被get到根目录的vendor文件夹下,不会与其它的项目混用第三方包，完美避免多个项目同用同一个第三方包的不同版本问题。<br>因此只需要对vendor/vendor.json进行版本控制，即可对第三包依赖关系进行控制。</p>
+<h2 id="vendor的使用"><a href="#vendor的使用" class="headerlink" title="vendor的使用"></a>vendor的使用</h2><p>想要详细了解govendor请参考<a href="https://github.com/kardianos/govendor" target="_blank" rel="external">govendor</a></p>
+<blockquote>
+<p>安装govendor</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">go get -u -v github.com/kardianos/govendor</div></pre></td></tr></table></figure>
+<blockquote>
+<p>创建一个golang的项目</p>
+</blockquote>
+<p>比如我创建一个简单的依赖ssh服务的包<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"bytes"</span></div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"log"</span></div><div class="line"></div><div class="line">	<span class="string">"golang.org/x/crypto/ssh"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	ce := <span class="function"><span class="keyword">func</span><span class="params">(err error, msg <span class="keyword">string</span>)</span></span> &#123;</div><div class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">			log.Fatalf(<span class="string">"%s error: %v"</span>, msg, err)</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	client, err := ssh.Dial(<span class="string">"tcp"</span>, <span class="string">"localhost:1234"</span>, &amp;ssh.ClientConfig&#123;</div><div class="line">		User: <span class="string">"root"</span>,</div><div class="line">		Auth: []ssh.AuthMethod&#123;ssh.Password(<span class="string">"xxx"</span>)&#125;,</div><div class="line">	&#125;)</div><div class="line">	ce(err, <span class="string">"dial"</span>)</div><div class="line">	session, err := client.NewSession()</div><div class="line">	ce(err, <span class="string">"new session"</span>)</div><div class="line">	<span class="keyword">defer</span> session.Close()</div><div class="line">	modes := ssh.TerminalModes&#123;</div><div class="line">		ssh.ECHO:          <span class="number">1</span>,</div><div class="line">		ssh.ECHOCTL:       <span class="number">0</span>,</div><div class="line">		ssh.TTY_OP_ISPEED: <span class="number">14400</span>,</div><div class="line">		ssh.TTY_OP_OSPEED: <span class="number">14400</span>,</div><div class="line">	&#125;</div><div class="line">	err = session.RequestPty(<span class="string">"xterm-256color"</span>, <span class="number">80</span>, <span class="number">40</span>, modes)</div><div class="line">	ce(err, <span class="string">"request pty"</span>)</div><div class="line">	<span class="keyword">if</span> err := session.Setenv(<span class="string">"LC_USR_DIR"</span>, <span class="string">"/usr"</span>); err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="built_in">panic</span>(<span class="string">"Failed to run: "</span> + err.Error())</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">var</span> b bytes.Buffer</div><div class="line">	session.Stdout, session.Stderr = &amp;b, &amp;b</div><div class="line">	<span class="keyword">if</span> err := session.Run(<span class="string">"ls -l $LC_USR_DIR"</span>); err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="built_in">panic</span>(<span class="string">"Failed to run: "</span> + err.Error())</div><div class="line">	&#125;</div><div class="line">	fmt.Println(b.String())</div></pre></td></tr></table></figure></p>
+<blockquote>
+<p>初始化vendor文件</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">➜  govendor_test govendor init</div><div class="line">➜  govendor_test cat vendor/vendor.json</div><div class="line">&#123;</div><div class="line">	&quot;comment&quot;: &quot;&quot;,</div><div class="line">	&quot;ignore&quot;: &quot;test&quot;,</div><div class="line">	&quot;package&quot;: [],</div><div class="line">	&quot;rootPath&quot;: &quot;govendor_test&quot;</div><div class="line">&#125;</div><div class="line">➜  govendor_test tree .</div><div class="line">.</div><div class="line">├── main.go</div><div class="line">└── vendor</div><div class="line">    └── vendor.json</div></pre></td></tr></table></figure>
+<p>初始化完成后会生成一个vendor的文件夹, 因为我还没添加依赖, 所以vendor.json里面并没有相关依赖包的描述</p>
+<blockquote>
+<p>添加依赖的第三方包</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div></pre></td><td class="code"><pre><div class="line">➜  govendor_test govendor add +external</div><div class="line">➜  govendor_test cat vendor/vendor.json</div><div class="line">&#123;</div><div class="line">	&quot;comment&quot;: &quot;&quot;,</div><div class="line">	&quot;ignore&quot;: &quot;test&quot;,</div><div class="line">	&quot;package&quot;: [</div><div class="line">		&#123;</div><div class="line">			&quot;checksumSHA1&quot;: &quot;C1KKOxFoW7/W/NFNpiXK+boguNo=&quot;,</div><div class="line">			&quot;path&quot;: &quot;golang.org/x/crypto/curve25519&quot;,</div><div class="line">			&quot;revision&quot;: &quot;453249f01cfeb54c3d549ddb75ff152ca243f9d8&quot;,</div><div class="line">			&quot;revisionTime&quot;: &quot;2017-02-08T20:51:15Z&quot;</div><div class="line">		&#125;,</div><div class="line">		&#123;</div><div class="line">			&quot;checksumSHA1&quot;: &quot;wGb//LjBPNxYHqk+dcLo7BjPXK8=&quot;,</div><div class="line">			&quot;path&quot;: &quot;golang.org/x/crypto/ed25519&quot;,</div><div class="line">			&quot;revision&quot;: &quot;453249f01cfeb54c3d549ddb75ff152ca243f9d8&quot;,</div><div class="line">			&quot;revisionTime&quot;: &quot;2017-02-08T20:51:15Z&quot;</div><div class="line">		&#125;,</div><div class="line">		&#123;</div><div class="line">			&quot;checksumSHA1&quot;: &quot;LXFcVx8I587SnWmKycSDEq9yvK8=&quot;,</div><div class="line">			&quot;path&quot;: &quot;golang.org/x/crypto/ed25519/internal/edwards25519&quot;,</div><div class="line">			&quot;revision&quot;: &quot;453249f01cfeb54c3d549ddb75ff152ca243f9d8&quot;,</div><div class="line">			&quot;revisionTime&quot;: &quot;2017-02-08T20:51:15Z&quot;</div><div class="line">		&#125;,</div><div class="line">		&#123;</div><div class="line">			&quot;checksumSHA1&quot;: &quot;fsrFs762jlaILyqqQImS1GfvIvw=&quot;,</div><div class="line">			&quot;path&quot;: &quot;golang.org/x/crypto/ssh&quot;,</div><div class="line">			&quot;revision&quot;: &quot;453249f01cfeb54c3d549ddb75ff152ca243f9d8&quot;,</div><div class="line">			&quot;revisionTime&quot;: &quot;2017-02-08T20:51:15Z&quot;</div><div class="line">		&#125;</div><div class="line">	],</div><div class="line">	&quot;rootPath&quot;: &quot;govendor_test&quot;</div><div class="line">&#125;</div><div class="line">➜  govendor_test tree .</div><div class="line">.</div><div class="line">├── main.go</div><div class="line">└── vendor</div><div class="line">    ├── golang.org</div><div class="line">    │   └── x</div><div class="line">    │       └── crypto</div><div class="line">    │           ├── LICENSE</div><div class="line">    │           ├── PATENTS</div><div class="line">    │           ├── curve25519</div><div class="line">    │           │   ├── const_amd64.h</div><div class="line">    │           │   ├── const_amd64.s</div><div class="line">    │           │   ├── cswap_amd64.s</div><div class="line">    │           │   ├── curve25519.go</div><div class="line">    │           │   ├── doc.go</div><div class="line">    │           │   ├── freeze_amd64.s</div><div class="line">    │           │   ├── ladderstep_amd64.s</div><div class="line">    │           │   ├── mont25519_amd64.go</div><div class="line">    │           │   ├── mul_amd64.s</div><div class="line">    │           │   └── square_amd64.s</div><div class="line">    │           ├── ed25519</div><div class="line">    │           │   ├── ed25519.go</div><div class="line">    │           │   └── internal</div><div class="line">    │           │       └── edwards25519</div><div class="line">    │           │           ├── const.go</div><div class="line">    │           │           └── edwards25519.go</div><div class="line">    │           └── ssh</div><div class="line">    │               ├── buffer.go</div><div class="line">    │               ├── certs.go</div><div class="line">    │               ├── channel.go</div><div class="line">    │               ├── cipher.go</div><div class="line">    │               ├── client.go</div><div class="line">    │               ├── client_auth.go</div><div class="line">    │               ├── common.go</div><div class="line">    │               ├── connection.go</div><div class="line">    │               ├── doc.go</div><div class="line">    │               ├── handshake.go</div><div class="line">    │               ├── kex.go</div><div class="line">    │               ├── keys.go</div><div class="line">    │               ├── mac.go</div><div class="line">    │               ├── messages.go</div><div class="line">    │               ├── mux.go</div><div class="line">    │               ├── server.go</div><div class="line">    │               ├── session.go</div><div class="line">    │               ├── tcpip.go</div><div class="line">    │               └── transport.go</div><div class="line">    └── vendor.json</div><div class="line"></div><div class="line">9 directories, 36 files</div></pre></td></tr></table></figure>
+<p>我们发现vendor.json的package已经记录了第三方包的版本,并且把这些依赖的包都放到vendor目录下了</p>
+<blockquote>
+<p>根据自己的需求,选择是否将vendor目录做版本控制</p>
+</blockquote>
+<p>一般只需要将vendor.json做版本控制即可,但是对于那些需要翻墙才能下载的包也可以直接将vendor都纳入版本控制<br>添加.ignore.git仅对vendor.json做版本控制<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">git init</div><div class="line">echo &quot;vendor/golang.or&quot; .gitignore</div><div class="line">git add .</div><div class="line">git commit -m &quot;test commit&quot;</div><div class="line">git push -u origin master</div><div class="line">...</div></pre></td></tr></table></figure></p>
+<blockquote>
+<p>其他小伙伴安装依赖</p>
+</blockquote>
+<p>其他小伙伴如果需要使用这个项目, 拉下该项目<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">git clone ssh://git@xxx/govendor_test.git</div><div class="line">https_proxy=http://localhost:8123 govendor sync  (我需要安装golang.org的包,因此需要FQ)</div></pre></td></tr></table></figure></p>
+<p>这样就安装了该项目的指定版本的第三个依赖。<br>接下来愉快的玩耍吧!</p>
 
       
     </div>
@@ -541,7 +513,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/summary/" rel="tag"># summary</a>
+            <a href="/tags/vendor/" rel="tag"># vendor</a>
           
         </div>
       
@@ -550,8 +522,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/12/30/go-cobra/" rel="next" title="如何使用golang编写漂亮的命令行工具">
-                <i class="fa fa-chevron-left"></i> 如何使用golang编写漂亮的命令行工具
+              <a href="/2017/03/10/opentsdb-vs-influxdb/" rel="next" title="时序数据库之InfluxDB">
+                <i class="fa fa-chevron-left"></i> 时序数据库之InfluxDB
               </a>
             
           </div>
@@ -559,10 +531,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/01/01/nodejs-vscode/" rel="prev" title="使用VSCode快速搭建NodeJS开发环境">
-                使用VSCode快速搭建NodeJS开发环境 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -588,8 +556,8 @@
           
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/12/31/2016-summary/"
-           data-title="2016总结与2017计划" data-url="https://blog.yumaojun.net/2016/12/31/2016-summary/">
+      <div class="ds-thread" data-thread-key="2017/03/13/golang-pkg-management-tool/"
+           data-title="golang包管理之vendor" data-url="https://blog.yumaojun.net/2017/03/13/golang-pkg-management-tool/">
       </div>
     
   </div>
@@ -743,7 +711,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#转瞬即逝的2016"><span class="nav-number">1.</span> <span class="nav-text">转瞬即逝的2016</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#瞬息万变的2017"><span class="nav-number">2.</span> <span class="nav-text">瞬息万变的2017</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Python提升书单-今年主力"><span class="nav-number">2.1.</span> <span class="nav-text">Python提升书单(今年主力)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Golang提升书单"><span class="nav-number">2.2.</span> <span class="nav-text">Golang提升书单</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JavaScript提升书单"><span class="nav-number">2.3.</span> <span class="nav-text">JavaScript提升书单</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#vendor之前"><span class="nav-number">1.</span> <span class="nav-text">vendor之前</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vendor的历史"><span class="nav-number">2.</span> <span class="nav-text">vendor的历史</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vendor的使用"><span class="nav-number">3.</span> <span class="nav-text">vendor的使用</span></a></li></ol></div>
             
 
           </div>
