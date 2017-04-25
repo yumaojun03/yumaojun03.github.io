@@ -68,10 +68,12 @@
 <link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="紫川秀, 博客" />
+  <meta name="keywords" content="cobra," />
 
 
 
+
+  
 
 
   <link rel="alternate" href="/atom.xml" title="紫川秀的博客" type="application/atom+xml" />
@@ -86,15 +88,16 @@
 
 
 
+<meta name="description" content="由于我们需要编写自己服务的客户端，之前参考过magnum的python客户端，编写过一个，整体感受就是: 一件简单的事儿，被他封装的很复杂，而且还有一个关键痛点，部署问题: 1.依赖python环境 2. 蹩脚的二进制打包方式。 因此，作为一个产品的CLI，以二进制方式交付会带来诸多方便，比如cloud foundry也用golang重写了他的客户端部分。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="commit message编写规范">
-<meta property="og:url" content="https://blog.yumaojun.net/2017/01/17/commit-message-style/index.html">
+<meta property="og:title" content="使用Golang开发OpenStack服务的CLI">
+<meta property="og:url" content="https://blog.yumaojun.net/2017/04/23/openstack-golang-cli/index.html">
 <meta property="og:site_name" content="紫川秀的博客">
-<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/angular-commit-message.png">
-<meta property="og:updated_time" content="2017-01-17T06:11:50.000Z">
+<meta property="og:description" content="由于我们需要编写自己服务的客户端，之前参考过magnum的python客户端，编写过一个，整体感受就是: 一件简单的事儿，被他封装的很复杂，而且还有一个关键痛点，部署问题: 1.依赖python环境 2. 蹩脚的二进制打包方式。 因此，作为一个产品的CLI，以二进制方式交付会带来诸多方便，比如cloud foundry也用golang重写了他的客户端部分。">
+<meta property="og:updated_time" content="2017-04-25T14:43:42.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="commit message编写规范">
-<meta name="twitter:image" content="http://oiw1gzfww.bkt.clouddn.com/angular-commit-message.png">
+<meta name="twitter:title" content="使用Golang开发OpenStack服务的CLI">
+<meta name="twitter:description" content="由于我们需要编写自己服务的客户端，之前参考过magnum的python客户端，编写过一个，整体感受就是: 一件简单的事儿，被他封装的很复杂，而且还有一个关键痛点，部署问题: 1.依赖python环境 2. 蹩脚的二进制打包方式。 因此，作为一个产品的CLI，以二进制方式交付会带来诸多方便，比如cloud foundry也用golang重写了他的客户端部分。">
 
 
 
@@ -122,13 +125,13 @@
 
 
 
-  <link rel="canonical" href="https://blog.yumaojun.net/2017/01/17/commit-message-style/"/>
+  <link rel="canonical" href="https://blog.yumaojun.net/2017/04/23/openstack-golang-cli/"/>
 
 
 
 
 
-  <title> commit message编写规范 | 紫川秀的博客 </title>
+  <title> 使用Golang开发OpenStack服务的CLI | 紫川秀的博客 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -294,7 +297,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-  <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/01/17/commit-message-style/">
+  <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/04/23/openstack-golang-cli/">
 
   <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
     <meta itemprop="name" content="紫川秀">
@@ -318,7 +321,7 @@
             
             
               
-                commit message编写规范
+                使用Golang开发OpenStack服务的CLI
               
             
           </h1>
@@ -333,8 +336,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-01-17T11:09:22+08:00">
-                2017-01-17
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-04-23T08:52:09+08:00">
+                2017-04-23
               </time>
             
 
@@ -349,8 +352,8 @@
               
                 <span class="post-meta-item-text">更新于</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2017-01-17T14:11:50+08:00">
-                2017-01-17
+              <time title="更新于" itemprop="dateModified" datetime="2017-04-25T22:43:42+08:00">
+                2017-04-25
               </time>
             
           </span>
@@ -368,8 +371,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/开发工具/" itemprop="url" rel="index">
-                    <span itemprop="name">开发工具</span>
+                  <a href="/categories/开发语言/" itemprop="url" rel="index">
+                    <span itemprop="name">开发语言</span>
                   </a>
                 </span>
 
@@ -379,8 +382,8 @@
                 
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/开发工具/git/" itemprop="url" rel="index">
-                    <span itemprop="name">git</span>
+                  <a href="/categories/开发语言/Golang/" itemprop="url" rel="index">
+                    <span itemprop="name">Golang</span>
                   </a>
                 </span>
 
@@ -397,8 +400,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2017/01/17/commit-message-style/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/01/17/commit-message-style/" itemprop="commentCount"></span>
+                <a href="/2017/04/23/openstack-golang-cli/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2017/04/23/openstack-golang-cli/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -408,7 +411,7 @@
 
           
           
-             <span id="/2017/01/17/commit-message-style/" class="leancloud_visitors" data-flag-title="commit message编写规范">
+             <span id="/2017/04/23/openstack-golang-cli/" class="leancloud_visitors" data-flag-title="使用Golang开发OpenStack服务的CLI">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -435,61 +438,37 @@
       
 
       
-        <p><img src="http://oiw1gzfww.bkt.clouddn.com/angular-commit-message.png" alt=""><br><a id="more"></a><br>Git每次提交代码，都要写<code>Commit message</code>(提交说明)，否则就不允许提交, <code>Commit message</code>往往会用于生成<code>Change log</code>文档, 规范的<code>Commit message</code>是一个高质量项目基本要求。社区有多种<code>Commit message</code>的写法规范。其中以国际知名项目<code>AngularJS</code>的规范使用最为广泛, 因为其比较合理和系统化,并且有相应的配套工具。</p>
-<h2 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h2><p>格式化得<code>Commit message</code>有很多好处</p>
+        <p>由于我们需要编写自己服务的客户端，之前参考过magnum的python客户端，编写过一个，整体感受就是: 一件简单的事儿，被他封装的很复杂，而且还有一个关键痛点，部署问题: 1.依赖python环境 2. 蹩脚的二进制打包方式。 因此，作为一个产品的CLI，以二进制方式交付会带来诸多方便，比如cloud foundry也用golang重写了他的客户端部分。<br><a id="more"></a></p>
+<h2 id="Cobra简介"><a href="#Cobra简介" class="headerlink" title="Cobra简介"></a>Cobra简介</h2><p>在博客的开篇写过一篇cobra的博客: <a href="/2016/12/30/go-cobra/" title="如何使用golang编写漂亮的命令行工具">如何使用golang编写漂亮的命令行工具</a>, 很多流行的CLI都基于这个库开发，比如kubectl, etcdctl, docker等, 基本的概念和用法请参考之前的博客。不喜欢我啰嗦的，直接看源码:<a href="https://github.com/yumaojun03/golang/tree/master/app-cli" target="_blank" rel="external">完整代码示例</a></p>
+<h2 id="基于RESTful的CLI"><a href="#基于RESTful的CLI" class="headerlink" title="基于RESTful的CLI"></a>基于RESTful的CLI</h2><p>打造的这个CLI是RESTful的客户端, 在RESTful里面以资源(Resource)为核心，因此客户端也需要以资源的形式表现, 比如Docker的 Management Commands:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">Management Commands:</div><div class="line">  checkpoint  Manage checkpoints</div><div class="line">  container   Manage containers</div><div class="line">  image       Manage images</div><div class="line">  network     Manage networks</div><div class="line">  node        Manage Swarm nodes</div><div class="line">  plugin      Manage plugins</div><div class="line">  secret      Manage Docker secrets</div><div class="line">  service     Manage services</div><div class="line">  stack       Manage Docker stacks</div><div class="line">  swarm       Manage Swarm</div><div class="line">  system      Manage Docker</div><div class="line">  volume      Manage volumes</div></pre></td></tr></table></figure></p>
+<p>该资源允许的操作:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">➜  uniresctl git:(dev_maojun) docker image -h</div><div class="line">Flag shorthand -h has been deprecated, please use --help</div><div class="line"></div><div class="line">Usage:  docker image COMMAND</div><div class="line"></div><div class="line">Manage images</div><div class="line"></div><div class="line">Options:</div><div class="line">      --help   Print usage</div><div class="line"></div><div class="line">Commands:</div><div class="line">  build       Build an image from a Dockerfile</div><div class="line">  <span class="built_in">history</span>     Show the <span class="built_in">history</span> of an image</div><div class="line">  import      Import the contents from a tarball to create a filesystem image</div><div class="line">  inspect     Display detailed information on one or more images</div><div class="line">  load        Load an image from a tar archive or STDIN</div><div class="line">  ls          List images</div><div class="line">  prune       Remove unused images</div><div class="line">  pull        Pull an image or a repository from a registry</div><div class="line">  push        Push an image or a repository to a registry</div><div class="line">  rm          Remove one or more images</div><div class="line">  save        Save one or more images to a tar archive (streamed to STDOUT by default)</div><div class="line">  tag         Create a tag TARGET_IMAGE that refers to SOURCE_IMAGE</div></pre></td></tr></table></figure></p>
+<p>因此, 轮廓上我们需要打造这样一种风格的RESTful CLI</p>
+<h2 id="OpenStack服务-CLI"><a href="#OpenStack服务-CLI" class="headerlink" title="OpenStack服务 CLI"></a>OpenStack服务 CLI</h2><p>我们的OpenStack服务是自己开发的, 开发出来的CLI风格想要和Openstack社区风格一致(长相相近), 这东西社区是没有Golang版本的(有的话给我留言, 我真没找到), 因此整个架子需要自己构建, 由于cobra架子比较成熟, 如果只用官方的Flag库来做的话，会有很多重复工作, 因此使用cobra为基础来进行构建。</p>
+<p>要做成和Openstack风格类似的CLI, 在cobra的基础上我们需要加入2个组件:</p>
 <ul>
-<li><p>提供更多的历史信息，方便快速浏览</p>
-  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">$ git <span class="built_in">log</span> &lt;last tag&gt; HEAD --pretty=format:%s</div><div class="line">添加testcase</div><div class="line">添加ignore格式</div><div class="line">添加py2支持</div><div class="line">补充entry_points</div><div class="line">添加测试环境文件</div><div class="line">添加tox测试相关文件</div></pre></td></tr></table></figure>
-</li>
-<li><p>可以过滤某些commit（比如文档改动），便于快速查找信息</p>
-  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">git <span class="built_in">log</span> HEAD --grep <span class="string">'添加'</span></div><div class="line">commit dfedec2ca55bc57137e1ffe430f9f7216d912ca0</div><div class="line">Merge: 5fcae1d f5c5120</div><div class="line">Author: 紫川秀 &lt;719118794@qq.com&gt;</div><div class="line">Date:   Mon Jan 9 19:13:47 2017 +0800</div><div class="line"></div><div class="line">    Merge pull request <span class="comment">#1 from huang75961/master</span></div><div class="line"></div><div class="line">    添加tox测试</div><div class="line"></div><div class="line">commit f5c5120ac5bb43529bd2eb9e83ccef023450a8a5</div><div class="line">Author: hc &lt;409438984@qq.com&gt;</div><div class="line">Date:   Mon Jan 9 19:00:32 2017 +0800</div><div class="line"></div><div class="line">    添加testcase</div></pre></td></tr></table></figure>
-</li>
-<li><p>可以直接从commit生成Change log<br>  这个需要配合后面的工具使用</p>
-</li>
+<li>keystone认证: 对每一个资源的访问必须通过keystone认证才能访问, 因此认证部分是全局的。</li>
+<li>表格输出: OpenstackCLI把资源以Table的方式输出, 这个也需要单独实现。</li>
 </ul>
-<h2 id="规范"><a href="#规范" class="headerlink" title="规范"></a>规范</h2><p>每次提交，Commit message 都包括三个部分：Header，Body 和 Footer。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&lt;<span class="built_in">type</span>&gt;(&lt;scope&gt;): &lt;subject&gt;</div><div class="line"></div><div class="line">&lt;body&gt;</div><div class="line"></div><div class="line">&lt;footer&gt;</div></pre></td></tr></table></figure></p>
-<p>其中，Header 是必需的，Body 和 Footer 可以省略。不管是哪一个部分，任何一行都不得超过72个字符（或100个字符）。这是为了避免自动换行影响美观。</p>
-<h3 id="Header"><a href="#Header" class="headerlink" title="Header"></a>Header</h3><p>Header部分只有一行，包括三个字段：type（必需）、scope（可选）和subject（必需）。</p>
-<h4 id="type"><a href="#type" class="headerlink" title="type"></a>type</h4><p>用于说明<code>commit</code>的类别，只允许使用下面7个标识</p>
+<h2 id="搭建CLI架子"><a href="#搭建CLI架子" class="headerlink" title="搭建CLI架子"></a>搭建CLI架子</h2><p> <code>完整代码的栗子请看Github</code>: <a href="https://github.com/yumaojun03/golang/tree/master/app-cli" target="_blank" rel="external">完整代码示例</a></p>
+<p>初始化app, 添加resourceA和resourceB<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">cobra init app-cli</div><div class="line">cobra add resourceA</div><div class="line">cobra add resourceB</div></pre></td></tr></table></figure></p>
+<p>访问每一个resource都需要经过keystone的认证,因此认证属于一个全局都要执行的逻辑, 必须放在最前面，这里Cobra提供的一组Hook可以解决这个问题</p>
+<blockquote>
+<p>带错误处理的Hook<br>当处理过程中如果产生了error可以直接return出来, 从而中断命令的继续执行, 因此认证部分我们需要这种带错误处理的Hook, 因为认证失败需要中断请求,<br>其次，cobra 在命令函数的执行前后分别设置了2组Hook, 执行的顺序如下:</p>
 <ul>
-<li>feat：新功能（feature）</li>
-<li>fix：修补bug</li>
-<li>docs：文档（documentation）</li>
-<li>style： 格式（不影响代码运行的变动）</li>
-<li>refactor：重构（即不是新增功能，也不是修改bug的代码变动）</li>
-<li>test：增加测试</li>
-<li>chore：构建过程或辅助工具的变动</li>
+<li>PersistentPreRunE: 无论函数 执不执行 该函数都会运行</li>
+<li>PreRunE: 在函数执行前执行</li>
+<li>RunE: 执行函数</li>
+<li>PostRunE: 函数执行后执行</li>
+<li>PersistentPostRunE: 无论函数 执不执行 该函数都会执行</li>
 </ul>
-<p>如果type为<code>feat</code>和<code>fix</code>，则该commit将肯定出现在<code>Change log</code>之中。其他情况（docs、chore、style、refactor、test）由你决定，要不要放入<code>Change log</code>，建议是不要。</p>
-<h4 id="scope"><a href="#scope" class="headerlink" title="scope"></a>scope</h4><p>scope用于说明 commit 影响的范围，比如数据层、控制层、视图层等等，视项目不同而不同</p>
-<h4 id="subject"><a href="#subject" class="headerlink" title="subject"></a>subject</h4><p>subject是 commit 目的的简短描述，不超过50个字符。</p>
-<ul>
-<li>以动词开头，使用第一人称现在时，比如change，而不是changed或changes</li>
-<li>第一个字母小写</li>
-<li>结尾不加句号（.）</li>
-</ul>
-<h3 id="Body"><a href="#Body" class="headerlink" title="Body"></a>Body</h3><p>Body 部分是对本次 commit 的详细描述，可以分成多行。但是有两个注意点。</p>
-<ul>
-<li>使用第一人称现在时，比如使用change而不是changed或changes。</li>
-<li>应该说明代码变动的动机，以及与以前行为的对比。<br>下面是一个angular项目下面的一个范例。<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">Protractor users were having a problem <span class="built_in">where</span> <span class="keyword">if</span> they had asynchonous code <span class="keyword">in</span> a</div><div class="line">`route.resolve` or `route.resolveRedirectTo` variable, Protractor was not</div><div class="line">waiting <span class="keyword">for</span> that code to complete before continuing. See</div><div class="line">angular/protractor<span class="comment">#789 (comment) for</span></div><div class="line">details.</div><div class="line"></div><div class="line">This commit fixes it by ensuring that `<span class="variable">$browser</span><span class="comment">#outstandingRequestCount` is</span></div><div class="line">properly increased/decreased <span class="keyword">while</span> `<span class="variable">$route</span>` (asynchronously) processes a route.</div><div class="line"></div><div class="line">Also, enhanced `ngMock` to <span class="built_in">wait</span> <span class="keyword">for</span> pending requests, before calling callbacks</div><div class="line">from `<span class="variable">$browser</span>.notifyWhenNoOutstandingRequests()`.</div></pre></td></tr></table></figure>
-</li>
-</ul>
-<h3 id="Footer"><a href="#Footer" class="headerlink" title="Footer"></a>Footer</h3><p>该部分主要是用于变更过会的一些后续操作的, 比如关闭issue, 撤销之前的commit等</p>
-<h4 id="关闭Issue"><a href="#关闭Issue" class="headerlink" title="关闭Issue"></a>关闭Issue</h4><p>如果当前 commit 针对某个issue，那么可以在 Footer 部分关闭这个 issue 。也可以一次关闭多个issue<br> <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Closes <span class="comment">#112</span></div></pre></td></tr></table></figure></p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Closes <span class="comment">#221, 222, 223</span></div></pre></td></tr></table></figure>
-<h4 id="撤销之前的commit"><a href="#撤销之前的commit" class="headerlink" title="撤销之前的commit"></a>撤销之前的commit</h4><p>如果当前 commit 用于撤销以前的 commit，则必须以revert:开头，后面跟着被撤销 Commit 的 Header。<br>Body部分的格式是固定的，必须写成This reverts commit <code>hash</code>.，其中的<code>hash</code>是被撤销 commit 的 SHA 标识符。<br>如果当前 commit 与被撤销的 commit，在同一个发布（release）里面，那么它们都不会出现在 Change log 里面。如果两者在不同的发布，那么当前 commit，会出现在 Change log 的Reverts小标题下面。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">revert: feat(pencil): add <span class="string">'graphiteWidth'</span> option</div><div class="line"></div><div class="line">This reverts commit 667ecc1654a317a13331b17617d973392f415f02.</div></pre></td></tr></table></figure></p>
-<h4 id="不兼容变动"><a href="#不兼容变动" class="headerlink" title="不兼容变动"></a>不兼容变动</h4><p>如果当前代码与上一个版本不兼容，则 Footer 部分以BREAKING CHANGE开头，后面是对变动的描述、以及变动理由和迁移方法。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">BREAKING CHANGE: isolate scope bindings definition has changed.</div><div class="line"></div><div class="line">    To migrate the code follow the example below:</div><div class="line"></div><div class="line">    Before:</div><div class="line"></div><div class="line">    scope: &#123;</div><div class="line">      myAttr: <span class="string">'attribute'</span>,</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    After:</div><div class="line"></div><div class="line">    scope: &#123;</div><div class="line">      myAttr: <span class="string">'@'</span>,</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    The removed `inject` wasn<span class="string">'t generaly useful for directives so there should be no code using it.</span></div></pre></td></tr></table></figure></p>
-<h2 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h2><p>基于commit message有丰富的工具，包括编辑器，校验工具，以及生成Change log的工具</p>
-<h3 id="Commitizen编辑工具"><a href="#Commitizen编辑工具" class="headerlink" title="Commitizen编辑工具"></a>Commitizen编辑工具</h3><p>Commitizen是一个撰写合格 Commit message 的工具, 详细说明<a href="https://github.com/commitizen/cz-cli" target="_blank" rel="external">github地址</a></p>
-<h4 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h4><p>1) 全局安装(记得使用淘宝源来加速)<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">➜  ~ npm install -g commitizen</div><div class="line">➜  ~ npm install -g cz-conventional-changelog</div><div class="line"><span class="built_in">echo</span> <span class="string">'&#123; "path": "cz-conventional-changelog" &#125;'</span> &gt; ~/.czrc</div></pre></td></tr></table></figure></p>
-<p>2）局部安装<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">➜  ~ npm install commitizen -g</div><div class="line">➜  ~ commitizen init cz-conventional-changelog --save-dev --save-exact</div></pre></td></tr></table></figure></p>
-<p>主要如果报package.json不存在,需要添加这个文件, 这是nodejs的包管理文件, 格式可以参数<a href="https://github.com/commitizen/cz-cli/blob/master/package.json" target="_blank" rel="external">commitizen包的package.json</a></p>
-<h4 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">➜  device git:(master) ✗ git cz</div><div class="line">cz-cli@2.9.5, cz-conventional-changelog@1.2.0</div><div class="line"></div><div class="line"></div><div class="line">Line 1 will be cropped at 100 characters. All other lines will be wrapped after 100 characters.</div><div class="line"></div><div class="line">? Select the <span class="built_in">type</span> of change that you<span class="string">'re committing: (Use arrow keys)</span></div><div class="line">❯ feat:     A new feature</div><div class="line">  fix:      A bug fix</div><div class="line">  docs:     Documentation only changes</div><div class="line">  style:    Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)</div><div class="line">  refactor: A code change that neither fixes a bug nor adds a feature</div><div class="line">  perf:     A code change that improves performance</div><div class="line">  test:     Adding missing tests or correcting existing tests</div><div class="line">(Move up and down to reveal more choices)</div></pre></td></tr></table></figure>
-<h3 id="validate-commit-msg校验工具"><a href="#validate-commit-msg校验工具" class="headerlink" title="validate-commit-msg校验工具"></a>validate-commit-msg校验工具</h3><p>validate-commit-msg 用于检查 Node 项目的 Commit message 是否符合格式。我暂时不需要,<a href="https://github.com/kentcdodds/validate-commit-msg" target="_blank" rel="external">github地址</a></p>
-<h3 id="生成Change-log的工具"><a href="#生成Change-log的工具" class="headerlink" title="生成Change log的工具"></a>生成Change log的工具</h3><p>conventional-changelog 就是生成 Change log 的工具，运行下面的命令即可。<br>我已经使用setuptools的pbr来管理change log, 因此我咱不适用这个工具,关于<a href="http://docs.openstack.org/developer/pbr/" target="_blank" rel="external">pbr说明</a><br>如果是其他项目可以考虑这个工具<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ npm install -g conventional-changelog</div><div class="line">$ <span class="built_in">cd</span> my-project</div><div class="line">$ conventional-changelog -p angular -i CHANGELOG.md -w</div></pre></td></tr></table></figure></p>
-<p>上面命令不会覆盖以前的 Change log，只会在CHANGELOG.md的头部加上自从上次发布以来的变动。<br>如果你想生成所有发布的 Change log，要改为运行下面的命令。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ conventional-changelog -p angular -i CHANGELOG.md -w -r 0</div></pre></td></tr></table></figure></p>
-<p>为了方便使用，可以将其写入package.json的scripts字段。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">  <span class="string">"scripts"</span>: &#123;</div><div class="line">    <span class="string">"changelog"</span>: <span class="string">"conventional-changelog -p angular -i CHANGELOG.md -w -r 0"</span></div><div class="line">  &#125;&#125;</div></pre></td></tr></table></figure></p>
-<p>以后，直接运行下面的命令即可。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ npm run changelog</div></pre></td></tr></table></figure></p>
+</blockquote>
+<p>利用cobra提供的PersistentPreRunE来实现验证功能<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// RootCmd represents the base command when called without any subcommands</span></div><div class="line"><span class="keyword">var</span> RootCmd = &amp;cobra.Command&#123;</div><div class="line">        Use:   <span class="string">"app-cli"</span>,</div><div class="line">        Short: <span class="string">"A brief description of your application"</span>,</div><div class="line">        Long: <span class="string">`A longer description that spans multiple lines and likely contains</span></div><div class="line">examples and usage of using your application. For example:</div><div class="line"></div><div class="line">Cobra is a CLI library for Go that empowers applications.</div><div class="line">This application is a tool to generate the needed files</div><div class="line">to quickly create a Cobra application.`,</div><div class="line">       PersistentPreRunE: auth,</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>auth函数实现认证并不难, 关键是auth过后的token 如何传递给后面的子命令使用, 参考etcdctl和docker部分都使用上下文来实现这个需求, cobra里面也没有地方给我存上下文, 因此需要专门用一个模块来保持 全局的上下文, 因此需要手动实现一个common包。<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> common</div><div class="line"></div><div class="line"><span class="comment">// GlobalFlag use to contain the all context</span></div><div class="line"><span class="keyword">var</span> GlobalFlag *globalFlag</div><div class="line"></div><div class="line"><span class="keyword">type</span> globalFlag <span class="keyword">struct</span> &#123;</div><div class="line">	endpoint <span class="keyword">string</span></div><div class="line">	token    <span class="keyword">string</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(g *globalFlag)</span> <span class="title">SetToken</span><span class="params">(token <span class="keyword">string</span>)</span></span> &#123;</div><div class="line">	g.token = token</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(g *globalFlag)</span> <span class="title">GetToken</span><span class="params">()</span> <span class="title">string</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> g.token</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(g *globalFlag)</span> <span class="title">SetEndPoint</span><span class="params">(url <span class="keyword">string</span>)</span></span> &#123;</div><div class="line">	g.endpoint = url</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(g *globalFlag)</span> <span class="title">GetEndPoint</span><span class="params">()</span> <span class="title">string</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> g.endpoint</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(g *globalFlag)</span> <span class="title">GetClient</span><span class="params">()</span> *<span class="title">Client</span></span> &#123;</div><div class="line">	client, _ := NewClient(g.endpoint, g.token)</div><div class="line">	<span class="keyword">return</span> client</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">init</span><span class="params">()</span></span> &#123;</div><div class="line">	<span class="keyword">if</span> GlobalFlag == <span class="literal">nil</span> &#123;</div><div class="line">		GlobalFlag = &amp;globalFlag&#123;&#125;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>最后在common包里面添加2个子包: keystone, printTable, keystone 用于实现与keystone认证的过程, printTable用于打印最后结果的表格,具体详情请看源码。</p>
+<h2 id="添加资源"><a href="#添加资源" class="headerlink" title="添加资源"></a>添加资源</h2><p>为每一个资源添加5个基础的操作:get, list, create, delete, update。另起一个resourceA的包，实现这些方法，添加到子命令即可， 比如:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">init</span><span class="params">()</span></span> &#123;</div><div class="line">	RootCmd.AddCommand(resourceACmd)</div><div class="line">	resourceACmd.AddCommand(resourceA.CreateCmd,</div><div class="line">		resourceA.ListCmd,</div><div class="line">		resourceA.GetCmd,</div><div class="line">		resourceA.UpdateCmd,</div><div class="line">		resourceA.DeleteCmd)</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>大概效果如下<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">➜  app-cli git:(master) ✗ go run main.go resourceA -h</div><div class="line">A longer description that spans multiple lines and likely contains examples</div><div class="line">and usage of using your command. For example:</div><div class="line"></div><div class="line">Cobra is a CLI library <span class="keyword">for</span> Go that empowers applications.</div><div class="line">This application is a tool to generate the needed files</div><div class="line">to quickly create a Cobra application.</div><div class="line"></div><div class="line">Usage:</div><div class="line">  app-cli resourceA [flags]</div><div class="line">  app-cli resourceA [<span class="built_in">command</span>]</div><div class="line"></div><div class="line">Available Commands:</div><div class="line">  create      create an resource</div><div class="line">  delete      delete an resource</div><div class="line">  get         get an resource</div><div class="line">  list        list resources</div><div class="line">  update      update an resource</div><div class="line"></div><div class="line">Global Flags:</div><div class="line">      --api-endpoint string            unires service endpoint</div><div class="line">      --auth_url string                keyston auth url</div><div class="line">      --idenntity-api-version string   keystone auth version</div><div class="line">      --password string                keystone auth user password</div><div class="line">      --project-domain-name string     keystone auth user project domain</div><div class="line">      --project-name string            keystone auth user project name</div><div class="line">      --user-domain-name string        keystone auth user domain name</div><div class="line">      --username string                keystone auth user</div><div class="line"></div><div class="line">Use <span class="string">"app-cli resourceA [command] --help"</span> <span class="keyword">for</span> more information about a command.</div></pre></td></tr></table></figure></p>
+<h2 id="使用效果"><a href="#使用效果" class="headerlink" title="使用效果"></a>使用效果</h2><p>和使用openstack一样，你需要有一个admin_openrc 用于导入环境变量<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">export</span> OS_USERNAME=admin</div><div class="line"><span class="built_in">export</span> OS_PASSWORD=admin</div><div class="line"><span class="built_in">export</span> OS_PROJECT_NAME=admin.cloud</div><div class="line"><span class="built_in">export</span> OS_USER_DOMAIN_NAME=admin</div><div class="line"><span class="built_in">export</span> OS_PROJECT_DOMAIN_NAME=admin</div><div class="line"><span class="built_in">export</span> OS_AUTH_URL=http://127.0.0.1:35357/v3</div><div class="line"><span class="built_in">export</span> OS_IDENTITY_API_VERSION=3</div><div class="line"><span class="built_in">export</span> UNIRES_ENDPOINT=http://127.0.0.1:8080</div></pre></td></tr></table></figure></p>
+<p>比如<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">source</span> admin_openrc</div><div class="line">./app-cli resourceA get</div></pre></td></tr></table></figure></p>
 
       
     </div>
@@ -527,13 +506,19 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/cobra/" rel="tag"># cobra</a>
+          
+        </div>
+      
 
       
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/01/12/goroutine-pool/" rel="next" title="Golang并发编程-协程池">
-                <i class="fa fa-chevron-left"></i> Golang并发编程-协程池
+              <a href="/2017/04/05/golang-mysql-connection-pool/" rel="next" title="golang中mysql连接池使用">
+                <i class="fa fa-chevron-left"></i> golang中mysql连接池使用
               </a>
             
           </div>
@@ -541,10 +526,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/01/19/markdown-to-pdf/" rel="prev" title="使用pandoc将markdown文档转换成pdf">
-                使用pandoc将markdown文档转换成pdf <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -570,8 +551,8 @@
           
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2017/01/17/commit-message-style/"
-           data-title="commit message编写规范" data-url="https://blog.yumaojun.net/2017/01/17/commit-message-style/">
+      <div class="ds-thread" data-thread-key="2017/04/23/openstack-golang-cli/"
+           data-title="使用Golang开发OpenStack服务的CLI" data-url="https://blog.yumaojun.net/2017/04/23/openstack-golang-cli/">
       </div>
     
   </div>
@@ -725,7 +706,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#作用"><span class="nav-number">1.</span> <span class="nav-text">作用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#规范"><span class="nav-number">2.</span> <span class="nav-text">规范</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Header"><span class="nav-number">2.1.</span> <span class="nav-text">Header</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#type"><span class="nav-number">2.1.1.</span> <span class="nav-text">type</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#scope"><span class="nav-number">2.1.2.</span> <span class="nav-text">scope</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#subject"><span class="nav-number">2.1.3.</span> <span class="nav-text">subject</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Body"><span class="nav-number">2.2.</span> <span class="nav-text">Body</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Footer"><span class="nav-number">2.3.</span> <span class="nav-text">Footer</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#关闭Issue"><span class="nav-number">2.3.1.</span> <span class="nav-text">关闭Issue</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#撤销之前的commit"><span class="nav-number">2.3.2.</span> <span class="nav-text">撤销之前的commit</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#不兼容变动"><span class="nav-number">2.3.3.</span> <span class="nav-text">不兼容变动</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#工具"><span class="nav-number">3.</span> <span class="nav-text">工具</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Commitizen编辑工具"><span class="nav-number">3.1.</span> <span class="nav-text">Commitizen编辑工具</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#安装"><span class="nav-number">3.1.1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用"><span class="nav-number">3.1.2.</span> <span class="nav-text">使用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#validate-commit-msg校验工具"><span class="nav-number">3.2.</span> <span class="nav-text">validate-commit-msg校验工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#生成Change-log的工具"><span class="nav-number">3.3.</span> <span class="nav-text">生成Change log的工具</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Cobra简介"><span class="nav-number">1.</span> <span class="nav-text">Cobra简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基于RESTful的CLI"><span class="nav-number">2.</span> <span class="nav-text">基于RESTful的CLI</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OpenStack服务-CLI"><span class="nav-number">3.</span> <span class="nav-text">OpenStack服务 CLI</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#搭建CLI架子"><span class="nav-number">4.</span> <span class="nav-text">搭建CLI架子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#添加资源"><span class="nav-number">5.</span> <span class="nav-text">添加资源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用效果"><span class="nav-number">6.</span> <span class="nav-text">使用效果</span></a></li></ol></div>
             
 
           </div>

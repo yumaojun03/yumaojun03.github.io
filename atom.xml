@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog.yumaojun.net/"/>
-  <updated>2017-04-06T06:31:24.000Z</updated>
+  <updated>2017-04-25T14:43:42.000Z</updated>
   <id>https://blog.yumaojun.net/</id>
   
   <author>
@@ -14,6 +14,61 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>使用Golang开发OpenStack服务的CLI</title>
+    <link href="https://blog.yumaojun.net/2017/04/23/openstack-golang-cli/"/>
+    <id>https://blog.yumaojun.net/2017/04/23/openstack-golang-cli/</id>
+    <published>2017-04-23T00:52:09.000Z</published>
+    <updated>2017-04-25T14:43:42.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>由于我们需要编写自己服务的客户端，之前参考过magnum的python客户端，编写过一个，整体感受就是: 一件简单的事儿，被他封装的很复杂，而且还有一个关键痛点，部署问题: 1.依赖python环境 2. 蹩脚的二进制打包方式。 因此，作为一个产品的CLI，以二进制方式交付会带来诸多方便，比如cloud foundry也用golang重写了他的客户端部分。<br><a id="more"></a></p>
+<h2 id="Cobra简介"><a href="#Cobra简介" class="headerlink" title="Cobra简介"></a>Cobra简介</h2><p>在博客的开篇写过一篇cobra的博客: <a href="/2016/12/30/go-cobra/" title="如何使用golang编写漂亮的命令行工具">如何使用golang编写漂亮的命令行工具</a>, 很多流行的CLI都基于这个库开发，比如kubectl, etcdctl, docker等, 基本的概念和用法请参考之前的博客。不喜欢我啰嗦的，直接看源码:<a href="https://github.com/yumaojun03/golang/tree/master/app-cli" target="_blank" rel="external">完整代码示例</a></p>
+<h2 id="基于RESTful的CLI"><a href="#基于RESTful的CLI" class="headerlink" title="基于RESTful的CLI"></a>基于RESTful的CLI</h2><p>打造的这个CLI是RESTful的客户端, 在RESTful里面以资源(Resource)为核心，因此客户端也需要以资源的形式表现, 比如Docker的 Management Commands:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">Management Commands:</div><div class="line">  checkpoint  Manage checkpoints</div><div class="line">  container   Manage containers</div><div class="line">  image       Manage images</div><div class="line">  network     Manage networks</div><div class="line">  node        Manage Swarm nodes</div><div class="line">  plugin      Manage plugins</div><div class="line">  secret      Manage Docker secrets</div><div class="line">  service     Manage services</div><div class="line">  stack       Manage Docker stacks</div><div class="line">  swarm       Manage Swarm</div><div class="line">  system      Manage Docker</div><div class="line">  volume      Manage volumes</div></pre></td></tr></table></figure></p>
+<p>该资源允许的操作:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">➜  uniresctl git:(dev_maojun) docker image -h</div><div class="line">Flag shorthand -h has been deprecated, please use --help</div><div class="line"></div><div class="line">Usage:  docker image COMMAND</div><div class="line"></div><div class="line">Manage images</div><div class="line"></div><div class="line">Options:</div><div class="line">      --help   Print usage</div><div class="line"></div><div class="line">Commands:</div><div class="line">  build       Build an image from a Dockerfile</div><div class="line">  <span class="built_in">history</span>     Show the <span class="built_in">history</span> of an image</div><div class="line">  import      Import the contents from a tarball to create a filesystem image</div><div class="line">  inspect     Display detailed information on one or more images</div><div class="line">  load        Load an image from a tar archive or STDIN</div><div class="line">  ls          List images</div><div class="line">  prune       Remove unused images</div><div class="line">  pull        Pull an image or a repository from a registry</div><div class="line">  push        Push an image or a repository to a registry</div><div class="line">  rm          Remove one or more images</div><div class="line">  save        Save one or more images to a tar archive (streamed to STDOUT by default)</div><div class="line">  tag         Create a tag TARGET_IMAGE that refers to SOURCE_IMAGE</div></pre></td></tr></table></figure></p>
+<p>因此, 轮廓上我们需要打造这样一种风格的RESTful CLI</p>
+<h2 id="OpenStack服务-CLI"><a href="#OpenStack服务-CLI" class="headerlink" title="OpenStack服务 CLI"></a>OpenStack服务 CLI</h2><p>我们的OpenStack服务是自己开发的, 开发出来的CLI风格想要和Openstack社区风格一致(长相相近), 这东西社区是没有Golang版本的(有的话给我留言, 我真没找到), 因此整个架子需要自己构建, 由于cobra架子比较成熟, 如果只用官方的Flag库来做的话，会有很多重复工作, 因此使用cobra为基础来进行构建。</p>
+<p>要做成和Openstack风格类似的CLI, 在cobra的基础上我们需要加入2个组件:</p>
+<ul>
+<li>keystone认证: 对每一个资源的访问必须通过keystone认证才能访问, 因此认证部分是全局的。</li>
+<li>表格输出: OpenstackCLI把资源以Table的方式输出, 这个也需要单独实现。</li>
+</ul>
+<h2 id="搭建CLI架子"><a href="#搭建CLI架子" class="headerlink" title="搭建CLI架子"></a>搭建CLI架子</h2><p> <code>完整代码的栗子请看Github</code>: <a href="https://github.com/yumaojun03/golang/tree/master/app-cli" target="_blank" rel="external">完整代码示例</a></p>
+<p>初始化app, 添加resourceA和resourceB<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">cobra init app-cli</div><div class="line">cobra add resourceA</div><div class="line">cobra add resourceB</div></pre></td></tr></table></figure></p>
+<p>访问每一个resource都需要经过keystone的认证,因此认证属于一个全局都要执行的逻辑, 必须放在最前面，这里Cobra提供的一组Hook可以解决这个问题</p>
+<blockquote>
+<p>带错误处理的Hook<br>当处理过程中如果产生了error可以直接return出来, 从而中断命令的继续执行, 因此认证部分我们需要这种带错误处理的Hook, 因为认证失败需要中断请求,<br>其次，cobra 在命令函数的执行前后分别设置了2组Hook, 执行的顺序如下:</p>
+<ul>
+<li>PersistentPreRunE: 无论函数 执不执行 该函数都会运行</li>
+<li>PreRunE: 在函数执行前执行</li>
+<li>RunE: 执行函数</li>
+<li>PostRunE: 函数执行后执行</li>
+<li>PersistentPostRunE: 无论函数 执不执行 该函数都会执行</li>
+</ul>
+</blockquote>
+<p>利用cobra提供的PersistentPreRunE来实现验证功能<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// RootCmd represents the base command when called without any subcommands</span></div><div class="line"><span class="keyword">var</span> RootCmd = &amp;cobra.Command&#123;</div><div class="line">        Use:   <span class="string">"app-cli"</span>,</div><div class="line">        Short: <span class="string">"A brief description of your application"</span>,</div><div class="line">        Long: <span class="string">`A longer description that spans multiple lines and likely contains</span></div><div class="line">examples and usage of using your application. For example:</div><div class="line"></div><div class="line">Cobra is a CLI library for Go that empowers applications.</div><div class="line">This application is a tool to generate the needed files</div><div class="line">to quickly create a Cobra application.`,</div><div class="line">       PersistentPreRunE: auth,</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>auth函数实现认证并不难, 关键是auth过后的token 如何传递给后面的子命令使用, 参考etcdctl和docker部分都使用上下文来实现这个需求, cobra里面也没有地方给我存上下文, 因此需要专门用一个模块来保持 全局的上下文, 因此需要手动实现一个common包。<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> common</div><div class="line"></div><div class="line"><span class="comment">// GlobalFlag use to contain the all context</span></div><div class="line"><span class="keyword">var</span> GlobalFlag *globalFlag</div><div class="line"></div><div class="line"><span class="keyword">type</span> globalFlag <span class="keyword">struct</span> &#123;</div><div class="line">	endpoint <span class="keyword">string</span></div><div class="line">	token    <span class="keyword">string</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(g *globalFlag)</span> <span class="title">SetToken</span><span class="params">(token <span class="keyword">string</span>)</span></span> &#123;</div><div class="line">	g.token = token</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(g *globalFlag)</span> <span class="title">GetToken</span><span class="params">()</span> <span class="title">string</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> g.token</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(g *globalFlag)</span> <span class="title">SetEndPoint</span><span class="params">(url <span class="keyword">string</span>)</span></span> &#123;</div><div class="line">	g.endpoint = url</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(g *globalFlag)</span> <span class="title">GetEndPoint</span><span class="params">()</span> <span class="title">string</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> g.endpoint</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(g *globalFlag)</span> <span class="title">GetClient</span><span class="params">()</span> *<span class="title">Client</span></span> &#123;</div><div class="line">	client, _ := NewClient(g.endpoint, g.token)</div><div class="line">	<span class="keyword">return</span> client</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">init</span><span class="params">()</span></span> &#123;</div><div class="line">	<span class="keyword">if</span> GlobalFlag == <span class="literal">nil</span> &#123;</div><div class="line">		GlobalFlag = &amp;globalFlag&#123;&#125;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>最后在common包里面添加2个子包: keystone, printTable, keystone 用于实现与keystone认证的过程, printTable用于打印最后结果的表格,具体详情请看源码。</p>
+<h2 id="添加资源"><a href="#添加资源" class="headerlink" title="添加资源"></a>添加资源</h2><p>为每一个资源添加5个基础的操作:get, list, create, delete, update。另起一个resourceA的包，实现这些方法，添加到子命令即可， 比如:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">init</span><span class="params">()</span></span> &#123;</div><div class="line">	RootCmd.AddCommand(resourceACmd)</div><div class="line">	resourceACmd.AddCommand(resourceA.CreateCmd,</div><div class="line">		resourceA.ListCmd,</div><div class="line">		resourceA.GetCmd,</div><div class="line">		resourceA.UpdateCmd,</div><div class="line">		resourceA.DeleteCmd)</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>大概效果如下<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">➜  app-cli git:(master) ✗ go run main.go resourceA -h</div><div class="line">A longer description that spans multiple lines and likely contains examples</div><div class="line">and usage of using your command. For example:</div><div class="line"></div><div class="line">Cobra is a CLI library <span class="keyword">for</span> Go that empowers applications.</div><div class="line">This application is a tool to generate the needed files</div><div class="line">to quickly create a Cobra application.</div><div class="line"></div><div class="line">Usage:</div><div class="line">  app-cli resourceA [flags]</div><div class="line">  app-cli resourceA [<span class="built_in">command</span>]</div><div class="line"></div><div class="line">Available Commands:</div><div class="line">  create      create an resource</div><div class="line">  delete      delete an resource</div><div class="line">  get         get an resource</div><div class="line">  list        list resources</div><div class="line">  update      update an resource</div><div class="line"></div><div class="line">Global Flags:</div><div class="line">      --api-endpoint string            unires service endpoint</div><div class="line">      --auth_url string                keyston auth url</div><div class="line">      --idenntity-api-version string   keystone auth version</div><div class="line">      --password string                keystone auth user password</div><div class="line">      --project-domain-name string     keystone auth user project domain</div><div class="line">      --project-name string            keystone auth user project name</div><div class="line">      --user-domain-name string        keystone auth user domain name</div><div class="line">      --username string                keystone auth user</div><div class="line"></div><div class="line">Use <span class="string">"app-cli resourceA [command] --help"</span> <span class="keyword">for</span> more information about a command.</div></pre></td></tr></table></figure></p>
+<h2 id="使用效果"><a href="#使用效果" class="headerlink" title="使用效果"></a>使用效果</h2><p>和使用openstack一样，你需要有一个admin_openrc 用于导入环境变量<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">export</span> OS_USERNAME=admin</div><div class="line"><span class="built_in">export</span> OS_PASSWORD=admin</div><div class="line"><span class="built_in">export</span> OS_PROJECT_NAME=admin.cloud</div><div class="line"><span class="built_in">export</span> OS_USER_DOMAIN_NAME=admin</div><div class="line"><span class="built_in">export</span> OS_PROJECT_DOMAIN_NAME=admin</div><div class="line"><span class="built_in">export</span> OS_AUTH_URL=http://127.0.0.1:35357/v3</div><div class="line"><span class="built_in">export</span> OS_IDENTITY_API_VERSION=3</div><div class="line"><span class="built_in">export</span> UNIRES_ENDPOINT=http://127.0.0.1:8080</div></pre></td></tr></table></figure></p>
+<p>比如<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">source</span> admin_openrc</div><div class="line">./app-cli resourceA get</div></pre></td></tr></table></figure></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;由于我们需要编写自己服务的客户端，之前参考过magnum的python客户端，编写过一个，整体感受就是: 一件简单的事儿，被他封装的很复杂，而且还有一个关键痛点，部署问题: 1.依赖python环境 2. 蹩脚的二进制打包方式。 因此，作为一个产品的CLI，以二进制方式交付会带来诸多方便，比如cloud foundry也用golang重写了他的客户端部分。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
+    
+      <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
+    
+    
+      <category term="cobra" scheme="https://blog.yumaojun.net/tags/cobra/"/>
+    
+  </entry>
   
   <entry>
     <title>golang中mysql连接池使用</title>
@@ -1247,244 +1302,6 @@
     
     
       <category term="restful" scheme="https://blog.yumaojun.net/tags/restful/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>如何使用swagger设计出漂亮的RESTful API</title>
-    <link href="https://blog.yumaojun.net/2017/01/05/api-design-swagger/"/>
-    <id>https://blog.yumaojun.net/2017/01/05/api-design-swagger/</id>
-    <published>2017-01-05T05:19:16.000Z</published>
-    <updated>2017-01-06T06:02:18.000Z</updated>
-    
-    <content type="html"><![CDATA[<p><img src="http://oiw1gzfww.bkt.clouddn.com/swagger_example.png" alt=""><br><a id="more"></a></p>
-<p>按照现在的趋势，前后端分离几乎已经是业界对开发和部署方式所达成的一种共识, 后台只负责数据的提供和计算，而完全不处理展现。而前端则负责拿到数据，组织数据并展现的工作。这样结构清晰，关注点分离，前后端会变得相对独立并松耦合。而前段和后端对待的契约就是API设计文档, 有了API的设计文档过后, 后端依据设计文件开发后端程序, 前段根据API设计文档模拟服务器,开发前段页面。而<code>Swagger</code>就是其中一种比较优秀的 <code>RESTful API</code>设计工具。</p>
-<h2 id="swagger-工具简介"><a href="#swagger-工具简介" class="headerlink" title="swagger 工具简介"></a>swagger 工具简介</h2><p>swagger是一个RESTful API 的设计工具，官方提供3种工具：</p>
-<ol>
-<li><code>swagger-editor</code> 在线编辑器，同时提供编辑-展现-客户端-服务端代码的生成</li>
-<li><code>swagger-ui</code> 展示工具，将编辑器定义好的json描述文件友好展示的工具。</li>
-<li><code>swagger-codegen</code> 生成服务端和客户端的代码。</li>
-</ol>
-<p>因为swagger-editor集成了swagger-codegen功能，因此我们仅需要使用swagger-editor和swagger-ui就够了。</p>
-<h2 id="编辑器-editor"><a href="#编辑器-editor" class="headerlink" title="编辑器(editor)"></a>编辑器(editor)</h2><p>可以使用在线编辑器，而由于网络原因, 往往不能很好的使用swagger提供的在线编辑器，然而这个在线编辑器也可以本地部署，其次有很多编辑器也有swagger的插件, 通过按照swagger插件，我们也可以配置出一个swagger的编辑器。有了编辑器后，我们需要熟悉使用swagger来设计API的一些语法。</p>
-<h3 id="部署本地编辑器"><a href="#部署本地编辑器" class="headerlink" title="部署本地编辑器"></a>部署本地编辑器</h3><p>安装docker，配置镜像加速，然后拉去镜像到本地运行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">docker pull swaggerapi/swagger-editor</div><div class="line">docker run -p 80:8080 swaggerapi/swagger-editor</div></pre></td></tr></table></figure></p>
-<h3 id="使用本地编辑器"><a href="#使用本地编辑器" class="headerlink" title="使用本地编辑器"></a>使用本地编辑器</h3><p>推荐使用<code>vscode</code>作为编辑器, 安装vscode的<code>Swagger View</code>插件 就可以打造一个 swagger的编辑器了采用yaml编写，然后使用Swagger Preview 查看预览。</p>
-<h3 id="swagger2-0语法"><a href="#swagger2-0语法" class="headerlink" title="swagger2.0语法"></a>swagger2.0语法</h3><p>详情参考<a href="http://swagger.io/specification/" target="_blank" rel="external">swagger2.0官方规范</a></p>
-<ul>
-<li><p>格式<br>采用json， 因为yaml是json的一个超集，因此也可以使用。通常情况我们通过yaml来完成编辑，最后通过编辑器导出为json文件。</p>
-</li>
-<li><p>文件结构<br>为一个单独的文件，但是其中definitions部分可以被抽出来为一个独立文件，通过$ref进行引用，按照惯例，这个文件应该被命名为 swagger.json</p>
-</li>
-<li><p>数据类型<br>用于描述一个数据的数据类型，对象定义时使用。</p>
-</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>Common Name</th>
-<th style="text-align:center">type</th>
-<th style="text-align:center">format</th>
-<th style="text-align:right">Comments</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>integer</td>
-<td style="text-align:center">integer</td>
-<td style="text-align:center">int32</td>
-<td style="text-align:right">signed 32 bits</td>
-</tr>
-<tr>
-<td>long</td>
-<td style="text-align:center">integer</td>
-<td style="text-align:center">int64</td>
-<td style="text-align:right">signed 64 bits</td>
-</tr>
-<tr>
-<td>float</td>
-<td style="text-align:center">number</td>
-<td style="text-align:center">float</td>
-<td style="text-align:right"></td>
-</tr>
-<tr>
-<td>double</td>
-<td style="text-align:center">number</td>
-<td style="text-align:center">double</td>
-<td style="text-align:right"></td>
-</tr>
-<tr>
-<td>string</td>
-<td style="text-align:center">string</td>
-<td style="text-align:center"></td>
-<td style="text-align:right"></td>
-</tr>
-<tr>
-<td>byte</td>
-<td style="text-align:center">string</td>
-<td style="text-align:center">byte</td>
-<td style="text-align:right">base64 encoded characters</td>
-</tr>
-<tr>
-<td>binary</td>
-<td style="text-align:center">string</td>
-<td style="text-align:center">binary</td>
-<td style="text-align:right">any sequence of octets</td>
-</tr>
-<tr>
-<td>boolean</td>
-<td style="text-align:center">boolean</td>
-<td style="text-align:center"></td>
-<td style="text-align:right"></td>
-</tr>
-<tr>
-<td>date</td>
-<td style="text-align:center">string</td>
-<td style="text-align:center">date</td>
-<td style="text-align:right">As defined by full-date - RFC3339</td>
-</tr>
-<tr>
-<td>dateTime</td>
-<td style="text-align:center">string</td>
-<td style="text-align:center">date-time</td>
-<td style="text-align:right">As defined by date-time - RFC3339</td>
-</tr>
-<tr>
-<td>password</td>
-<td style="text-align:center">string</td>
-<td style="text-align:center">password</td>
-<td style="text-align:right">Used to hint UIs the input needs to be obscured.</td>
-</tr>
-</tbody>
-</table>
-<ul>
-<li>规范<br>规范也就是语法，会安装此规范来编写API设计文档。以下列出了所有需要的关键字段</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>字段名</th>
-<th style="text-align:center">类型</th>
-<th style="text-align:right">描述    </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>swagger</td>
-<td style="text-align:center">string</td>
-<td style="text-align:right">必填项。表示使用的swagger的版本，必须为2.0</td>
-</tr>
-<tr>
-<td>info</td>
-<td style="text-align:center"><a href="http://swagger.io/specification/#infoObject" target="_blank" rel="external">Info Object</a></td>
-<td style="text-align:right">必填项。提供API的一些元数据描述</td>
-</tr>
-<tr>
-<td>host</td>
-<td style="text-align:center">string</td>
-<td style="text-align:right">提供该API服务的主机名称或者IP，测试时 使用该地址进程测试。</td>
-</tr>
-<tr>
-<td>basePath</td>
-<td style="text-align:center">string</td>
-<td style="text-align:right">API的基本路径,这是相对的host。 如果不包括,API是直属host。 必须以”/“开头</td>
-</tr>
-<tr>
-<td>schemes</td>
-<td style="text-align:center">[string]</td>
-<td style="text-align:right">API的传输协议的列表。 在”http”,”https”,”ws”,”wss”其中选择</td>
-</tr>
-<tr>
-<td>consumes</td>
-<td style="text-align:center">[string]</td>
-<td style="text-align:right">一个MIME类型的api可以使用列表。 值必须是所描述的Mime类型</td>
-</tr>
-<tr>
-<td>produces</td>
-<td style="text-align:center">[string]</td>
-<td style="text-align:right">MIME类型的api可以产生的列表。   值必须是所描述的Mime类型</td>
-</tr>
-<tr>
-<td>paths</td>
-<td style="text-align:center"><a href="http://swagger.io/specification/#pathsObject" target="_blank" rel="external">路径对象</a></td>
-<td style="text-align:right">必填项。可用的路径和操作的API</td>
-</tr>
-<tr>
-<td>definitions</td>
-<td style="text-align:center"><a href="http://swagger.io/specification/#definitionsObject" target="_blank" rel="external">定义对象</a></td>
-<td style="text-align:right">一个对象数据类型定义</td>
-</tr>
-<tr>
-<td>parameters</td>
-<td style="text-align:center"><a href="http://swagger.io/specification/#parametersDefinitionsObject" target="_blank" rel="external">参数定义对象</a></td>
-<td style="text-align:right">定义请求参数的对象</td>
-</tr>
-<tr>
-<td>responses</td>
-<td style="text-align:center"><a href="http://swagger.io/specification/#responsesDefinitionsObject" target="_blank" rel="external">反应定义对象</a></td>
-<td style="text-align:right">定义请求响应对象</td>
-</tr>
-<tr>
-<td>securityDefinitions</td>
-<td style="text-align:center"><a href="http://swagger.io/specification/#securityDefinitionsObject" target="_blank" rel="external">安全定义对象</a></td>
-<td style="text-align:right">安全方案定义规范,比如认证</td>
-</tr>
-<tr>
-<td>security</td>
-<td style="text-align:center"><a href="http://swagger.io/specification/#securityRequirementObject" target="_blank" rel="external">安全需求对象</a></td>
-<td style="text-align:right">这里主要指使用哪种认证手段</td>
-</tr>
-<tr>
-<td>tags</td>
-<td style="text-align:center"><a href="http://swagger.io/specification/#tagObject" target="_blank" rel="external">标签对象</a></td>
-<td style="text-align:right">没个RESTful中资源的标签，列表中的每个标记名称必须是唯一的</td>
-</tr>
-<tr>
-<td>externalDocs</td>
-<td style="text-align:center"><a href="http://swagger.io/specification/#externalDocumentationObject" target="_blank" rel="external">外部文档对象</a></td>
-<td style="text-align:right">额外的外部文档, 指向外部url</td>
-</tr>
-</tbody>
-</table>
-<h2 id="渲染器-ui"><a href="#渲染器-ui" class="headerlink" title="渲染器(ui)"></a>渲染器(ui)</h2><p>swagger-ui的使用很简单<a href="http://swagger.io/docs/" target="_blank" rel="external">swager-ui官方文档</a></p>
-<h3 id="HTML文档渲染"><a href="#HTML文档渲染" class="headerlink" title="HTML文档渲染"></a>HTML文档渲染</h3><p>渲染器使用官方的swagger-ui，这里我们需要一个web服务器，用来渲染我们刚才编辑完成的api 设计文档。这里一般使用node 的 express为web框架来做这个简单的web服务器</p>
-<h3 id="PDF文档渲染"><a href="#PDF文档渲染" class="headerlink" title="PDF文档渲染"></a>PDF文档渲染</h3><p>将API设计文档渲染成PDF, 流程是这样: swagger.yaml —&gt; asciiDoc—&gt; pdf</p>
-<ul>
-<li><p>使用<a href="https://github.com/Swagger2Markup/swagger2markup" target="_blank" rel="external">swagger2markup</a>来生成asciiDoc格式的文档<br>下载swagger2markup工具,<a href="http://repo.springsource.org/libs-release-remote/io/github/swagger2markup/swagger2markup-cli/" target="_blank" rel="external">下载地址</a>,选择你想要的版本下载<br>使用工具生成asciiDoc, -i指定swagger.yaml的位置, -f指定输出文件名称：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java -jar swagger2markup-cli-1.1.0.jar convert -i ~/PycharmProjects/doc/api_design/swagger.yaml <span class="_">-f</span> asiidoc/swagger</div></pre></td></tr></table></figure>
-</li>
-<li><p>使用<a href="http://asciidoctor.org/docs/convert-asciidoc-to-pdf/" target="_blank" rel="external">asciidoctor</a>来将asciiDoc换换成PDF<br>这是一个ruby写的工具，我本地不打算部署ruby环境，因此在找一个docker镜像：<code>madduci/docker-asciidoctor-pdf</code><br>由于访问dockerhub的镜像速度非常慢，因此我将该工具的使用说明复制了下来，<a href="https://store.docker.com/community/images/madduci/docker-asciidoctor-pdf" target="_blank" rel="external">镜像使用说明</a></p>
-<blockquote>
-<p>Docker Image exposing asciidoctor-pdf as entrypoint and /document as mounted volume where to build the file<br>To build your own documents as PDF, simply run the container as:<br>docker run –rm -v /path/to/your/document/folder/:/document/ madduci/docker-asciidoctor-pdf /document/your_document.adoc<br>If you want to use some custom styles, just run it as<br>docker run –rm -v /path/to/your/document/folder/:/document/ madduci/docker-asciidoctor-pdf -a pdf-stylesdir=/document/resources/themes -a pdf-style=your_style -a pdf-fontsdir=/document/resources/fonts /document/your_document.adoc<br>and it will generate the pdf in the mounted volume /document</p>
-</blockquote>
-<p>这工具在生成含有中文的pdf文档时有字体问题，因此我修改了字体为微软雅黑字体，以下是修改方法：</p>
-<ol>
-<li><p>添加雅黑字体到当前的Fonts文件夹下面,这里需要标准字体和粗体, 而默认提供的字体只有这些<a href="https://github.com/asciidoctor/asciidoctor-pdf/tree/master/data/fonts" target="_blank" rel="external">默认提供的字体</a></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">➜  asiidoc ls Fonts |grep -i &apos;yahei&apos;</div><div class="line">Microsoft Yahei.ttf</div><div class="line">yahei.ttf</div><div class="line">yahei_bold.ttf</div></pre></td></tr></table></figure>
-</li>
-<li><p>修改主题配置<code>default-theme.yml</code>的<code>Noto Serif</code>字段，使用该字体:<br>配置文件下载地址<a href="https://github.com/asciidoctor/asciidoctor-pdf/tree/master/data/themes" target="_blank" rel="external">默认配置文件下载地址</a></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Noto Serif:</div><div class="line">normal: yahei.ttf</div><div class="line">bold: yahei_bold.ttf</div><div class="line">italic: yahei.ttf</div><div class="line">bold_italic: yahei_bold.tt</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>最后把我们生成好的swagger.adoc, 主题配置文件,字体 放在一个目录下，挂载到docker里面去:</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">➜  Downloads ls asiidoc</div><div class="line">Fonts  swagger.adoc themes</div><div class="line">docker run --rm -v $(<span class="built_in">pwd</span>)/asiidoc/:/document/ madduci/docker-asciidoctor-pdf  <span class="_">-a</span> pdf-fontsdir=/document/Fonts <span class="_">-a</span> pdf-stylesdir=/document/themes /document/swagger.adoc</div></pre></td></tr></table></figure>
-<p>最后查看asiidoc下面就会有生成的pdf文件</p>
-</li>
-</ul>
-<h2 id="代码生成器-codegen"><a href="#代码生成器-codegen" class="headerlink" title="代码生成器(codegen)"></a>代码生成器(codegen)</h2><p>swagger能提供服务端和客户端的代码生成功能,这个功能在swagger-editor上已经集成<br>生成server端代码：<br><img src="http://oiw1gzfww.bkt.clouddn.com/swagger_gen_server_code.png" alt=""><br>生成客户端代码：<br><img src="http://oiw1gzfww.bkt.clouddn.com/swagger_gen_client_code.png" alt=""></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;&lt;img src=&quot;http://oiw1gzfww.bkt.clouddn.com/swagger_example.png&quot; alt=&quot;&quot;&gt;&lt;br&gt;
-    
-    </summary>
-    
-      <category term="程序设计" scheme="https://blog.yumaojun.net/categories/%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/"/>
-    
-      <category term="RESTful API" scheme="https://blog.yumaojun.net/categories/%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1/RESTful-API/"/>
-    
-    
-      <category term="swagger" scheme="https://blog.yumaojun.net/tags/swagger/"/>
     
   </entry>
   
