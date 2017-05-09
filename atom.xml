@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog.yumaojun.net/"/>
-  <updated>2017-05-01T00:55:42.000Z</updated>
+  <updated>2017-05-09T04:58:49.000Z</updated>
   <id>https://blog.yumaojun.net/</id>
   
   <author>
@@ -16,13 +16,69 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>使用Golang开发OpenStack服务API</title>
-    <link href="https://blog.yumaojun.net/2017/04/26/openstack-service-golang/"/>
-    <id>https://blog.yumaojun.net/2017/04/26/openstack-service-golang/</id>
-    <published>2017-04-26T06:41:58.000Z</published>
-    <updated>2017-05-01T00:55:42.000Z</updated>
+    <title>如何使用容器build多平台golang程序</title>
+    <link href="https://blog.yumaojun.net/2017/05/08/build-goapp-with-docker/"/>
+    <id>https://blog.yumaojun.net/2017/05/08/build-goapp-with-docker/</id>
+    <published>2017-05-08T08:06:25.000Z</published>
+    <updated>2017-05-09T04:58:49.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>在CI和CD环境中,  goalng源码程序往往需要build不同平台的二进制程序, 这时候使用容器是一个不错的选择, 因为build完成后,我们可以立即释放容器, 而且也保证了build环境的干净。<br><a id="more"></a> </p>
+<h2 id="基于容器的build"><a href="#基于容器的build" class="headerlink" title="基于容器的build"></a>基于容器的build</h2><p>使用容器来进行build, 所遇到的一些小坑。</p>
+<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>我们采用vendor来做golang项目的依赖管理, build的docker镜像拉取的官方的<a href="https://store.docker.com/images/golang?tab=description" target="_blank" rel="external">golang官方镜像</a>, 按照镜像的使用说明:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ docker run --rm -v <span class="string">"<span class="variable">$PWD</span>"</span>:/usr/src/myapp -w /usr/src/myapp golang:1.6 go build -v</div></pre></td></tr></table></figure></p>
+<p>但是却没有成功, 我项目下面的vendor的依赖并没有被go找到。</p>
+<h3 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h3><p>在各种google之后也没找到原因。仔细观察官方的示例才发现，使用vendor功能时包都在$GOPATH/src下，测试了一下，果然是这样。只有在$GOPATH/src下的包，才能使用vendor目录存放依赖包。</p>
+<p>现在go对不在$GOPATH/src下开发的项目限制越来越多，所以解决办法就很明显了, 将项目挂到GOPATH的src下面, 查下镜像的后发现GOPATH就是/go，所以解决办法是这样<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ docker run --rm -v <span class="string">"<span class="variable">$PWD</span>"</span>:/go/src/myapp -w /go/src/myapp golang:1.6 go build -v</div></pre></td></tr></table></figure></p>
+<p>注意 将myapp替换成你项目真正的名称。</p>
+<h2 id="多平台打包"><a href="#多平台打包" class="headerlink" title="多平台打包"></a>多平台打包</h2><p>通过在docker中进行交叉编译，产出各种平台的二进制文件。</p>
+<h3 id="本地编译"><a href="#本地编译" class="headerlink" title="本地编译"></a>本地编译</h3><p>简单来讲，本地编译就是以 本地环境作为软件运行的目标环境来进行 程序的编译, 因此如果你本地环境是Mac，那么就只能编译darwin平台的，如果你本地是Linux就只能编译出Linux平台的。如果你需要发布多种平台的软件，那么你就需要准备多种环境, 来进行分别build, 这是极其不便的。</p>
+<p>而且对于一些嵌入式设备而言，其性能有限, 比如低配的ARM平台, 很多情况下无法胜任本地编译。</p>
+<p>但是本地编译也有他的优点: 本地环境的原生性，有助于保障程序编译后的稳定性和可靠性, 因此本地编译是最可靠的一种手段。</p>
+<h3 id="交叉编译"><a href="#交叉编译" class="headerlink" title="交叉编译"></a>交叉编译</h3><p>简单地说，就是在一个平台上生成另一个平台上的可执行程序, 所以带来了很大的方便性, 不用准备那么多平台的环境了。</p>
+<p>要进行交叉编译, 那么必须准备好交叉编译的环境, 交叉编译环境一般由 交叉编译器和工具包组成, 如果你使用c/c++那么你需要 下载集成好的交叉编译环境，也可以自己制作 （比较复杂，建议读者下载集成好的交叉编译环境）, 但是这些Golang早已经看穿了, 在Golang的工具链上已经集成好了, 因此直接使用即可。</p>
+<p>接下来介绍Golang中的交叉编译。</p>
+<h3 id="Golang中的交叉编译"><a href="#Golang中的交叉编译" class="headerlink" title="Golang中的交叉编译"></a>Golang中的交叉编译</h3><p>Golang的交叉编译依赖2个环境变量的控制:</p>
+<ul>
+<li>$GOARCH 目标平台（编译后的目标平台）的处理器架构（386、amd64、arm）</li>
+<li>$GOOS 目标平台（编译后的目标平台）的操作系统（darwin、freebsd、linux、windows）</li>
+</ul>
+<p>交叉编译的系统要求:</p>
+<table>
+<thead>
+<tr>
+<th>OS</th>
+<th style="text-align:center">ARCH</th>
+<th style="text-align:right">OS version    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>linux</td>
+<td style="text-align:center">386/amd64/arm</td>
+<td style="text-align:right">&gt;= Linux 2.6</td>
+</tr>
+<tr>
+<td>darwin</td>
+<td style="text-align:center">386/amd64</td>
+<td style="text-align:right">OS X (Snow Leapard + Lion)</td>
+</tr>
+<tr>
+<td>freebsd</td>
+<td style="text-align:center">386/amd64</td>
+<td style="text-align:right">&gt;= FreeBSD 7</td>
+</tr>
+<tr>
+<td>windows</td>
+<td style="text-align:center">386/amd64</td>
+<td style="text-align:right">&gt;= Windows 2000</td>
+</tr>
+</tbody>
+</table>
+<p>进行交叉编译(尽量减少依赖,方便直接放入docker运行, 所以编译时禁用的CGO):<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 如果你想在Windows 32位系统下运行</span></div><div class="line">$ CGO_ENABLED=0 GOOS=windows GOARCH=386 go build</div><div class="line"><span class="comment"># 如果你想在Windows 64位系统下运行</span></div><div class="line">$ CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build</div><div class="line"></div><div class="line"><span class="comment"># 如果你想在Linux 32位系统下运行</span></div><div class="line">$ CGO_ENABLED=0 GOOS=linux GOARCH=386 go build</div><div class="line"><span class="comment"># 如果你想在Linux 64位系统下运行</span></div><div class="line">$ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build</div></pre></td></tr></table></figure></p>
+]]></content>
     
     <summary type="html">
+    
+      &lt;p&gt;在CI和CD环境中,  goalng源码程序往往需要build不同平台的二进制程序, 这时候使用容器是一个不错的选择, 因为build完成后,我们可以立即释放容器, 而且也保证了build环境的干净。&lt;br&gt;
     
     </summary>
     
@@ -31,7 +87,7 @@
       <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
     
     
-      <category term="openstack" scheme="https://blog.yumaojun.net/tags/openstack/"/>
+      <category term="docker" scheme="https://blog.yumaojun.net/tags/docker/"/>
     
   </entry>
   

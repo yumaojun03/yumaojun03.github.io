@@ -74,7 +74,7 @@
 <link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="ssh-jumphost," />
+  <meta name="keywords" content="docker," />
 
 
 
@@ -92,20 +92,16 @@
 
 
 
-<meta name="description" content="一直参与JumpServer的开发, 也一直在想如何设计一个相对完美的跳板机, 跳板机的本质是ssh协议的反向代理(主要还是ssh, 至于rdp还没想过), 虽然也经常使用ssh(做运维的时候还专门就ssh学习过), 但也仅仅是ssh客户端的使用以及服务端的配置, 我觉得一个完美的跳板机应该是从协议层面解决这个问题。因此打算以Golang为开发语言(因为ssh库完善，websocket编写简单),">
+<meta name="description" content="在CI和CD环境中,  goalng源码程序往往需要build不同平台的二进制程序, 这时候使用容器是一个不错的选择, 因为build完成后,我们可以立即释放容器, 而且也保证了build环境的干净。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="跳板机系列(一)-架构与简介">
-<meta property="og:url" content="https://blog.yumaojun.net/2017/02/15/go-ssh/index.html">
+<meta property="og:title" content="如何使用容器build多平台golang程序">
+<meta property="og:url" content="https://blog.yumaojun.net/2017/05/08/build-goapp-with-docker/index.html">
 <meta property="og:site_name" content="紫川秀的博客">
-<meta property="og:description" content="一直参与JumpServer的开发, 也一直在想如何设计一个相对完美的跳板机, 跳板机的本质是ssh协议的反向代理(主要还是ssh, 至于rdp还没想过), 虽然也经常使用ssh(做运维的时候还专门就ssh学习过), 但也仅仅是ssh客户端的使用以及服务端的配置, 我觉得一个完美的跳板机应该是从协议层面解决这个问题。因此打算以Golang为开发语言(因为ssh库完善，websocket编写简单),">
-<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/jump-design-simple.png">
-<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/jump-design-update.png">
-<meta property="og:image" content="http://gravitational.com/teleport/docs/img/everything.svg">
-<meta property="og:updated_time" content="2017-02-22T15:50:40.000Z">
+<meta property="og:description" content="在CI和CD环境中,  goalng源码程序往往需要build不同平台的二进制程序, 这时候使用容器是一个不错的选择, 因为build完成后,我们可以立即释放容器, 而且也保证了build环境的干净。">
+<meta property="og:updated_time" content="2017-05-09T04:58:49.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="跳板机系列(一)-架构与简介">
-<meta name="twitter:description" content="一直参与JumpServer的开发, 也一直在想如何设计一个相对完美的跳板机, 跳板机的本质是ssh协议的反向代理(主要还是ssh, 至于rdp还没想过), 虽然也经常使用ssh(做运维的时候还专门就ssh学习过), 但也仅仅是ssh客户端的使用以及服务端的配置, 我觉得一个完美的跳板机应该是从协议层面解决这个问题。因此打算以Golang为开发语言(因为ssh库完善，websocket编写简单),">
-<meta name="twitter:image" content="http://oiw1gzfww.bkt.clouddn.com/jump-design-simple.png">
+<meta name="twitter:title" content="如何使用容器build多平台golang程序">
+<meta name="twitter:description" content="在CI和CD环境中,  goalng源码程序往往需要build不同平台的二进制程序, 这时候使用容器是一个不错的选择, 因为build完成后,我们可以立即释放容器, 而且也保证了build环境的干净。">
 
 
 
@@ -133,13 +129,13 @@
 
 
 
-  <link rel="canonical" href="https://blog.yumaojun.net/2017/02/15/go-ssh/"/>
+  <link rel="canonical" href="https://blog.yumaojun.net/2017/05/08/build-goapp-with-docker/"/>
 
 
 
 
 
-  <title>跳板机系列(一)-架构与简介 | 紫川秀的博客</title>
+  <title>如何使用容器build多平台golang程序 | 紫川秀的博客</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -288,7 +284,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/02/15/go-ssh/">
+    <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/05/08/build-goapp-with-docker/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="紫川秀">
@@ -305,7 +301,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">跳板机系列(一)-架构与简介</h1>
+          <h1 class="post-title" itemprop="name headline">如何使用容器build多平台golang程序</h1>
         
 
         <div class="post-meta">
@@ -317,8 +313,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-02-15T13:49:19+08:00">
-                2017-02-15
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-08T16:06:25+08:00">
+                2017-05-08
               </time>
             
 
@@ -333,8 +329,8 @@
               
                 <span class="post-meta-item-text">更新于</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2017-02-22T23:50:40+08:00">
-                2017-02-22
+              <time title="更新于" itemprop="dateModified" datetime="2017-05-09T12:58:49+08:00">
+                2017-05-09
               </time>
             
           </span>
@@ -381,7 +377,7 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a class="cloud-tie-join-count" href="/2017/02/15/go-ssh/#comments" itemprop="discussionUrl">
+                <a class="cloud-tie-join-count" href="/2017/05/08/build-goapp-with-docker/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count join-count" itemprop="commentCount"></span>
                 </a>
               </span>
@@ -390,7 +386,7 @@
 
           
           
-             <span id="/2017/02/15/go-ssh/" class="leancloud_visitors" data-flag-title="跳板机系列(一)-架构与简介">
+             <span id="/2017/05/08/build-goapp-with-docker/" class="leancloud_visitors" data-flag-title="如何使用容器build多平台golang程序">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -418,19 +414,58 @@
       
 
       
-        <p>一直参与JumpServer的开发, 也一直在想如何设计一个相对完美的跳板机, 跳板机的本质是ssh协议的反向代理(主要还是ssh, 至于rdp还没想过), 虽然也经常使用ssh(做运维的时候还专门就ssh学习过), 但也仅仅是ssh客户端的使用以及服务端的配置, 我觉得一个完美的跳板机应该是从协议层面解决这个问题。因此打算以Golang为开发语言(因为ssh库完善，websocket编写简单),开发一个有基本功能的跳板机。<br><a id="more"></a></p>
-<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>这一系列的博客 包含很多篇, 主要目的是: 在之前的经验上, 把开发过程中涉及到的所有知识和感想记录下来(当然包含源码), 这一系列涉及如下文章, 由浅入深, 循序渐进的介绍开发过程中涉及到的各种知识:</p>
+        <p>在CI和CD环境中,  goalng源码程序往往需要build不同平台的二进制程序, 这时候使用容器是一个不错的选择, 因为build完成后,我们可以立即释放容器, 而且也保证了build环境的干净。<br><a id="more"></a> </p>
+<h2 id="基于容器的build"><a href="#基于容器的build" class="headerlink" title="基于容器的build"></a>基于容器的build</h2><p>使用容器来进行build, 所遇到的一些小坑。</p>
+<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>我们采用vendor来做golang项目的依赖管理, build的docker镜像拉取的官方的<a href="https://store.docker.com/images/golang?tab=description" target="_blank" rel="external">golang官方镜像</a>, 按照镜像的使用说明:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ docker run --rm -v <span class="string">"<span class="variable">$PWD</span>"</span>:/usr/src/myapp -w /usr/src/myapp golang:1.6 go build -v</div></pre></td></tr></table></figure></p>
+<p>但是却没有成功, 我项目下面的vendor的依赖并没有被go找到。</p>
+<h3 id="解决办法"><a href="#解决办法" class="headerlink" title="解决办法"></a>解决办法</h3><p>在各种google之后也没找到原因。仔细观察官方的示例才发现，使用vendor功能时包都在$GOPATH/src下，测试了一下，果然是这样。只有在$GOPATH/src下的包，才能使用vendor目录存放依赖包。</p>
+<p>现在go对不在$GOPATH/src下开发的项目限制越来越多，所以解决办法就很明显了, 将项目挂到GOPATH的src下面, 查下镜像的后发现GOPATH就是/go，所以解决办法是这样<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ docker run --rm -v <span class="string">"<span class="variable">$PWD</span>"</span>:/go/src/myapp -w /go/src/myapp golang:1.6 go build -v</div></pre></td></tr></table></figure></p>
+<p>注意 将myapp替换成你项目真正的名称。</p>
+<h2 id="多平台打包"><a href="#多平台打包" class="headerlink" title="多平台打包"></a>多平台打包</h2><p>通过在docker中进行交叉编译，产出各种平台的二进制文件。</p>
+<h3 id="本地编译"><a href="#本地编译" class="headerlink" title="本地编译"></a>本地编译</h3><p>简单来讲，本地编译就是以 本地环境作为软件运行的目标环境来进行 程序的编译, 因此如果你本地环境是Mac，那么就只能编译darwin平台的，如果你本地是Linux就只能编译出Linux平台的。如果你需要发布多种平台的软件，那么你就需要准备多种环境, 来进行分别build, 这是极其不便的。</p>
+<p>而且对于一些嵌入式设备而言，其性能有限, 比如低配的ARM平台, 很多情况下无法胜任本地编译。</p>
+<p>但是本地编译也有他的优点: 本地环境的原生性，有助于保障程序编译后的稳定性和可靠性, 因此本地编译是最可靠的一种手段。</p>
+<h3 id="交叉编译"><a href="#交叉编译" class="headerlink" title="交叉编译"></a>交叉编译</h3><p>简单地说，就是在一个平台上生成另一个平台上的可执行程序, 所以带来了很大的方便性, 不用准备那么多平台的环境了。</p>
+<p>要进行交叉编译, 那么必须准备好交叉编译的环境, 交叉编译环境一般由 交叉编译器和工具包组成, 如果你使用c/c++那么你需要 下载集成好的交叉编译环境，也可以自己制作 （比较复杂，建议读者下载集成好的交叉编译环境）, 但是这些Golang早已经看穿了, 在Golang的工具链上已经集成好了, 因此直接使用即可。</p>
+<p>接下来介绍Golang中的交叉编译。</p>
+<h3 id="Golang中的交叉编译"><a href="#Golang中的交叉编译" class="headerlink" title="Golang中的交叉编译"></a>Golang中的交叉编译</h3><p>Golang的交叉编译依赖2个环境变量的控制:</p>
 <ul>
-<li><a href="/2017/02/15/go-ssh/" title="跳板机系列(一)-架构与简介">跳板机系列(一)-架构与简介</a></li>
-<li><a href="/2017/02/16/ssh-protocol/" title="跳板机系列(二)-ssh协议原理简介">跳板机系列(二)-ssh协议原理简介</a></li>
-<li><a href="/2017/02/22/ssh-protocol-go/" title="跳板机系列(三)-Golang中SSH客户端的实现">跳板机系列(三)-Golang中SSH客户端的实现</a>
-</li>
+<li>$GOARCH 目标平台（编译后的目标平台）的处理器架构（386、amd64、arm）</li>
+<li>$GOOS 目标平台（编译后的目标平台）的操作系统（darwin、freebsd、linux、windows）</li>
 </ul>
-<h2 id="简单架构"><a href="#简单架构" class="headerlink" title="简单架构"></a>简单架构</h2><p>之前JumpServer的核心是按照简单的架构来开发的, 一个简单的架构其实已经有很多不错的demo或者产品了, 比如这个项目<a href="http://git.oschina.net/shibingli/webconsole" target="_blank" rel="external">webconsole</a>, 当然他不完整仅仅实现了web，至于命令行并没有实现, 而jumpserver这2个都实现了。<br>为什么称之为简单的架构, 因为他的核心思想就是: 就是模拟一个终端(web端的xterm这个js库就是干这个事儿的, 而命令行同样模拟一个终端就行了, 比如golang的ssh/terminal这个库就可以完成这个事儿),然后通过一个ssh agent访问后面的真实的服务器，起到一个代理转发的作用。<br><img src="http://oiw1gzfww.bkt.clouddn.com/jump-design-simple.png" alt=""></p>
-<p>这种模式的缺陷主要体现在命令行终端上面, 因为此时终端后面接的就是ssh客户端, 因此这个终端是一个客户端和跳板机绑定在一起了, 用户只有先登录跳板机才能使用代理服务, 而这显然是不合理的,Jumpserver在此上进行了改进, 通过再添加一个ssh server监听, 实际上就是ssh-in-ssh。</p>
-<h2 id="架构改进"><a href="#架构改进" class="headerlink" title="架构改进"></a>架构改进</h2><p>改进过后主要加入一个ssh的代理服务,统一代理层, 抽离客户端。<br><img src="http://oiw1gzfww.bkt.clouddn.com/jump-design-update.png" alt=""></p>
-<h2 id="完美架构"><a href="#完美架构" class="headerlink" title="完美架构"></a>完美架构</h2><p>个人架构的能力还是很菜的, 对ssh协议的理解也不深, 当看到teleport这个开源产品的设计时, 完全被惊呆了。 这不就是我想要的架构嘛, 而且细节是做的那么的漂亮。<br><img src="http://gravitational.com/teleport/docs/img/everything.svg" alt=""><br>后期如果有时间的话, 打算写一个关于teleport源码解读的系列, 一点一个剖析这个完美架构的实现。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>写这一个系列不容易, 这是一个开篇和规划，希望最后能完美的收尾，有一个不错的demo展示给大家。<br>现在看来teleport已经很完善了, 也符合我心目中的跳板机的样子, 等读完teleport源码过后, 看其是否完善, 扩展是否方便, 因此很有可能是完善teleport,而不是从头开始。</p>
+<p>交叉编译的系统要求:</p>
+<table>
+<thead>
+<tr>
+<th>OS</th>
+<th style="text-align:center">ARCH</th>
+<th style="text-align:right">OS version    </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>linux</td>
+<td style="text-align:center">386/amd64/arm</td>
+<td style="text-align:right">&gt;= Linux 2.6</td>
+</tr>
+<tr>
+<td>darwin</td>
+<td style="text-align:center">386/amd64</td>
+<td style="text-align:right">OS X (Snow Leapard + Lion)</td>
+</tr>
+<tr>
+<td>freebsd</td>
+<td style="text-align:center">386/amd64</td>
+<td style="text-align:right">&gt;= FreeBSD 7</td>
+</tr>
+<tr>
+<td>windows</td>
+<td style="text-align:center">386/amd64</td>
+<td style="text-align:right">&gt;= Windows 2000</td>
+</tr>
+</tbody>
+</table>
+<p>进行交叉编译(尽量减少依赖,方便直接放入docker运行, 所以编译时禁用的CGO):<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 如果你想在Windows 32位系统下运行</span></div><div class="line">$ CGO_ENABLED=0 GOOS=windows GOARCH=386 go build</div><div class="line"><span class="comment"># 如果你想在Windows 64位系统下运行</span></div><div class="line">$ CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build</div><div class="line"></div><div class="line"><span class="comment"># 如果你想在Linux 32位系统下运行</span></div><div class="line">$ CGO_ENABLED=0 GOOS=linux GOARCH=386 go build</div><div class="line"><span class="comment"># 如果你想在Linux 64位系统下运行</span></div><div class="line">$ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build</div></pre></td></tr></table></figure></p>
 
       
     </div>
@@ -476,7 +511,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/ssh-jumphost/" rel="tag"># ssh-jumphost</a>
+            <a href="/tags/docker/" rel="tag"># docker</a>
           
         </div>
       
@@ -489,8 +524,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/02/14/nodejs-accelerate/" rel="next" title="nodejs源加速">
-                <i class="fa fa-chevron-left"></i> nodejs源加速
+              <a href="/2017/04/23/openstack-golang-cli/" rel="next" title="使用Golang开发OpenStack服务的CLI">
+                <i class="fa fa-chevron-left"></i> 使用Golang开发OpenStack服务的CLI
               </a>
             
           </div>
@@ -498,10 +533,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/02/16/ssh-protocol/" rel="prev" title="跳板机系列(二)-ssh协议原理简介">
-                跳板机系列(二)-ssh协议原理简介 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -692,7 +723,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#简单架构"><span class="nav-number">2.</span> <span class="nav-text">简单架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#架构改进"><span class="nav-number">3.</span> <span class="nav-text">架构改进</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#完美架构"><span class="nav-number">4.</span> <span class="nav-text">完美架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#基于容器的build"><span class="nav-number">1.</span> <span class="nav-text">基于容器的build</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#问题"><span class="nav-number">1.1.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解决办法"><span class="nav-number">1.2.</span> <span class="nav-text">解决办法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多平台打包"><span class="nav-number">2.</span> <span class="nav-text">多平台打包</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#本地编译"><span class="nav-number">2.1.</span> <span class="nav-text">本地编译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#交叉编译"><span class="nav-number">2.2.</span> <span class="nav-text">交叉编译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Golang中的交叉编译"><span class="nav-number">2.3.</span> <span class="nav-text">Golang中的交叉编译</span></a></li></ol></li></ol></div>
             
 
           </div>
