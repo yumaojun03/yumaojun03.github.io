@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog.yumaojun.net/"/>
-  <updated>2017-05-09T04:58:49.000Z</updated>
+  <updated>2017-05-14T05:32:06.000Z</updated>
   <id>https://blog.yumaojun.net/</id>
   
   <author>
@@ -14,6 +14,55 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>golang获取字符的宽度(East_Asian_Width)</title>
+    <link href="https://blog.yumaojun.net/2017/05/10/golang-char-width/"/>
+    <id>https://blog.yumaojun.net/2017/05/10/golang-char-width/</id>
+    <published>2017-05-10T05:08:48.000Z</published>
+    <updated>2017-05-14T05:32:06.000Z</updated>
+    
+    <content type="html"><![CDATA[<p> 最近在用golang写CLI, 数据在终端以Table方式展示和MySLQ输出的表格一样, 使用的是一个GitHub上不怎么出名的项目, 因为该项目逻辑清晰, 功能也完善, 自己也能很好的看懂, 容易维护, 但是前些天出了一个问题: 录入中文字符和一些特殊字符过会让Table无法对齐, 我已经fork过来修复了, 但是其中涉及到的知识点, 想通过这篇博客来讲清楚。<br><a id="more"></a> </p>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>我使用一个叫simpletalbe的库: <a href="https://github.com/alexeyco/simpletable" target="_blank" rel="external">GitHub地址</a>, 我使用他的例子, 添加了一行中文输入，结果是这样的:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">Default style</div><div class="line">+----+------------------+--------------+-----------------------------+------+</div><div class="line">| <span class="comment">#  |       NAME       |    PHONE     |            EMAIL            | QTTY |</span></div><div class="line">+----+------------------+--------------+-----------------------------+------+</div><div class="line">|  1 | Newton G. Goetz  | 252-585-5166 | NewtonGGoetz@dayrep.com     |   10 |</div><div class="line">|  2 | Rebecca R. Edney | 865-475-4171 | RebeccaREdney@armyspy.com   |   12 |</div><div class="line">|  3 | John R. Jackson  | 810-325-1417 | JohnRJackson@armyspy.com    |   15 |</div><div class="line">|  4 | Ron J. Gomes     | 217-450-8568 | RonJGomes@rhyta.com         |   25 |</div><div class="line">|  5 | Penny R. Lewis   | 870-794-1666 | PennyRLewis@rhyta.com       |    5 |</div><div class="line">|  6 | Sofia J. Smith   | 770-333-7379 | SofiaJSmith@armyspy.com     |    3 |</div><div class="line">|  7 | Karlene D. Owen  | 231-242-4157 | KarleneDOwen@jourrapide.com |   12 |</div><div class="line">|  8 | Daniel L. Love   | 978-210-4178 | DanielLLove@rhyta.com       |   44 |</div><div class="line">|  9 | Julie T. Dial    | 719-966-5354 | JulieTDial@jourrapide.com   |    8 |</div><div class="line">| 10 | Juan J. Kennedy  | 908-910-8893 | JuanJKennedy@dayrep.com     |   16 |</div><div class="line">| 11 | 中文夹渣 abc         | 特殊字符夹渣 ℃     | JuanJKennedy@dayrep.com     |   16 |</div><div class="line">+----+------------------+--------------+-----------------------------+------+</div><div class="line">|                                                           Subtotal |  166 |</div><div class="line">+----+------------------+--------------+-----------------------------+------+</div></pre></td></tr></table></figure></p>
+<p>仔细观察可以发现问题, 一个中文的宽度是2个英文字符的宽度,但是他却依然使用1个宽度来计算, 致使实际字符的宽度少算了4位, 所以第一个Name表格字符多出去了4个字符宽度。</p>
+<p>这个问题的本质是一个编码问题, 由于Golang内部字符统一使用Unicode编码, 所以问题定位为 unicode 编码的字符宽度问题, 该问题和语言无关, 只要你使用unicode 就会有这个问题, 顺着这个问题 我们来说明Golang的中的字符类型Rune</p>
+<h2 id="Golang中的Rune类型"><a href="#Golang中的Rune类型" class="headerlink" title="Golang中的Rune类型"></a>Golang中的Rune类型</h2><p>在python中一个字符以char类型表示, 而在Golang中字符类型以Rune表示, 注意字符通过码表(code point)来进行翻译, 所以字符串是码表翻译过来拼接而成的, 所以不要傻傻搞不清楚rune和string的区别。</p>
+<p>golang里面用 “” 表示字符串, 用户``表示多行字符串, ‘’表示字符, 比如:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">a := <span class="string">"字符串"</span></div><div class="line">b := `多行</div><div class="line">字符串`</div><div class="line">c := <span class="string">'中'</span></div></pre></td></tr></table></figure></p>
+<p>该网站有unicode的码位表: <a href="http://www.utf8-chartable.de/unicode-utf8-table.pl" target="_blank" rel="external">unicode-utf8-table</a>, 我们从中找出一部分来做测试:<br><img src="http://oiw1gzfww.bkt.clouddn.com/unicode-code-point.png" alt=""></p>
+<p>我们以打印下4e07为例来 验证下code point:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	fmt.Printf(<span class="string">"%c\n"</span>, <span class="number">0x4e07</span>)</div><div class="line">	fmt.Printf(<span class="string">"%x\n"</span>, <span class="string">'万'</span>)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="关于字符宽度"><a href="#关于字符宽度" class="headerlink" title="关于字符宽度"></a>关于字符宽度</h2><p>编码之战始于Ascii码空余的第8位, 最终以unicode统一 这是一场惊心动魄的历史, 我在之前篇运维的博客中有过介绍, 当时花了1个星期撸编码问题, 后面会将其转过来(买的VPS快到期了)。</p>
+<p>关于编码介绍: <a href="">编码之战</a></p>
+<p>有了上面的基础, 我们继续字符宽度的问题, 文章标题含有:East_Asian_Width, 这个东西很重要, 它在unicode标准中负责定义字符的宽度。让我们由浅入深的开始介绍。</p>
+<p>截止我写这篇博客之时, unicode规范的稳定版是第9版，开发版是第10版, 我主要参考unicode9规范的文档。</p>
+<p>在unicode9中的技术报告中有关于 unicode标准的所有的规范: <a href="http://www.unicode.org/reports/#annexes" target="_blank" rel="external">Unicode Technical Reports
+</a>, 其中 Unicode Standard Annexes 描述了unicode所有相关规范，其中这2个规范需要我们关注:</p>
+<ul>
+<li><a href="http://www.unicode.org/reports/tr44/" target="_blank" rel="external">UNICODE CHARACTER DATABASE</a>: 用于描述码表(code point), 既Unicode字符数据库(UCD),它描述了Unicode字符数据库的布局和组织，以及它如何指定Unicode字符属性的形式化定义.</li>
+<li><a href="http://www.unicode.org/reports/tr11/" target="_blank" rel="external">EAST ASIAN WIDTH</a>: 用于描述东亚传统字符集的信息属性的规范, 其中就包括字符宽度.<br>在UCD规范中, unicode字符有一个<code>East_Asian_Width</code>属性(5.11.1描述了二进制属性),定义了一个unicode字符可能出现的字符宽度。<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># East_Asian_Width (ea)</span></div><div class="line"></div><div class="line">ea ; A         ; Ambiguous</div><div class="line">ea ; F         ; Fullwidth</div><div class="line">ea ; H         ; Halfwidth</div><div class="line">ea ; N         ; Neutral</div><div class="line">ea ; Na        ; Narrow</div><div class="line">ea ; W         ; Wide</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>其中除A不确定外，F/H/N/Na/W都能很明确的知道宽度。因此每一个unicode字符我们只需要知道其East_Asian_Width属性的值 就可知道其字符的宽度, 但是查看了下Golang unicode标准库, 并没有发现East_Asian_Width相关属性的实现和方法, 因此估计需要自己实现了。</p>
+<p>如何实现East_Asian_Width喃?, 这就需要刚才提到的unicode规范中的另外一个规范<a href="http://www.unicode.org/reports/tr11/" target="_blank" rel="external">EAST ASIAN WIDTH</a>, 该文档整理出了所有的unicode字符的宽度的范围表, 该规范的 6.3节中 给出了这个范围表<a href="http://www.unicode.org/Public/UCD/latest/ucd/EastAsianWidth.txt" target="_blank" rel="external">unicode字符宽度范围表</a>,只要有这张表我们就可以知道字符宽度。</p>
+<p>因此我们根据这张范围表可以实现一个获取unicode字符宽度的功能模块, 默认F/W为Fullwidth, 其他为Halfwidth, 该模块具体代码见: <a href="https://github.com/yumaojun03/simpletable/blob/master/east_asian_width.go" target="_blank" rel="external">east_asian_width</a>, 有了这个模块我们就可以来解决 字符宽度问题了</p>
+<h2 id="解决字符宽度问题"><a href="#解决字符宽度问题" class="headerlink" title="解决字符宽度问题"></a>解决字符宽度问题</h2><p>我们找到simpletalbe里面关于字符长度的代码:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// width returns content width</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *content)</span> <span class="title">width</span><span class="params">()</span> <span class="title">int</span></span> &#123;</div><div class="line">	m := c.maxLinewidth()</div><div class="line">	<span class="keyword">if</span> m &gt; c.w &#123;</div><div class="line">		<span class="keyword">return</span> m</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">return</span> c.w</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// line formats content line</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *content)</span> <span class="title">line</span><span class="params">(l <span class="keyword">string</span>, a <span class="keyword">int</span>)</span> <span class="title">string</span></span> &#123;</div><div class="line">	<span class="built_in">len</span> := c.width() - utf8.RuneCountInString(l)</div><div class="line">  ...</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>我们定义好获取字符长度的函数，提供掉他的判断方法<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// get the string width</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">getStringWidth</span><span class="params">(str <span class="keyword">string</span>)</span> <span class="title">int</span></span> &#123;</div><div class="line">	w := <span class="number">0</span></div><div class="line"></div><div class="line">	<span class="keyword">for</span> _, c := <span class="keyword">range</span> []<span class="keyword">rune</span>(str) &#123;</div><div class="line">		<span class="keyword">if</span> IsHalfwidth(c) &#123;</div><div class="line">			w = w + <span class="number">1</span></div><div class="line">		&#125; <span class="keyword">else</span> &#123;</div><div class="line">			w = w + <span class="number">2</span></div><div class="line">		&#125;</div><div class="line"></div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">return</span> w</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// width returns maximum content lines width</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *content)</span> <span class="title">maxLinewidth</span><span class="params">()</span> <span class="title">int</span></span> &#123;</div><div class="line">	w := <span class="number">0</span></div><div class="line"></div><div class="line">	<span class="keyword">for</span> _, r := <span class="keyword">range</span> c.c &#123;</div><div class="line">		l := getStringWidth(r)</div><div class="line">		<span class="keyword">if</span> l &gt; w &#123;</div><div class="line">			w = l</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">return</span> w</div><div class="line">&#125;</div><div class="line"></div><div class="line"></div><div class="line"><span class="comment">// line formats content line</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *content)</span> <span class="title">line</span><span class="params">(l <span class="keyword">string</span>, a <span class="keyword">int</span>)</span> <span class="title">string</span></span> &#123;</div><div class="line">	<span class="built_in">len</span> := c.width() - getStringWidth(l)</div><div class="line">  ...</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>然后测试效果<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">Default style</div><div class="line">+----+------------------+----------------+-----------------------------+------+</div><div class="line">| <span class="comment">#  |       NAME       |     PHONE      |            EMAIL            | QTTY |</span></div><div class="line">+----+------------------+----------------+-----------------------------+------+</div><div class="line">|  1 | Newton G. Goetz  | 252-585-5166   | NewtonGGoetz@dayrep.com     |   10 |</div><div class="line">|  2 | Rebecca R. Edney | 865-475-4171   | RebeccaREdney@armyspy.com   |   12 |</div><div class="line">|  3 | John R. Jackson  | 810-325-1417   | JohnRJackson@armyspy.com    |   15 |</div><div class="line">|  4 | Ron J. Gomes     | 217-450-8568   | RonJGomes@rhyta.com         |   25 |</div><div class="line">|  5 | Penny R. Lewis   | 870-794-1666   | PennyRLewis@rhyta.com       |    5 |</div><div class="line">|  6 | Sofia J. Smith   | 770-333-7379   | SofiaJSmith@armyspy.com     |    3 |</div><div class="line">|  7 | Karlene D. Owen  | 231-242-4157   | KarleneDOwen@jourrapide.com |   12 |</div><div class="line">|  8 | Daniel L. Love   | 978-210-4178   | DanielLLove@rhyta.com       |   44 |</div><div class="line">|  9 | Julie T. Dial    | 719-966-5354   | JulieTDial@jourrapide.com   |    8 |</div><div class="line">| 10 | Juan J. Kennedy  | 908-910-8893   | JuanJKennedy@dayrep.com     |   16 |</div><div class="line">| 11 | adfsb“           | 特殊字符夹渣 ℃ | JuanJKennedy@dayrep.com     |   16 |</div><div class="line">+----+------------------+----------------+-----------------------------+------+</div><div class="line">|                                                             Subtotal |  166 |</div><div class="line">+----+------------------+----------------+-----------------------------+------+</div></pre></td></tr></table></figure></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt; 最近在用golang写CLI, 数据在终端以Table方式展示和MySLQ输出的表格一样, 使用的是一个GitHub上不怎么出名的项目, 因为该项目逻辑清晰, 功能也完善, 自己也能很好的看懂, 容易维护, 但是前些天出了一个问题: 录入中文字符和一些特殊字符过会让Table无法对齐, 我已经fork过来修复了, 但是其中涉及到的知识点, 想通过这篇博客来讲清楚。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
+    
+      <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
+    
+    
+      <category term="unicode" scheme="https://blog.yumaojun.net/tags/unicode/"/>
+    
+  </entry>
   
   <entry>
     <title>如何使用容器build多平台golang程序</title>
@@ -1223,43 +1272,6 @@
     
     
       <category term="goroutine" scheme="https://blog.yumaojun.net/tags/goroutine/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>如何开发Openstack服务-开篇(一)</title>
-    <link href="https://blog.yumaojun.net/2017/01/10/develop-openstack-service/"/>
-    <id>https://blog.yumaojun.net/2017/01/10/develop-openstack-service/</id>
-    <published>2017-01-10T14:06:53.000Z</published>
-    <updated>2017-01-12T07:31:06.000Z</updated>
-    
-    <content type="html"><![CDATA[<p><img src="http://oiw1gzfww.bkt.clouddn.com/openstack.develop.png" alt=""><br><a id="more"></a></p>
-<p>openstack是我见过最大最复杂的python项目, 虽然openstack项目的热度在下滑, 但是openstack这套开发理念任然是相当不错的，值得我们学习. 由于工作需要, 我也需要开发一些自定义的openstack服务, 因此想将开发openstack服务的过程以一系列的文章记录下来, 方便需要的人。</p>
-<h2 id="openstack简介"><a href="#openstack简介" class="headerlink" title="openstack简介"></a>openstack简介</h2><p>openstack是一个IaaS平台, 提供计算服务、网络服务、存储服务等, 有3种方式使用openstack提供的服务</p>
-<ul>
-<li>API<br>通过API使用OpenStack的方式是由各个服务自己实现的, 这些API都是有统一的形式的，都是采用了HTTP协议实现的符合REST规范的API。</li>
-<li>CLI/SDK<br>通过命令行是用OpenStack服务的方式是由一系列项目来提供的，这些项目一般都命名为python-projectclient，比如python-keystoneclient，python-novaclietn等。这些命令行项目分别对应到各个主要的服务，为用户提供命令行操作界面和Python的SDK。比如python-keystoneclient对应到keystone，为用户提供了keystone这个命令，同时也提供了keyston项目的SDK（其实是在SDK的基础上实现了命令行）。这些client项目提供的SDK其实也是封装了对各自服务的API的调用。由于每个主要项目都有一个自己的命令行工具，社区觉得不好，于是又有了一个新的项目python-openstackclient，用来提供一个统一的命令行工具openstack（命令的名字就叫做openstack），这个工具实现了命令行，然后使用各个服务的client项目提供的SDK来完成对应的操作</li>
-<li>WebUI<br>通过Web界面使用OpenStack服务这种方式是通过OpenStack的Horizon项目提供的。Horizon项目是一个Django应用，实现了一个面板功能，是传统的MVC开发模型, 不过最新的项目 在慢慢往Angular上迁移。Horizon项目主要是提供一种交互界面，它会通过API来和各个OpenStack服务进行交互，然后在Web界面上展示各个服务的状态；它也会接收用户的操作，然后调用各个服务的API来完成用户对各个服务的使用</li>
-</ul>
-<p>因此开发一个完整的openstack项目需要完成上面介绍的3部分的开发，当然API服务是根本。</p>
-<h2 id="openstack架构"><a href="#openstack架构" class="headerlink" title="openstack架构"></a>openstack架构</h2><p>整个openstack的服务是以插件化得方式进行独立开发, 然后通过API相互关联, 比如:<br><img src="http://oiw1gzfww.bkt.clouddn.com/openstack-conceptual-arch-folsom.jpg" alt=""><br>接下来我们会以demo的形式开发一个和openstack服务类似的服务，该服务的名称就叫demo</p>
-<h2 id="openstack中的api服务"><a href="#openstack中的api服务" class="headerlink" title="openstack中的api服务"></a>openstack中的api服务</h2><p>openstack的API设计风格为RESTful, 如何设计RESTful API我在前面的博客中有介绍, Python的Web开发框架很多，基本上，还活跃的框架都支持<code>RESTful API</code>的开发, 有些框架还专门为<code>RESTful API</code>的开发提供了便利的功能,比如<code>Pecan</code>，有些框架则通过第三方模块来提供这种便利，比如<code>Django</code>和<code>Flask</code>都有不少和REST相关的第三方库。<br>对于框架选择，也没有什么特别好的标准，一般都是比较性能、文档、社区是否活跃等。在我看来，选择流行的一般就不会错<br>下面是openstack keystone关于credential的API:<br><img src="http://oiw1gzfww.bkt.clouddn.com/openstack-restful-api.png" alt=""></p>
-<h3 id="早期项目的api服务"><a href="#早期项目的api服务" class="headerlink" title="早期项目的api服务"></a>早期项目的api服务</h3><p>OpenStack项目倾向于不重新发明轮子，一般都会选择现有的库和框架来使用，除非现有的框架不满足需求。因为Web框架的选择很多，而且都满足需求，所以OpenStack项目到目前为止都是使用现成的Web框架。<br>OpenStack早期的项目并没有使用一个框架，而是使用了几个不同的模块来组合出一个框架：Paste + PasteDeploy + Routes + WebOb，这几个不同的模块分别负责应用的WSGI化、URL路由和请求处理等功能。Nova, Glance, Neutron, Keystone等早期的项目都是使用这样的架构来实现RESTful API的。<br>早期的这种技术选型带来的好处是”框架”具备足够的灵活性，缺点则是要把这几个模块组合起来实现一个REST服务，需要写很多代码，连WSGI的入口函数都要自己实现（比如Keystone项目的keystone/common/wsgi.py文件中的class Application）。因为灵活性的好处不是很明显，而代码量大的坏处很明显，比如上面那个class Application需要在每个项目中复制一遍，所以社区的新项目就开始使用新的Web框架Pecan</p>
-<h3 id="新项目的api服务"><a href="#新项目的api服务" class="headerlink" title="新项目的api服务"></a>新项目的api服务</h3><p>Pecan是一个基于对象路由的框架，即灵活又简单。Pecan主要实现了URL路由功能，支持RESTful API。Pecan没有实现模板、session管理和ORM等功能，但是这些功能可以通过其他的模块来实现。对于OpenStack来说，Pecan是一个很好的选择，因为OpenStack项目中统一使用sqlalchemy来实现ORM，API的实现也不需要模板功能，安全控制则基于Keystone体系。使用Pecan来开发REST服务，代码量很少，代码结构也清晰。Ceilometer项目就是使用了Pecan</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;&lt;img src=&quot;http://oiw1gzfww.bkt.clouddn.com/openstack.develop.png&quot; alt=&quot;&quot;&gt;&lt;br&gt;
-    
-    </summary>
-    
-      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
-    
-      <category term="Python" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Python/"/>
-    
-    
-      <category term="openstack" scheme="https://blog.yumaojun.net/tags/openstack/"/>
     
   </entry>
   

@@ -1,0 +1,1012 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="unicode," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="紫川秀的博客" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="最近在用golang写CLI, 数据在终端以Table方式展示和MySLQ输出的表格一样, 使用的是一个GitHub上不怎么出名的项目, 因为该项目逻辑清晰, 功能也完善, 自己也能很好的看懂, 容易维护, 但是前些天出了一个问题: 录入中文字符和一些特殊字符过会让Table无法对齐, 我已经fork过来修复了, 但是其中涉及到的知识点, 想通过这篇博客来讲清楚。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="golang获取字符的宽度(East_Asian_Width)">
+<meta property="og:url" content="https://blog.yumaojun.net/2017/05/10/golang-char-width/index.html">
+<meta property="og:site_name" content="紫川秀的博客">
+<meta property="og:description" content="最近在用golang写CLI, 数据在终端以Table方式展示和MySLQ输出的表格一样, 使用的是一个GitHub上不怎么出名的项目, 因为该项目逻辑清晰, 功能也完善, 自己也能很好的看懂, 容易维护, 但是前些天出了一个问题: 录入中文字符和一些特殊字符过会让Table无法对齐, 我已经fork过来修复了, 但是其中涉及到的知识点, 想通过这篇博客来讲清楚。">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/unicode-code-point.png">
+<meta property="og:updated_time" content="2017-05-14T05:32:06.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="golang获取字符的宽度(East_Asian_Width)">
+<meta name="twitter:description" content="最近在用golang写CLI, 数据在终端以Table方式展示和MySLQ输出的表格一样, 使用的是一个GitHub上不怎么出名的项目, 因为该项目逻辑清晰, 功能也完善, 自己也能很好的看懂, 容易维护, 但是前些天出了一个问题: 录入中文字符和一些特殊字符过会让Table无法对齐, 我已经fork过来修复了, 但是其中涉及到的知识点, 想通过这篇博客来讲清楚。">
+<meta name="twitter:image" content="http://oiw1gzfww.bkt.clouddn.com/unicode-code-point.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 'undefined',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://blog.yumaojun.net/2017/05/10/golang-char-width/"/>
+
+
+
+
+
+  <title>golang获取字符的宽度(East_Asian_Width) | 紫川秀的博客</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?035e345b7c80cdf05aec8bc846b2f227";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">紫川秀的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">比你优秀的人不可怕,可怕的是比你优秀的人比你更努力。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/05/10/golang-char-width/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="紫川秀">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://oiw1gzfww.bkt.clouddn.com/me.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="紫川秀的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">golang获取字符的宽度(East_Asian_Width)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-10T13:08:48+08:00">
+                2017-05-10
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2017-05-14T13:32:06+08:00">
+                2017-05-14
+              </time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开发语言/" itemprop="url" rel="index">
+                    <span itemprop="name">开发语言</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开发语言/Golang/" itemprop="url" rel="index">
+                    <span itemprop="name">Golang</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a class="cloud-tie-join-count" href="/2017/05/10/golang-char-width/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count join-count" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/05/10/golang-char-width/" class="leancloud_visitors" data-flag-title="golang获取字符的宽度(East_Asian_Width)">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p> 最近在用golang写CLI, 数据在终端以Table方式展示和MySLQ输出的表格一样, 使用的是一个GitHub上不怎么出名的项目, 因为该项目逻辑清晰, 功能也完善, 自己也能很好的看懂, 容易维护, 但是前些天出了一个问题: 录入中文字符和一些特殊字符过会让Table无法对齐, 我已经fork过来修复了, 但是其中涉及到的知识点, 想通过这篇博客来讲清楚。<br><a id="more"></a> </p>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>我使用一个叫simpletalbe的库: <a href="https://github.com/alexeyco/simpletable" target="_blank" rel="external">GitHub地址</a>, 我使用他的例子, 添加了一行中文输入，结果是这样的:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">Default style</div><div class="line">+----+------------------+--------------+-----------------------------+------+</div><div class="line">| <span class="comment">#  |       NAME       |    PHONE     |            EMAIL            | QTTY |</span></div><div class="line">+----+------------------+--------------+-----------------------------+------+</div><div class="line">|  1 | Newton G. Goetz  | 252-585-5166 | NewtonGGoetz@dayrep.com     |   10 |</div><div class="line">|  2 | Rebecca R. Edney | 865-475-4171 | RebeccaREdney@armyspy.com   |   12 |</div><div class="line">|  3 | John R. Jackson  | 810-325-1417 | JohnRJackson@armyspy.com    |   15 |</div><div class="line">|  4 | Ron J. Gomes     | 217-450-8568 | RonJGomes@rhyta.com         |   25 |</div><div class="line">|  5 | Penny R. Lewis   | 870-794-1666 | PennyRLewis@rhyta.com       |    5 |</div><div class="line">|  6 | Sofia J. Smith   | 770-333-7379 | SofiaJSmith@armyspy.com     |    3 |</div><div class="line">|  7 | Karlene D. Owen  | 231-242-4157 | KarleneDOwen@jourrapide.com |   12 |</div><div class="line">|  8 | Daniel L. Love   | 978-210-4178 | DanielLLove@rhyta.com       |   44 |</div><div class="line">|  9 | Julie T. Dial    | 719-966-5354 | JulieTDial@jourrapide.com   |    8 |</div><div class="line">| 10 | Juan J. Kennedy  | 908-910-8893 | JuanJKennedy@dayrep.com     |   16 |</div><div class="line">| 11 | 中文夹渣 abc         | 特殊字符夹渣 ℃     | JuanJKennedy@dayrep.com     |   16 |</div><div class="line">+----+------------------+--------------+-----------------------------+------+</div><div class="line">|                                                           Subtotal |  166 |</div><div class="line">+----+------------------+--------------+-----------------------------+------+</div></pre></td></tr></table></figure></p>
+<p>仔细观察可以发现问题, 一个中文的宽度是2个英文字符的宽度,但是他却依然使用1个宽度来计算, 致使实际字符的宽度少算了4位, 所以第一个Name表格字符多出去了4个字符宽度。</p>
+<p>这个问题的本质是一个编码问题, 由于Golang内部字符统一使用Unicode编码, 所以问题定位为 unicode 编码的字符宽度问题, 该问题和语言无关, 只要你使用unicode 就会有这个问题, 顺着这个问题 我们来说明Golang的中的字符类型Rune</p>
+<h2 id="Golang中的Rune类型"><a href="#Golang中的Rune类型" class="headerlink" title="Golang中的Rune类型"></a>Golang中的Rune类型</h2><p>在python中一个字符以char类型表示, 而在Golang中字符类型以Rune表示, 注意字符通过码表(code point)来进行翻译, 所以字符串是码表翻译过来拼接而成的, 所以不要傻傻搞不清楚rune和string的区别。</p>
+<p>golang里面用 “” 表示字符串, 用户``表示多行字符串, ‘’表示字符, 比如:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">a := <span class="string">"字符串"</span></div><div class="line">b := `多行</div><div class="line">字符串`</div><div class="line">c := <span class="string">'中'</span></div></pre></td></tr></table></figure></p>
+<p>该网站有unicode的码位表: <a href="http://www.utf8-chartable.de/unicode-utf8-table.pl" target="_blank" rel="external">unicode-utf8-table</a>, 我们从中找出一部分来做测试:<br><img src="http://oiw1gzfww.bkt.clouddn.com/unicode-code-point.png" alt=""></p>
+<p>我们以打印下4e07为例来 验证下code point:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	fmt.Printf(<span class="string">"%c\n"</span>, <span class="number">0x4e07</span>)</div><div class="line">	fmt.Printf(<span class="string">"%x\n"</span>, <span class="string">'万'</span>)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="关于字符宽度"><a href="#关于字符宽度" class="headerlink" title="关于字符宽度"></a>关于字符宽度</h2><p>编码之战始于Ascii码空余的第8位, 最终以unicode统一 这是一场惊心动魄的历史, 我在之前篇运维的博客中有过介绍, 当时花了1个星期撸编码问题, 后面会将其转过来(买的VPS快到期了)。</p>
+<p>关于编码介绍: <a href="">编码之战</a></p>
+<p>有了上面的基础, 我们继续字符宽度的问题, 文章标题含有:East_Asian_Width, 这个东西很重要, 它在unicode标准中负责定义字符的宽度。让我们由浅入深的开始介绍。</p>
+<p>截止我写这篇博客之时, unicode规范的稳定版是第9版，开发版是第10版, 我主要参考unicode9规范的文档。</p>
+<p>在unicode9中的技术报告中有关于 unicode标准的所有的规范: <a href="http://www.unicode.org/reports/#annexes" target="_blank" rel="external">Unicode Technical Reports
+</a>, 其中 Unicode Standard Annexes 描述了unicode所有相关规范，其中这2个规范需要我们关注:</p>
+<ul>
+<li><a href="http://www.unicode.org/reports/tr44/" target="_blank" rel="external">UNICODE CHARACTER DATABASE</a>: 用于描述码表(code point), 既Unicode字符数据库(UCD),它描述了Unicode字符数据库的布局和组织，以及它如何指定Unicode字符属性的形式化定义.</li>
+<li><a href="http://www.unicode.org/reports/tr11/" target="_blank" rel="external">EAST ASIAN WIDTH</a>: 用于描述东亚传统字符集的信息属性的规范, 其中就包括字符宽度.<br>在UCD规范中, unicode字符有一个<code>East_Asian_Width</code>属性(5.11.1描述了二进制属性),定义了一个unicode字符可能出现的字符宽度。<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># East_Asian_Width (ea)</span></div><div class="line"></div><div class="line">ea ; A         ; Ambiguous</div><div class="line">ea ; F         ; Fullwidth</div><div class="line">ea ; H         ; Halfwidth</div><div class="line">ea ; N         ; Neutral</div><div class="line">ea ; Na        ; Narrow</div><div class="line">ea ; W         ; Wide</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>其中除A不确定外，F/H/N/Na/W都能很明确的知道宽度。因此每一个unicode字符我们只需要知道其East_Asian_Width属性的值 就可知道其字符的宽度, 但是查看了下Golang unicode标准库, 并没有发现East_Asian_Width相关属性的实现和方法, 因此估计需要自己实现了。</p>
+<p>如何实现East_Asian_Width喃?, 这就需要刚才提到的unicode规范中的另外一个规范<a href="http://www.unicode.org/reports/tr11/" target="_blank" rel="external">EAST ASIAN WIDTH</a>, 该文档整理出了所有的unicode字符的宽度的范围表, 该规范的 6.3节中 给出了这个范围表<a href="http://www.unicode.org/Public/UCD/latest/ucd/EastAsianWidth.txt" target="_blank" rel="external">unicode字符宽度范围表</a>,只要有这张表我们就可以知道字符宽度。</p>
+<p>因此我们根据这张范围表可以实现一个获取unicode字符宽度的功能模块, 默认F/W为Fullwidth, 其他为Halfwidth, 该模块具体代码见: <a href="https://github.com/yumaojun03/simpletable/blob/master/east_asian_width.go" target="_blank" rel="external">east_asian_width</a>, 有了这个模块我们就可以来解决 字符宽度问题了</p>
+<h2 id="解决字符宽度问题"><a href="#解决字符宽度问题" class="headerlink" title="解决字符宽度问题"></a>解决字符宽度问题</h2><p>我们找到simpletalbe里面关于字符长度的代码:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// width returns content width</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *content)</span> <span class="title">width</span><span class="params">()</span> <span class="title">int</span></span> &#123;</div><div class="line">	m := c.maxLinewidth()</div><div class="line">	<span class="keyword">if</span> m &gt; c.w &#123;</div><div class="line">		<span class="keyword">return</span> m</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">return</span> c.w</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// line formats content line</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *content)</span> <span class="title">line</span><span class="params">(l <span class="keyword">string</span>, a <span class="keyword">int</span>)</span> <span class="title">string</span></span> &#123;</div><div class="line">	<span class="built_in">len</span> := c.width() - utf8.RuneCountInString(l)</div><div class="line">  ...</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>我们定义好获取字符长度的函数，提供掉他的判断方法<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// get the string width</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">getStringWidth</span><span class="params">(str <span class="keyword">string</span>)</span> <span class="title">int</span></span> &#123;</div><div class="line">	w := <span class="number">0</span></div><div class="line"></div><div class="line">	<span class="keyword">for</span> _, c := <span class="keyword">range</span> []<span class="keyword">rune</span>(str) &#123;</div><div class="line">		<span class="keyword">if</span> IsHalfwidth(c) &#123;</div><div class="line">			w = w + <span class="number">1</span></div><div class="line">		&#125; <span class="keyword">else</span> &#123;</div><div class="line">			w = w + <span class="number">2</span></div><div class="line">		&#125;</div><div class="line"></div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">return</span> w</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// width returns maximum content lines width</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *content)</span> <span class="title">maxLinewidth</span><span class="params">()</span> <span class="title">int</span></span> &#123;</div><div class="line">	w := <span class="number">0</span></div><div class="line"></div><div class="line">	<span class="keyword">for</span> _, r := <span class="keyword">range</span> c.c &#123;</div><div class="line">		l := getStringWidth(r)</div><div class="line">		<span class="keyword">if</span> l &gt; w &#123;</div><div class="line">			w = l</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">return</span> w</div><div class="line">&#125;</div><div class="line"></div><div class="line"></div><div class="line"><span class="comment">// line formats content line</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *content)</span> <span class="title">line</span><span class="params">(l <span class="keyword">string</span>, a <span class="keyword">int</span>)</span> <span class="title">string</span></span> &#123;</div><div class="line">	<span class="built_in">len</span> := c.width() - getStringWidth(l)</div><div class="line">  ...</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>然后测试效果<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">Default style</div><div class="line">+----+------------------+----------------+-----------------------------+------+</div><div class="line">| <span class="comment">#  |       NAME       |     PHONE      |            EMAIL            | QTTY |</span></div><div class="line">+----+------------------+----------------+-----------------------------+------+</div><div class="line">|  1 | Newton G. Goetz  | 252-585-5166   | NewtonGGoetz@dayrep.com     |   10 |</div><div class="line">|  2 | Rebecca R. Edney | 865-475-4171   | RebeccaREdney@armyspy.com   |   12 |</div><div class="line">|  3 | John R. Jackson  | 810-325-1417   | JohnRJackson@armyspy.com    |   15 |</div><div class="line">|  4 | Ron J. Gomes     | 217-450-8568   | RonJGomes@rhyta.com         |   25 |</div><div class="line">|  5 | Penny R. Lewis   | 870-794-1666   | PennyRLewis@rhyta.com       |    5 |</div><div class="line">|  6 | Sofia J. Smith   | 770-333-7379   | SofiaJSmith@armyspy.com     |    3 |</div><div class="line">|  7 | Karlene D. Owen  | 231-242-4157   | KarleneDOwen@jourrapide.com |   12 |</div><div class="line">|  8 | Daniel L. Love   | 978-210-4178   | DanielLLove@rhyta.com       |   44 |</div><div class="line">|  9 | Julie T. Dial    | 719-966-5354   | JulieTDial@jourrapide.com   |    8 |</div><div class="line">| 10 | Juan J. Kennedy  | 908-910-8893   | JuanJKennedy@dayrep.com     |   16 |</div><div class="line">| 11 | adfsb“           | 特殊字符夹渣 ℃ | JuanJKennedy@dayrep.com     |   16 |</div><div class="line">+----+------------------+----------------+-----------------------------+------+</div><div class="line">|                                                             Subtotal |  166 |</div><div class="line">+----+------------------+----------------+-----------------------------+------+</div></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://oiw1gzfww.bkt.clouddn.com/alipay.jpg" alt="紫川秀 Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/unicode/" rel="tag"># unicode</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/05/08/build-goapp-with-docker/" rel="next" title="如何使用容器build多平台golang程序">
+                <i class="fa fa-chevron-left"></i> 如何使用容器build多平台golang程序
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://oiw1gzfww.bkt.clouddn.com/me.png"
+               alt="紫川秀" />
+          <p class="site-author-name" itemprop="name">紫川秀</p>
+           
+              <p class="site-description motion-element" itemprop="description">喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">27</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">17</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/yumaojun03" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://douban.com/people/155892492" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/zi-chuan-xiu-86" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.liaoxuefeng.com/" title="廖雪峰官网" target="_blank">廖雪峰官网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://xiaorui.cc/" title="峰云,就她了" target="_blank">峰云,就她了</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题"><span class="nav-number">1.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Golang中的Rune类型"><span class="nav-number">2.</span> <span class="nav-text">Golang中的Rune类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关于字符宽度"><span class="nav-number">3.</span> <span class="nav-text">关于字符宽度</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决字符宽度问题"><span class="nav-number">4.</span> <span class="nav-text">解决字符宽度问题</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">紫川秀</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+    
+    <script>
+      var cloudTieConfig = {
+        url: document.location.href, 
+        sourceId: "",
+        productKey: "e99572b1efa1462db097e904eb19556a",
+        target: "cloud-tie-wrapper"
+      };
+    </script>
+    <script src="https://img1.ws.126.net/f2e/tie/yun/sdk/loader.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("51RM6PwqfSuyOFX9MxLeq5yY-gzGzoHsz", "dNQYvnf4KlnN364JVGClL7bp");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
