@@ -97,7 +97,7 @@
 <meta property="og:url" content="https://blog.yumaojun.net/2017/01/17/commit-message-style/index.html">
 <meta property="og:site_name" content="紫川秀的博客">
 <meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/angular-commit-message.png">
-<meta property="og:updated_time" content="2017-01-17T06:11:50.000Z">
+<meta property="og:updated_time" content="2017-05-22T03:58:46.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="commit message编写规范">
 <meta name="twitter:image" content="http://oiw1gzfww.bkt.clouddn.com/angular-commit-message.png">
@@ -328,8 +328,8 @@
               
                 <span class="post-meta-item-text">更新于</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2017-01-17T14:11:50+08:00">
-                2017-01-17
+              <time title="更新于" itemprop="dateModified" datetime="2017-05-22T11:58:46+08:00">
+                2017-05-22
               </time>
             
           </span>
@@ -464,7 +464,7 @@
 <p>主要如果报package.json不存在,需要添加这个文件, 这是nodejs的包管理文件, 格式可以参数<a href="https://github.com/commitizen/cz-cli/blob/master/package.json" target="_blank" rel="external">commitizen包的package.json</a></p>
 <h4 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">➜  device git:(master) ✗ git cz</div><div class="line">cz-cli@2.9.5, cz-conventional-changelog@1.2.0</div><div class="line"></div><div class="line"></div><div class="line">Line 1 will be cropped at 100 characters. All other lines will be wrapped after 100 characters.</div><div class="line"></div><div class="line">? Select the <span class="built_in">type</span> of change that you<span class="string">'re committing: (Use arrow keys)</span></div><div class="line">❯ feat:     A new feature</div><div class="line">  fix:      A bug fix</div><div class="line">  docs:     Documentation only changes</div><div class="line">  style:    Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)</div><div class="line">  refactor: A code change that neither fixes a bug nor adds a feature</div><div class="line">  perf:     A code change that improves performance</div><div class="line">  test:     Adding missing tests or correcting existing tests</div><div class="line">(Move up and down to reveal more choices)</div></pre></td></tr></table></figure>
 <h3 id="validate-commit-msg校验工具"><a href="#validate-commit-msg校验工具" class="headerlink" title="validate-commit-msg校验工具"></a>validate-commit-msg校验工具</h3><p>validate-commit-msg 用于检查 Node 项目的 Commit message 是否符合格式。我暂时不需要,<a href="https://github.com/kentcdodds/validate-commit-msg" target="_blank" rel="external">github地址</a></p>
-<h3 id="生成Change-log的工具"><a href="#生成Change-log的工具" class="headerlink" title="生成Change log的工具"></a>生成Change log的工具</h3><p>conventional-changelog 就是生成 Change log 的工具，运行下面的命令即可。<br>我已经使用setuptools的pbr来管理change log, 因此我咱不适用这个工具,关于<a href="http://docs.openstack.org/developer/pbr/" target="_blank" rel="external">pbr说明</a><br>如果是其他项目可以考虑这个工具<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ npm install -g conventional-changelog</div><div class="line">$ <span class="built_in">cd</span> my-project</div><div class="line">$ conventional-changelog -p angular -i CHANGELOG.md -w</div></pre></td></tr></table></figure></p>
+<h3 id="生成Change-log的工具"><a href="#生成Change-log的工具" class="headerlink" title="生成Change log的工具"></a>生成Change log的工具</h3><p>conventional-changelog 就是生成 Change log 的工具，运行下面的命令即可。<a href="https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-cli" target="_blank" rel="external">github地址</a><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ npm install -g conventional-changelog-cli</div><div class="line">$ <span class="built_in">cd</span> my-project</div><div class="line">$ conventional-changelog -p angular -i CHANGELOG.md <span class="_">-s</span></div></pre></td></tr></table></figure></p>
 <p>上面命令不会覆盖以前的 Change log，只会在CHANGELOG.md的头部加上自从上次发布以来的变动。<br>如果你想生成所有发布的 Change log，要改为运行下面的命令。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ conventional-changelog -p angular -i CHANGELOG.md -w -r 0</div></pre></td></tr></table></figure></p>
 <p>为了方便使用，可以将其写入package.json的scripts字段。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">  <span class="string">"scripts"</span>: &#123;</div><div class="line">    <span class="string">"changelog"</span>: <span class="string">"conventional-changelog -p angular -i CHANGELOG.md -w -r 0"</span></div><div class="line">  &#125;&#125;</div></pre></td></tr></table></figure></p>
 <p>以后，直接运行下面的命令即可。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ npm run changelog</div></pre></td></tr></table></figure></p>
@@ -612,7 +612,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">28</span>
+                <span class="site-state-item-count">29</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -634,7 +634,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-count">22</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

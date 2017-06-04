@@ -1,0 +1,1113 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="io," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="紫川秀的博客" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="在Golang开发过程中零零散散会遇到各种IO操作, 每次百度Google也能解决, 大概用法也还是清楚, 但是缺少系统性的全面了解, 也搞不清楚, 使用哪个方式才是最优的, 因此打算全面读一遍标准库中与io相关的源码, 总结成一系列的博客。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Golang IO系列(一) - 基本的IO接口">
+<meta property="og:url" content="https://blog.yumaojun.net/2017/05/06/golang-io/index.html">
+<meta property="og:site_name" content="紫川秀的博客">
+<meta property="og:description" content="在Golang开发过程中零零散散会遇到各种IO操作, 每次百度Google也能解决, 大概用法也还是清楚, 但是缺少系统性的全面了解, 也搞不清楚, 使用哪个方式才是最优的, 因此打算全面读一遍标准库中与io相关的源码, 总结成一系列的博客。">
+<meta property="og:updated_time" content="2017-06-04T14:40:05.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Golang IO系列(一) - 基本的IO接口">
+<meta name="twitter:description" content="在Golang开发过程中零零散散会遇到各种IO操作, 每次百度Google也能解决, 大概用法也还是清楚, 但是缺少系统性的全面了解, 也搞不清楚, 使用哪个方式才是最优的, 因此打算全面读一遍标准库中与io相关的源码, 总结成一系列的博客。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 'undefined',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://blog.yumaojun.net/2017/05/06/golang-io/"/>
+
+
+
+
+
+  <title>Golang IO系列(一) - 基本的IO接口 | 紫川秀的博客</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?035e345b7c80cdf05aec8bc846b2f227";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">紫川秀的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">比你优秀的人不可怕,可怕的是比你优秀的人比你更努力。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/05/06/golang-io/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="紫川秀">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://oiw1gzfww.bkt.clouddn.com/me.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="紫川秀的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Golang IO系列(一) - 基本的IO接口</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-06T08:39:00+08:00">
+                2017-05-06
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2017-06-04T22:40:05+08:00">
+                2017-06-04
+              </time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开发语言/" itemprop="url" rel="index">
+                    <span itemprop="name">开发语言</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开发语言/Golang/" itemprop="url" rel="index">
+                    <span itemprop="name">Golang</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a class="cloud-tie-join-count" href="/2017/05/06/golang-io/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count join-count" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/05/06/golang-io/" class="leancloud_visitors" data-flag-title="Golang IO系列(一) - 基本的IO接口">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在Golang开发过程中零零散散会遇到各种IO操作, 每次百度Google也能解决, 大概用法也还是清楚, 但是缺少系统性的全面了解, 也搞不清楚, 使用哪个方式才是最优的, 因此打算全面读一遍标准库中与io相关的源码, 总结成一系列的博客。<br><a id="more"></a></p>
+<h2 id="这一系列"><a href="#这一系列" class="headerlink" title="这一系列"></a>这一系列</h2><p>这是这一系列的一个开篇, 主要讲标准库中的一些io相关, 整个系列打算写7篇:</p>
+<p>基础篇</p>
+<ul>
+<li>基本的IO接口(io)</li>
+<li>高级的IO接口(ioutil)</li>
+<li>IO的格式化(fmt)</li>
+<li>IO的缓冲(bufio)</li>
+</ul>
+<p>运用篇</p>
+<ul>
+<li>字符串操作(strings.Reader)</li>
+<li>字节操作(bytes.buffer)</li>
+<li>文件操作(os.File)</li>
+</ul>
+<h2 id="IO的概念"><a href="#IO的概念" class="headerlink" title="IO的概念"></a>IO的概念</h2><p>IO在计算机中指Input/Output，也就是输入和输出。由于程序和运行时数据是在内存中驻留，由CPU这个超快的计算核心来执行，涉及到数据交换的地方，通常是磁盘、网络等，就需要IO接口。各种语言一般都会提供IO库供开发者使用。Go语言也不例外。<br>Input指往内存中读取数据, 比如读取文件, 读取服务器响应的网络数据, 在Golang的IO接口中主要以Reader来完成。<br>Outout指从内存中往外发送数据, 比如将数据保存回磁盘的文件, 作为服务端时，返回客户需要的数据, 在Golang的IO接口中主要以Writer来完成。<br>在IO编程中，还有一个很重要的概念:<code>Stream(流)</code>, 可以把流想象成一个水管，数据就是水管里的水，但是只能单向流动。Input Stream就是数据从外面（磁盘、网络）流进内存，Output Stream就是数据从内存流到外面去。而像水管这样的东西，在不同语言里基本都有一个一样的名称:<code>pipe</code>, Golang中关于pipe的一些功能函数都定义在这个文件里面。</p>
+<h2 id="IO包的文件"><a href="#IO包的文件" class="headerlink" title="IO包的文件"></a>IO包的文件</h2><p>不要有恐惧心理, IO标准库的代码量其实并不多, 除去test和example, 剩下的模块其实就5个(io.go, multi.go, pipe.go, ioutil.go, tempfile.go), 总共也才千余行代码，而且还有将近一半是注释。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">➜  io tree .</div><div class="line">.</div><div class="line">├── example_test.go</div><div class="line">├── io.go</div><div class="line">├── io_test.go</div><div class="line">├── ioutil</div><div class="line">│   ├── example_test.goF</div><div class="line">│   ├── ioutil.go</div><div class="line">│   ├── ioutil_test.go</div><div class="line">│   ├── tempfile.go</div><div class="line">│   └── tempfile_test.go</div><div class="line">├── multi.go</div><div class="line">├── multi_test.go</div><div class="line">├── pipe.go</div><div class="line">└── pipe_test.go</div><div class="line"></div><div class="line">1 directory, 12 files</div></pre></td></tr></table></figure></p>
+<p>这篇博客主要关注io.go，multi.go, pipe.go 3个文件。</p>
+<h2 id="从IO包的注解开始讲起"><a href="#从IO包的注解开始讲起" class="headerlink" title="从IO包的注解开始讲起"></a>从IO包的注解开始讲起</h2><p>io包为I/O原语提供了基本的接口。它主要功能是包装了这些原语的已有实现, 这个描述得有点绕, 直白来说: IO表示的是一个过程(输入与输出), IO包就是将输入与输出的规范定义清楚(一些通用的接口和函数), 而具体的输入什么,输出什么, 是由具体的对象来实现,比如后面应用时需要讲到的strings, bytes, file等。<br>由于这些接口和原语以不同的实现包装了低级操作，因此除非另行通知，否则客户端不应假定它们对于并行执行是安全的。</p>
+<h3 id="io-go源码分析"><a href="#io-go源码分析" class="headerlink" title="io.go源码分析"></a>io.go源码分析</h3><p>我们先从IO包的核心文件io.go开始读起, 该文件主要定义了单路读写的相关规范</p>
+<h4 id="基础IO接口的定义"><a href="#基础IO接口的定义" class="headerlink" title="基础IO接口的定义"></a>基础IO接口的定义</h4><p>基础接口涉及到读，写，关闭，以及指针位置这4个方面。</p>
+<ul>
+<li>Reader: 数据读取的方法: Read, 如果对象是一个Reader对象,那么我们就能调用Read读取其中的数据。</li>
+<li>ReadAt: 从偏移量off处开始读取数据的方法: ReadAt</li>
+<li>ReaderFrom: 从一个Reader对象中读入数据: ReaderFrom, 方便对象之间的数据读取。</li>
+<li>Writer: 定义了数据写入的方法: Write, 如果对象是一个Writer对象, 那么我们就能调用Write往该对象写入数据。</li>
+<li>WriterAt: 从偏移量off处开始写入数据的方法: WriterAt</li>
+<li>WriterTo: 往一个Writer对象中写入数据: WriterTo, 方便对象之间的数据写入。</li>
+<li>Closer: 定义了关闭数据流的方法。</li>
+<li>Seeker: 定义设置读写时 偏移量(偏移指针)的值。</li>
+</ul>
+<h5 id="读接口和函数"><a href="#读接口和函数" class="headerlink" title="读接口和函数"></a>读接口和函数</h5><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Reader <span class="keyword">interface</span> &#123;</div><div class="line">	Read(p []<span class="keyword">byte</span>) (n <span class="keyword">int</span>, err error)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">type</span> ReaderAt <span class="keyword">interface</span> &#123;</div><div class="line">	ReadAt(p []<span class="keyword">byte</span>, off <span class="keyword">int64</span>) (n <span class="keyword">int</span>, err error)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">type</span> WriterTo <span class="keyword">interface</span> &#123;</div><div class="line">	WriteTo(w Writer) (n <span class="keyword">int64</span>, err error)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>Read: 将len(p)个字节读取到p中。它返回读取的字节数n（0 &lt;= n &lt;= len(p)）以及任何遇到的错误, 也就是说，当Read方法返回错误时，不代表没有读取到任何数据。调用者应该处理返回的任何数据，之后才处理可能的错误。</li>
+<li>ReadAt: 从基本输入源的偏移量off处开始，将len(p)个字节读取到p中。它返回读取的字节数n（0 &lt;= n &lt;= len(p)）以及任何遇到的错误。</li>
+<li>WriterTo: 将数据写入w中，直到没有数据可写或发生错误。其返回值n为写入的字节数。 在写入过程中遇到的任何错误也将被返回, 这个和ReadFrom对比着看, ReadFrom从Reader对象中直接读取数据，而WriterTo可以直接往一个Writer中写入数据.<br>strings的reader实现了这3个接口，以他为例,具体可以参考strings reader的源码.<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"os"</span></div><div class="line">	<span class="string">"strings"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	content := <span class="string">"example for io.Read, io.ReadAt, io.WriteTo"</span></div><div class="line">	reader := strings.NewReader(content)</div><div class="line">	read := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="number">50</span>)</div><div class="line">	readAt := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="number">50</span>)</div><div class="line"></div><div class="line">	<span class="comment">// 通过Read读取所有数据,如果读取完成，读指针已经移到最后</span></div><div class="line">	<span class="comment">// 通过Len可以知道还剩多少没读，因为指针位置Reader没有实现暴露</span></div><div class="line">	reader.Read(read)</div><div class="line">	fmt.Println(<span class="string">"read:"</span>, <span class="keyword">string</span>(read))</div><div class="line">	fmt.Println(<span class="string">"unread:"</span>, reader.Len())</div><div class="line"></div><div class="line">	<span class="comment">// 通过ReadAt从第9个字符开始读取,但是没有移到读指针的位置(io.ReadAt的规范)</span></div><div class="line">	reader.ReadAt(readAt, <span class="number">8</span>)</div><div class="line">	fmt.Println(<span class="string">"readAt:"</span>, <span class="keyword">string</span>(readAt))</div><div class="line"></div><div class="line">	<span class="comment">// 由于读指针已经移到最后, 所以需要恢复</span></div><div class="line">	<span class="comment">// 将reader的数据直接输出给writer, </span></div><div class="line">	reader.Seek(<span class="number">0</span>, <span class="number">0</span>)</div><div class="line">	reader.WriteTo(os.Stdout)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>跟Reader有关的函数:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// LimitReader</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">LimitReader</span><span class="params">(r Reader, n <span class="keyword">int64</span>)</span> <span class="title">Reader</span></span> &#123; <span class="keyword">return</span> &amp;LimitedReader&#123;r, n&#125; &#125;</div><div class="line"></div><div class="line"><span class="keyword">type</span> LimitedReader <span class="keyword">struct</span> &#123;</div><div class="line">	R Reader <span class="comment">// underlying reader</span></div><div class="line">	N <span class="keyword">int64</span>  <span class="comment">// max bytes remaining</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(l *LimitedReader)</span> <span class="title">Read</span><span class="params">(p []<span class="keyword">byte</span>)</span> <span class="params">(n <span class="keyword">int</span>, err error)</span></span> &#123;</div><div class="line">	<span class="keyword">if</span> l.N &lt;= <span class="number">0</span> &#123;</div><div class="line">		<span class="keyword">return</span> <span class="number">0</span>, EOF</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">if</span> <span class="keyword">int64</span>(<span class="built_in">len</span>(p)) &gt; l.N &#123;</div><div class="line">		p = p[<span class="number">0</span>:l.N]</div><div class="line">	&#125;</div><div class="line">	n, err = l.R.Read(p)</div><div class="line">	l.N -= <span class="keyword">int64</span>(n)</div><div class="line">	<span class="keyword">return</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// TeeReader</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">TeeReader</span><span class="params">(r Reader, w Writer)</span> <span class="title">Reader</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> &amp;teeReader&#123;r, w&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">type</span> teeReader <span class="keyword">struct</span> &#123;</div><div class="line">	r Reader</div><div class="line">	w Writer</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(t *teeReader)</span> <span class="title">Read</span><span class="params">(p []<span class="keyword">byte</span>)</span> <span class="params">(n <span class="keyword">int</span>, err error)</span></span> &#123;</div><div class="line">	n, err = t.r.Read(p)</div><div class="line">	<span class="keyword">if</span> n &gt; <span class="number">0</span> &#123;</div><div class="line">		<span class="keyword">if</span> n, err := t.w.Write(p[:n]); err != <span class="literal">nil</span> &#123;</div><div class="line">			<span class="keyword">return</span> n, err</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// ReadAtLeast</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">ReadAtLeast</span><span class="params">(r Reader, buf []<span class="keyword">byte</span>, min <span class="keyword">int</span>)</span> <span class="params">(n <span class="keyword">int</span>, err error)</span></span> &#123;</div><div class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(buf) &lt; min &#123;</div><div class="line">		<span class="keyword">return</span> <span class="number">0</span>, ErrShortBuffer</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">for</span> n &lt; min &amp;&amp; err == <span class="literal">nil</span> &#123;</div><div class="line">		<span class="keyword">var</span> nn <span class="keyword">int</span></div><div class="line">		nn, err = r.Read(buf[n:])</div><div class="line">		n += nn</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">if</span> n &gt;= min &#123;</div><div class="line">		err = <span class="literal">nil</span></div><div class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> n &gt; <span class="number">0</span> &amp;&amp; err == EOF &#123;</div><div class="line">		err = ErrUnexpectedEOF</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// ReadFull</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">ReadFull</span><span class="params">(r Reader, buf []<span class="keyword">byte</span>)</span> <span class="params">(n <span class="keyword">int</span>, err error)</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> ReadAtLeast(r, buf, <span class="built_in">len</span>(buf))</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<ul>
+<li><p>LimitReader: 返回一个LimitReader结构体, 从R读取但将返回的数据量限制为N字节。每调用一次Read都将更新N来反应新的剩余数量。如果你的读buf大于限制的长度, 将一次读取完, 如果你的buf小于限制长度, 则只有多次循环读取, 从而起到限制读取的作用。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"io"</span></div><div class="line">	<span class="string">"strings"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	content := <span class="string">"This is limitReader example"</span></div><div class="line">	reader := strings.NewReader(content)</div><div class="line"></div><div class="line">	i := <span class="number">1</span></div><div class="line">	<span class="comment">// 不做限制，读取所有的内容</span></div><div class="line">	limitReader := &amp;io.LimitedReader&#123;R: reader, N: <span class="keyword">int64</span>(<span class="built_in">len</span>(content))&#125;</div><div class="line">	<span class="keyword">for</span> limitReader.N &gt; <span class="number">0</span> &#123;</div><div class="line">		<span class="comment">// 限制性读取, 一次读取4字节</span></div><div class="line">		tmp := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="number">4</span>)</div><div class="line">		limitReader.Read(tmp)</div><div class="line">		fmt.Printf(<span class="string">"第%d次: %s\n"</span>, i, tmp)</div><div class="line">		i++</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>TeeReader: 返回一个 Reader，它将从r中读到的数据写入w中。所有经由它处理的从r的读取都匹配于对应的对w的写入。它没有内部缓存，即写入必须在读取完成前完成。任何在写入时遇到的错误都将作为读取错误返回,也就是说，我们通过Reader读取内容后，会自动写入到Writer中去</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"io"</span></div><div class="line">	<span class="string">"os"</span></div><div class="line">	<span class="string">"strings"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line"></div><div class="line">	<span class="keyword">var</span> (</div><div class="line">		err error</div><div class="line">		nn  <span class="keyword">int</span></div><div class="line">		n   <span class="keyword">int</span></div><div class="line">	)</div><div class="line">	content := <span class="string">"This is teeReader example\n"</span></div><div class="line"></div><div class="line">	<span class="comment">// 复制一份流到标准输出</span></div><div class="line">	reader := io.TeeReader(strings.NewReader(content), os.Stdout)</div><div class="line">	p := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="built_in">len</span>(content))</div><div class="line">	n, err = reader.Read(p)</div><div class="line"></div><div class="line">	<span class="comment">// 读完数据</span></div><div class="line">	<span class="keyword">for</span> err != io.EOF &#123;</div><div class="line">		nn, err = reader.Read(p[n:])</div><div class="line">		n += nn</div><div class="line">	</div><div class="line"></div><div class="line">	fmt.Printf(<span class="string">"my read: %s"</span>, <span class="keyword">string</span>(p))</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>ReadAtLeast:将r读取到buf中，直到读了最少min个字节为止,因此buf必须大于最小字节数,不然就会报错(buf小了), 这个和LimitReader功能类似, 但是</p>
+</li>
+<li>ReadFull: 精确地从r中将len(buf)个字节读取到buf中,将buf读满, 实际上ReadFull就是调用的ReadAtLeast来将buf填满的,<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"io"</span></div><div class="line">	<span class="string">"log"</span></div><div class="line">	<span class="string">"strings"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line"></div><div class="line">	content := <span class="string">"This is readFull example\n"</span></div><div class="line"></div><div class="line">	p := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="built_in">len</span>(content))</div><div class="line"></div><div class="line">	_, err := io.ReadFull(strings.NewReader(content), p)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		log.Fatal(err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	fmt.Printf(<span class="string">"my read: %s"</span>, <span class="keyword">string</span>(p))</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h5 id="写接口和函数"><a href="#写接口和函数" class="headerlink" title="写接口和函数"></a>写接口和函数</h5><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Writer <span class="keyword">interface</span> &#123;</div><div class="line">	Write(p []<span class="keyword">byte</span>) (n <span class="keyword">int</span>, err error)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">type</span> ReaderFrom <span class="keyword">interface</span> &#123;</div><div class="line">	ReadFrom(r Reader) (n <span class="keyword">int64</span>, err error)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">type</span> WriterAt <span class="keyword">interface</span> &#123;</div><div class="line">	WriteAt(p []<span class="keyword">byte</span>, off <span class="keyword">int64</span>) (n <span class="keyword">int</span>, err error)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>Writer: 将p中len(p)个字节的数据写入到基本数据流中, 它返回从p中被写入的字节数n（0 &lt;= n &lt;= len(p)）以及任何遇到的引起写入提前停止的错误.</li>
+<li>WriterAt:  和ReadAt相对，从p中将len(p)个字节写入到偏移量off处的基本数据流中,即从偏移量off处开始写入</li>
+<li>ReadFrom: 函数将io.Reader作为参数，也就是说，ReadFrom可以从任意Reader对象中读取数据，只要来源实现了io.Reader接口。比如，我们可以从标准输入、文件、字符串等读取数据。<br>bufio实现了Writer和ReadFrom, 没实现WriterAt, 我这里没扩展，因为Writer都在工厂模式的保护下，所有属性都没暴露，扩展起来不方便:<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"bufio"</span></div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"os"</span></div><div class="line">	<span class="string">"strings"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	content := <span class="string">"example for io.Writer, io.ReadFrom"</span></div><div class="line">	writer := bufio.NewWriter(os.Stdout)</div><div class="line"></div><div class="line">	<span class="comment">// 直接byte往标准输出写入</span></div><div class="line">	writer.Write([]<span class="keyword">byte</span>(content))</div><div class="line">	writer.Flush()</div><div class="line"></div><div class="line">	fmt.Println()</div><div class="line"></div><div class="line">	<span class="comment">// 为了方便其实也直接直接写入string</span></div><div class="line">	writer.WriteString(content)</div><div class="line">	writer.Flush()</div><div class="line"></div><div class="line">	fmt.Println()</div><div class="line"></div><div class="line">	<span class="comment">// 从Reader中读出数据,然后再往标准输出写入</span></div><div class="line">	reader := strings.NewReader(content)</div><div class="line">	writer.ReadFrom(reader)</div><div class="line">	writer.Flush()</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>跟Writer有关的函数:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">WriteString</span><span class="params">(w Writer, s <span class="keyword">string</span>)</span> <span class="params">(n <span class="keyword">int</span>, err error)</span></span> &#123;</div><div class="line">	<span class="keyword">if</span> sw, ok := w.(stringWriter); ok &#123;</div><div class="line">		<span class="keyword">return</span> sw.WriteString(s)</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> w.Write([]<span class="keyword">byte</span>(s))</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<ul>
+<li>WriteString: 将字符串内容写入到writer中, 如果writer实现了WriteString则直接调用它的方法写入,如果没有则直接调用Write处理成bytes写入, 具体上面已经有栗子了.</li>
+</ul>
+<h5 id="关闭与偏移量"><a href="#关闭与偏移量" class="headerlink" title="关闭与偏移量"></a>关闭与偏移量</h5><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> Closer <span class="keyword">interface</span> &#123;</div><div class="line">	Close() error</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// Seek whence values.</span></div><div class="line"><span class="keyword">const</span> (</div><div class="line">	SeekStart   = <span class="number">0</span> <span class="comment">// seek relative to the origin of the file</span></div><div class="line">	SeekCurrent = <span class="number">1</span> <span class="comment">// seek relative to the current offset</span></div><div class="line">	SeekEnd     = <span class="number">2</span> <span class="comment">// seek relative to the end</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="keyword">type</span> Seeker <span class="keyword">interface</span> &#123;</div><div class="line">	Seek(offset <span class="keyword">int64</span>, whence <span class="keyword">int</span>) (<span class="keyword">int64</span>, error)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>Closer: 该接口比较简单，只有一个Close()方法，用于关闭数据流, 比如数据库连接, 文件等。</li>
+<li>Seeker: 设置下一次Read或Write的偏移量(offset)，它的解释取决于 whence: 0表示相对于文件的起始处，1表示相对于当前的偏移，而2表示相对于其结尾处。 Seek返回新的偏移量和一个错误，如果有的话。也就是说，Seek方法用于设置偏移量的，这样可以从某个特定位置开始操作数据流。听起来和ReaderAt/WriteAt接口有些类似，不过Seeker接口更灵活，可以更好的控制读写数据流的位置。<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"log"</span></div><div class="line">	<span class="string">"strings"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	content := <span class="string">"字Seek测试读取指定位置的字符"</span></div><div class="line">	reader := strings.NewReader(content)</div><div class="line"></div><div class="line">	<span class="comment">// 读取倒数第5个字符, 由于string reader设计的原因</span></div><div class="line">	<span class="comment">// 无论是ReadAt, WriteAt还是Seek这里面的offset</span></div><div class="line">	<span class="comment">// 都指的是byte个数, 并且index累加的也是byte,所以</span></div><div class="line">	<span class="comment">// 就坑爹了，要取第5个字符实际上的byte位置是5*3</span></div><div class="line">	<span class="comment">// 注意utf8 是变长编码的, 所以并不是所有的中文都是3字节哦!</span></div><div class="line">	<span class="comment">// 所有这种方式是有问题的, 还是以字符个数进行计算合适</span></div><div class="line">	reader.Seek(<span class="number">-15</span>, <span class="number">2</span>)</div><div class="line">	r, s, err := reader.ReadRune()</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		log.Fatal(err)</div><div class="line">	&#125;</div><div class="line">	fmt.Println(s)</div><div class="line">	fmt.Printf(<span class="string">"%c\n"</span>, r)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="组合衍生的IO接口"><a href="#组合衍生的IO接口" class="headerlink" title="组合衍生的IO接口"></a>组合衍生的IO接口</h4><ul>
+<li>ReadWriter</li>
+<li>ReadCloser</li>
+<li>WriteCloser</li>
+<li>ReadWriteCloser</li>
+<li>ReadSeeker</li>
+<li>WriteSeeker</li>
+<li>ReadWriteSeeker </li>
+</ul>
+<p>这些都是基于上面单个接口组合而成, 理解上面的基础过会，这个就不多说了。</p>
+<h4 id="IO-Copy相关"><a href="#IO-Copy相关" class="headerlink" title="IO Copy相关"></a>IO Copy相关</h4><p>这里主要介绍和Copy相关的函数:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">CopyN</span><span class="params">(dst Writer, src Reader, n <span class="keyword">int64</span>)</span> <span class="params">(written <span class="keyword">int64</span>, err error)</span></span></div><div class="line"></div><div class="line"><span class="title">func</span> <span class="title">Copy</span><span class="params">(dst Writer, src Reader)</span> <span class="params">(written <span class="keyword">int64</span>, err error)</span></div><div class="line"></div><div class="line"><span class="title">func</span> <span class="title">CopyBuffer</span><span class="params">(dst Writer, src Reader, buf []<span class="keyword">byte</span>)</span> <span class="params">(written <span class="keyword">int64</span>, err error)</span></div></pre></td></tr></table></figure></p>
+<ul>
+<li>CopyN: 将n个字节从src复制到dst. 它返回复制的字节数以及在复制时遇到的最早的错误.</li>
+<li>Copy: 将src复制到dst，直到在src上到达EOF或发生错误。它返回复制的字节数，如果有的话，还会返回在复制时遇到的第一个错误。</li>
+<li>CopyBuffer: 相当于 Copy，只不 Copy 在执行的过程中会创建一个临时的缓冲区来中转数据，而 CopyBuffer 则可以单独提供一个缓冲区让多个复制操作共用同一个缓冲区，避免每次复制操作都创建新的缓冲区。如果 buf == nil，则 CopyBuffer 会自动创建缓冲区。</li>
+</ul>
+<p>举一组栗子:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"io"</span></div><div class="line">	<span class="string">"os"</span></div><div class="line">	<span class="string">"strings"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	content := <span class="string">"Copy相关操作的测试\n"</span></div><div class="line"></div><div class="line">	reader := strings.NewReader(content)</div><div class="line">	writer := os.Stdout</div><div class="line"></div><div class="line">	<span class="comment">// copy 10 个字节4的Ascii和2个中文</span></div><div class="line">	io.CopyN(writer, reader, <span class="number">10</span>)</div><div class="line">	fmt.Println()</div><div class="line"></div><div class="line">	<span class="comment">// 重置读指针,从新完成1次完整的copy</span></div><div class="line">	reader.Seek(<span class="number">0</span>, <span class="number">0</span>)</div><div class="line">	io.Copy(writer, reader)</div><div class="line"></div><div class="line">	<span class="comment">// 创建一个32字节的缓存用于所有copy使用,不用再开辟临时缓存</span></div><div class="line">	buf := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="number">32</span>)</div><div class="line">	r1 := strings.NewReader(<span class="string">"CopyBuffer测试第一次\n"</span>)</div><div class="line">	io.CopyBuffer(writer, r1, buf)</div><div class="line"></div><div class="line">	r2 := strings.NewReader(<span class="string">"CopyBuffer测试第二次\n"</span>)</div><div class="line">	io.CopyBuffer(writer, r2, buf)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h4 id="Byte和Rune类型IO相关"><a href="#Byte和Rune类型IO相关" class="headerlink" title="Byte和Rune类型IO相关"></a>Byte和Rune类型IO相关</h4><p>针对基础数据结构的IO读写,大概有如下几类:Byte, Rune, Section, 主要定义了如何读取一个字节和一个Unicode字符的规范, 一般地，我们不会使用bytes.Buffer来一次读取或写入一个字节, 但是在处理二进制数据和数据压缩时 这些接口用得比较多。</p>
+<ul>
+<li>RuneReader: 读取单个UTF-8字符, 返回其rune和该字符占用的字节</li>
+<li>RuneScanner: 相较于RuneReader而言, 仅增加了一个UnreadByt接口, UnreadByte方法的意思是：将上一次ReadByte的字节还原，使得再次调用ReadByte返回的结果和上一次调用相同，也就是说，UnreadByte是重置上一次的ReadByte。注意，UnreadByte调用之前必须调用了ReadByte，且不能连续调用UnreadByte。</li>
+<li>ByteReader: 读一个字节.</li>
+<li>ByteWriter: 写一个字节.</li>
+<li>ByteScanner: 和RuneScanner类似, 只是针对的式Byte而已.</li>
+</ul>
+<p>结构体</p>
+<ul>
+<li>SectionReader: 这是用于读取磁盘扇区的接口, 由于基本不会使用到, 因此不做解读了.</li>
+</ul>
+<h3 id="multi-go源码分析"><a href="#multi-go源码分析" class="headerlink" title="multi.go源码分析"></a>multi.go源码分析</h3><p>该文件主要定义了多路读写的相关规范,这里的多路指的是对多个reader或者多个writer同时的动作,它们接收多个Reader或Writer，返回一个Reader或Writer。我们可以猜想到这两个函数就是操作多个Reader或Writer就像操作一个。事实上，在io包中定义了两个非导出类型：mutilReader和multiWriter，它们分别实现了io.Reader和io.Writer接口<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> multiReader <span class="keyword">struct</span> &#123;</div><div class="line">	readers []Reader</div><div class="line">&#125;</div><div class="line"><span class="keyword">type</span> multiWriter <span class="keyword">struct</span> &#123;</div><div class="line">	writers []Writer</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">MultiReader</span><span class="params">(readers ...Reader)</span> <span class="title">Reader</span> </span></div><div class="line"><span class="title">func</span> <span class="title">MultiWriter</span><span class="params">(writers ...Writer)</span> <span class="title">Writer</span></div></pre></td></tr></table></figure></p>
+<ul>
+<li>MultiReader: 逻辑上将多个Reader组合起来，返回一个新的Reader, 但是这个新Reader并不能通过调用一次Read方法获取所有Reader的内容。因为它这个逻辑真的特别简单, 循环读取所有的Reader, 读完一个返回一个, 只是正常读完过后的EOF被重置为nil, 这样的结果就是 我们还得在外面再次循环读取一次, 直到EOF<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"bytes"</span></div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"io"</span></div><div class="line">	<span class="string">"strings"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line"></div><div class="line">	readers := []io.Reader&#123;</div><div class="line">		strings.NewReader(<span class="string">"from strings reader\n"</span>),</div><div class="line">		bytes.NewBufferString(<span class="string">"from bytes buffer\n"</span>),</div><div class="line">	&#125;</div><div class="line">	reader := io.MultiReader(readers...)</div><div class="line"></div><div class="line">	data := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="number">0</span>, <span class="number">1024</span>)</div><div class="line"></div><div class="line">	<span class="comment">// 循环读取每个reader返回的内容来拼接,</span></div><div class="line">	<span class="comment">// 直到所有reader读取后返回EOF停止</span></div><div class="line">	<span class="keyword">for</span> n, err := <span class="number">0</span>, error(<span class="literal">nil</span>); err != io.EOF; &#123;</div><div class="line">		tmp := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="number">512</span>)</div><div class="line">		n, err = reader.Read(tmp)</div><div class="line">		data = <span class="built_in">append</span>(data, tmp[:n]...)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	fmt.Printf(<span class="string">"%s"</span>, data)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>像上面这样使用显然有点麻烦, 比较方便的使用方式还是聚合过后直接使用io.Copy来搞定<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"bytes"</span></div><div class="line">	<span class="string">"io"</span></div><div class="line">	<span class="string">"os"</span></div><div class="line">	<span class="string">"strings"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line"></div><div class="line">	readers := []io.Reader&#123;</div><div class="line">		strings.NewReader(<span class="string">"from strings reader\n"</span>),</div><div class="line">		bytes.NewBufferString(<span class="string">"from bytes buffer\n"</span>),</div><div class="line">	&#125;</div><div class="line">	reader := io.MultiReader(readers...)</div><div class="line"></div><div class="line">	io.Copy(os.Stdout, reader)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<ul>
+<li>MultiWriter: 和MultiReader类似, 将多个writer聚合都一个slice里面, 然后用for循环写, 实际上就是将向自身写入的数据同步写入到所有writers中<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"io"</span></div><div class="line">	<span class="string">"os"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line"></div><div class="line">	<span class="comment">// 直接来2个writer</span></div><div class="line">	writers := []io.Writer&#123;</div><div class="line">		os.Stdout,</div><div class="line">		os.Stderr,</div><div class="line">	&#125;</div><div class="line">	writer := io.MultiWriter(writers...)</div><div class="line">	writer.Write([]<span class="keyword">byte</span>(<span class="string">"hello,world\n"</span>))</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="pipe-go源码分"><a href="#pipe-go源码分" class="headerlink" title="pipe.go源码分"></a>pipe.go源码分</h3><p>该文件主要定义了流式IO的相关规范,主要就是Pipe, Pipe在内存中创建一个同步管道，用于不同区域的代码之间相互传递数据, 因此和无缓冲channel很像，因此不能在一个goroutine中进行读和写。同样 由于管道没有缓存区, 所以和channel一样 对于读写和关闭都是 并行安全的。<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// A pipe is the shared pipe structure underlying PipeReader and PipeWriter.</span></div><div class="line"><span class="keyword">type</span> pipe <span class="keyword">struct</span> &#123;</div><div class="line">	rl    sync.Mutex <span class="comment">// gates readers one at a time</span></div><div class="line">	wl    sync.Mutex <span class="comment">// gates writers one at a time</span></div><div class="line">	l     sync.Mutex <span class="comment">// protects remaining fields</span></div><div class="line">	data  []<span class="keyword">byte</span>     <span class="comment">// data remaining in pending write</span></div><div class="line">	rwait sync.Cond  <span class="comment">// waiting reader</span></div><div class="line">	wwait sync.Cond  <span class="comment">// waiting writer</span></div><div class="line">	rerr  error      <span class="comment">// if reader closed, error to give writes</span></div><div class="line">	werr  error      <span class="comment">// if writer closed, error to give reads</span></div><div class="line">&#125;</div><div class="line"><span class="comment">// A PipeReader is the read half of a pipe.</span></div><div class="line"><span class="keyword">type</span> PipeReader <span class="keyword">struct</span> &#123;</div><div class="line">	p *pipe</div><div class="line">&#125;</div><div class="line"><span class="comment">// A PipeWriter is the write half of a pipe.</span></div><div class="line"><span class="keyword">type</span> PipeWriter <span class="keyword">struct</span> &#123;</div><div class="line">	p *pipe</div><div class="line">&#125;</div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">Pipe</span><span class="params">()</span> <span class="params">(*PipeReader, *PipeWriter)</span></span> &#123;</div><div class="line">	p := <span class="built_in">new</span>(pipe)</div><div class="line">	p.rwait.L = &amp;p.l</div><div class="line">	p.wwait.L = &amp;p.l</div><div class="line">	r := &amp;PipeReader&#123;p&#125;</div><div class="line">	w := &amp;PipeWriter&#123;p&#125;</div><div class="line">	<span class="keyword">return</span> r, w</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<ul>
+<li>PipeReader: 是管道的读取端。它实现了io.Reader和io.Closer接口，如果管道被关闭，则会返会一个错误信息：<ol>
+<li>如果写入端通过 CloseWithError 方法关闭了管道，则返回关闭时传入的错误信息。</li>
+<li>如果写入端通过 Close 方法关闭了管道，则返回 io.EOF。</li>
+<li>如果是读取端关闭了管道，则返回 io.ErrClosedPipe。</li>
+</ol>
+</li>
+<li>PipeWriter: 是管道的写入端。它实现了io.Writer和io.Closer接口, 如果管道被关闭，则会返会一个错误信息：<ol>
+<li>如果读取端通过 CloseWithError 方法关闭了管道，则返回关闭时传入的错误信息。</li>
+<li>如果读取端通过 Close 方法关闭了管道，则返回 io.ErrClosedPipe。</li>
+<li>如果是写入端关闭了管道，则返回 io.ErrClosedPipe。</li>
+</ol>
+</li>
+<li>Pipe: 它将io.Reader连接到io.Writer。一端的读取匹配另一端的写入，直接在这两端之间复制数据</li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"io"</span></div><div class="line">	<span class="string">"log"</span></div><div class="line">	<span class="string">"time"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	Pipe()</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">Pipe</span><span class="params">()</span></span> &#123;</div><div class="line">	rPipe, wPipe := io.Pipe()</div><div class="line">	<span class="keyword">go</span> Read(rPipe)</div><div class="line">	Write(wPipe)</div><div class="line">	time.Sleep(<span class="number">2</span> * time.Second)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">Write</span><span class="params">(pipeWriter *io.PipeWriter)</span></span> &#123;</div><div class="line">	_, err := pipeWriter.Write([]<span class="keyword">byte</span>(<span class="string">"Pipe 管道测试"</span>))</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		log.Fatal(err)</div><div class="line">	&#125;</div><div class="line">	<span class="comment">// 记得写入端关闭Pipe</span></div><div class="line">	pipeWriter.CloseWithError(io.EOF)</div><div class="line"></div><div class="line">	fmt.Println(<span class="string">"写入完成"</span>)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">Read</span><span class="params">(pipeReader *io.PipeReader)</span></span> &#123;</div><div class="line">	data := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="number">1024</span>)</div><div class="line"></div><div class="line">	<span class="keyword">for</span> n, err := <span class="number">0</span>, error(<span class="literal">nil</span>); err != io.EOF; &#123;</div><div class="line">		tmp := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="number">512</span>)</div><div class="line">		n, err = pipeReader.Read(tmp)</div><div class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &amp;&amp; err != io.EOF &#123;</div><div class="line">			log.Fatal(err)</div><div class="line">		&#125;</div><div class="line">		data = <span class="built_in">append</span>(data, tmp[:n]...)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	fmt.Println(<span class="string">"Data: "</span>, <span class="keyword">string</span>(data))</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://oiw1gzfww.bkt.clouddn.com/alipay.jpg" alt="紫川秀 Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/io/" rel="tag"># io</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/04/23/openstack-golang-cli/" rel="next" title="使用Golang开发OpenStack服务的CLI">
+                <i class="fa fa-chevron-left"></i> 使用Golang开发OpenStack服务的CLI
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/05/08/build-goapp-with-docker/" rel="prev" title="如何使用容器build多平台golang程序">
+                如何使用容器build多平台golang程序 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://oiw1gzfww.bkt.clouddn.com/me.png"
+               alt="紫川秀" />
+          <p class="site-author-name" itemprop="name">紫川秀</p>
+           
+              <p class="site-description motion-element" itemprop="description">喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">29</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">17</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">22</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/yumaojun03" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://douban.com/people/155892492" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/zi-chuan-xiu-86" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.liaoxuefeng.com/" title="廖雪峰官网" target="_blank">廖雪峰官网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://xiaorui.cc/" title="峰云,就她了" target="_blank">峰云,就她了</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#这一系列"><span class="nav-number">1.</span> <span class="nav-text">这一系列</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IO的概念"><span class="nav-number">2.</span> <span class="nav-text">IO的概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IO包的文件"><span class="nav-number">3.</span> <span class="nav-text">IO包的文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#从IO包的注解开始讲起"><span class="nav-number">4.</span> <span class="nav-text">从IO包的注解开始讲起</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#io-go源码分析"><span class="nav-number">4.1.</span> <span class="nav-text">io.go源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#基础IO接口的定义"><span class="nav-number">4.1.1.</span> <span class="nav-text">基础IO接口的定义</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#读接口和函数"><span class="nav-number">4.1.1.1.</span> <span class="nav-text">读接口和函数</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#写接口和函数"><span class="nav-number">4.1.1.2.</span> <span class="nav-text">写接口和函数</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#关闭与偏移量"><span class="nav-number">4.1.1.3.</span> <span class="nav-text">关闭与偏移量</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#组合衍生的IO接口"><span class="nav-number">4.1.2.</span> <span class="nav-text">组合衍生的IO接口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#IO-Copy相关"><span class="nav-number">4.1.3.</span> <span class="nav-text">IO Copy相关</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Byte和Rune类型IO相关"><span class="nav-number">4.1.4.</span> <span class="nav-text">Byte和Rune类型IO相关</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#multi-go源码分析"><span class="nav-number">4.2.</span> <span class="nav-text">multi.go源码分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pipe-go源码分"><span class="nav-number">4.3.</span> <span class="nav-text">pipe.go源码分</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">紫川秀</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+    
+    <script>
+      var cloudTieConfig = {
+        url: document.location.href, 
+        sourceId: "",
+        productKey: "e99572b1efa1462db097e904eb19556a",
+        target: "cloud-tie-wrapper"
+      };
+    </script>
+    <script src="https://img1.ws.126.net/f2e/tie/yun/sdk/loader.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("51RM6PwqfSuyOFX9MxLeq5yY-gzGzoHsz", "dNQYvnf4KlnN364JVGClL7bp");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
