@@ -1,0 +1,1071 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="MySQL," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="紫川秀的博客" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="最近一直使用gorm来操作数据库, 但当遇到一些批量操作时,感觉性能很差, 原因很简单, gorm是一条一条的执行的,效率很低, 所以对于批量操作, 特别是对于大量record需要创建或者修改时, 直接使用SQL, 才是正确的选择。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL批量更新与插入">
+<meta property="og:url" content="https://blog.yumaojun.net/2017/06/19/mysql-performance-for-bulk-action/index.html">
+<meta property="og:site_name" content="紫川秀的博客">
+<meta property="og:description" content="最近一直使用gorm来操作数据库, 但当遇到一些批量操作时,感觉性能很差, 原因很简单, gorm是一条一条的执行的,效率很低, 所以对于批量操作, 特别是对于大量record需要创建或者修改时, 直接使用SQL, 才是正确的选择。">
+<meta property="og:updated_time" content="2017-06-21T05:42:33.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MySQL批量更新与插入">
+<meta name="twitter:description" content="最近一直使用gorm来操作数据库, 但当遇到一些批量操作时,感觉性能很差, 原因很简单, gorm是一条一条的执行的,效率很低, 所以对于批量操作, 特别是对于大量record需要创建或者修改时, 直接使用SQL, 才是正确的选择。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 'undefined',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://blog.yumaojun.net/2017/06/19/mysql-performance-for-bulk-action/"/>
+
+
+
+
+
+  <title>MySQL批量更新与插入 | 紫川秀的博客</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?035e345b7c80cdf05aec8bc846b2f227";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">紫川秀的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">比你优秀的人不可怕,可怕的是比你优秀的人比你更努力。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/06/19/mysql-performance-for-bulk-action/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="紫川秀">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://oiw1gzfww.bkt.clouddn.com/me.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="紫川秀的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">MySQL批量更新与插入</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-19T10:09:57+08:00">
+                2017-06-19
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2017-06-21T13:42:33+08:00">
+                2017-06-21
+              </time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开发语言/" itemprop="url" rel="index">
+                    <span itemprop="name">开发语言</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开发语言/Golang/" itemprop="url" rel="index">
+                    <span itemprop="name">Golang</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a class="cloud-tie-join-count" href="/2017/06/19/mysql-performance-for-bulk-action/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count join-count" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/06/19/mysql-performance-for-bulk-action/" class="leancloud_visitors" data-flag-title="MySQL批量更新与插入">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近一直使用gorm来操作数据库, 但当遇到一些批量操作时,感觉性能很差, 原因很简单, gorm是一条一条的执行的,效率很低, 所以对于批量操作, 特别是对于大量record需要创建或者修改时, 直接使用SQL, 才是正确的选择。<br><a id="more"></a></p>
+<h2 id="调整MySQL配置-MariaDB10"><a href="#调整MySQL配置-MariaDB10" class="headerlink" title="调整MySQL配置(MariaDB10)"></a>调整MySQL配置(MariaDB10)</h2><ul>
+<li>bulk_insert_buffer_size: 调整批量插入缓冲， 默认是16M, 为了能支持更大数据的批量插入, 按需调整, 我这里调整到128M</li>
+<li>net_buffer_length: 客户发出的SQL语句期望的长度, 默认是16K。如果语句超过这个长度，缓冲区自动地被扩大，直到max_allowed_packet个字节, 我调整到128K</li>
+<li>max_allowed_packet: 一个包的最大尺寸, 默认也是16M。消息缓冲区被初始化为net_buffer_length字节，但是可在需要时增加到max_allowed_packet个字节, 我也调整到128M</li>
+</ul>
+<p>将这些配置写入MySQL的配置文件中<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">bulk_insert_buffer_size = 128M</div><div class="line">net_buffer_length = 128K</div><div class="line">max_allowed_packet = 128M</div></pre></td></tr></table></figure></p>
+<p>从启MySQL查看这些全局变量是否生效<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line">Welcome to the MariaDB monitor.  Commands end with ; or \g.</div><div class="line">Your MariaDB connection id is 142</div><div class="line">Server version: 10.1.21-MariaDB-1~jessie mariadb.org binary distribution</div><div class="line"></div><div class="line">Copyright (c) 2000, 2016, Oracle, MariaDB Corporation Ab and others.</div><div class="line"></div><div class="line">Type <span class="string">'help;'</span> or <span class="string">'\h'</span> <span class="keyword">for</span> help. Type <span class="string">'\c'</span> to clear the current input statement.</div><div class="line"></div><div class="line">MariaDB [(none)]&gt; show variables like <span class="string">"bulk_insert_buffer_size"</span>;</div><div class="line">+-------------------------+----------+</div><div class="line">| Variable_name           | Value    |</div><div class="line">+-------------------------+----------+</div><div class="line">| bulk_insert_buffer_size | 16777216 |</div><div class="line">+-------------------------+----------+</div><div class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</div><div class="line"></div><div class="line">MariaDB [(none)]&gt; show variables like <span class="string">"net_buffer_length"</span>;</div><div class="line">+-------------------+-------+</div><div class="line">| Variable_name     | Value |</div><div class="line">+-------------------+-------+</div><div class="line">| net_buffer_length | 16384 |</div><div class="line">+-------------------+-------+</div><div class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</div><div class="line"></div><div class="line">MariaDB [(none)]&gt; show variables like <span class="string">"max_allowed_packet"</span>;</div><div class="line">+--------------------+----------+</div><div class="line">| Variable_name      | Value    |</div><div class="line">+--------------------+----------+</div><div class="line">| max_allowed_packet | 16777216 |</div><div class="line">+--------------------+----------+</div><div class="line">1 row <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</div></pre></td></tr></table></figure></p>
+<h2 id="使用事物"><a href="#使用事物" class="headerlink" title="使用事物"></a>使用事物</h2><p>批量创建和修改多条记录时, 如果使用了多条语句, 请一定使用事物, 因为这些动作是一个事物, 避免部分成功,部分失败 造成数据不一致的问题。<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">tx,_ := db.Begin()  </div><div class="line">stm,_ := Tx.Preapare(<span class="string">"insert into test values(?,null)"</span>)  </div><div class="line">result,err := stm.Exec(<span class="string">'123'</span>)</div><div class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">    tx.Commit()</div><div class="line">&#125; <span class="keyword">else</span> &#123;</div><div class="line">    tx.Rollback()</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="批量插入"><a href="#批量插入" class="headerlink" title="批量插入"></a>批量插入</h2><p>批量插入的方法一般包含: </p>
+<ul>
+<li>直接循环提供(非常不推荐)</li>
+<li>基于事物的循环提交</li>
+<li>利用INSERT INTO的多值插入语句</li>
+</ul>
+<p>这里以插入10000条数据为例进行测试, 关于下面的测试代码见: <a href="https://github.com/yumaojun03/golang/blob/master/mysql/bulk_perf_test.go" target="_blank" rel="external">测试代码完整示例</a></p>
+<h3 id="直接循环提交"><a href="#直接循环提交" class="headerlink" title="直接循环提交"></a>直接循环提交</h3><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 使用For循环执行</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">forInsert</span><span class="params">()</span></span> &#123;</div><div class="line">	start := time.Now()</div><div class="line"></div><div class="line">	stmt, err := db.Prepare(<span class="string">`INSERT user (user_name,user_age,user_sex) values (?,?,?)`</span>)</div><div class="line">	checkErr(err)</div><div class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10000</span>; i++ &#123;</div><div class="line">		name := <span class="string">"tony"</span> + strconv.Itoa(i)</div><div class="line">		_, err := stmt.Exec(name, i, <span class="number">1</span>)</div><div class="line">		checkErr(err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	delta := time.Now().Sub(start).String()</div><div class="line">	fmt.Println(<span class="string">"For Insert Total Time: "</span>, delta)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="基于事物循环提交"><a href="#基于事物循环提交" class="headerlink" title="基于事物循环提交"></a>基于事物循环提交</h3><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 在一个事物内循环执行</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">withTxInsert</span><span class="params">()</span></span> &#123;</div><div class="line">	start := time.Now()</div><div class="line"></div><div class="line">	tx, err := db.Begin()</div><div class="line">	checkErr(err)</div><div class="line"></div><div class="line">	stmt, err := tx.Prepare(<span class="string">`INSERT user (user_name,user_age,user_sex) values (?,?,?)`</span>)</div><div class="line">	checkErr(err)</div><div class="line"></div><div class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10000</span>; i++ &#123;</div><div class="line">		name := <span class="string">"tony"</span> + strconv.Itoa(i)</div><div class="line">		_, err := stmt.Exec(name, i, <span class="number">1</span>)</div><div class="line">		checkErr(err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		err := tx.Rollback()</div><div class="line">		checkErr(err)</div><div class="line">		<span class="keyword">return</span></div><div class="line">	&#125;</div><div class="line"></div><div class="line">	err = tx.Commit()</div><div class="line">	checkErr(err)</div><div class="line"></div><div class="line">	delta := time.Now().Sub(start).String()</div><div class="line">	fmt.Println(<span class="string">"Bulk With Transaction Insert Total Time: "</span>, delta)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="构造成一条语句提交"><a href="#构造成一条语句提交" class="headerlink" title="构造成一条语句提交"></a>构造成一条语句提交</h3><p>SQL样例: “INSERT INTO table (field1,field2,field3) VALUES (‘a’,’b’,’c’), (‘a’,’b’,’c’),(‘a’,’b’,’c’);”<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 构造一条Insert语句批量提交</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">bulkoneInsert</span><span class="params">()</span></span> &#123;</div><div class="line">	start := time.Now()</div><div class="line"></div><div class="line">	sql := <span class="string">"INSERT INTO `user` (`user_name`,`user_age`,`user_sex`) VALUES "</span></div><div class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10000</span>; i++ &#123;</div><div class="line">		name := <span class="string">"tony"</span> + strconv.Itoa(i)</div><div class="line">		<span class="keyword">if</span> i &lt; <span class="number">10000</span> &#123;</div><div class="line">			sql += fmt.Sprintf(<span class="string">"('%s','%d','%d'),"</span>, name, i, <span class="number">1</span>)</div><div class="line">		&#125; <span class="keyword">else</span> &#123;</div><div class="line">			sql += fmt.Sprintf(<span class="string">"('%s','%d','%d');"</span>, name, i, <span class="number">1</span>)</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="comment">// fmt.Println(sql)</span></div><div class="line">	tx, err := db.Begin()</div><div class="line">	checkErr(err)</div><div class="line">	_, err = tx.Exec(sql)</div><div class="line">	<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</div><div class="line">		tx.Commit()</div><div class="line">	&#125; <span class="keyword">else</span> &#123;</div><div class="line">		fmt.Println(err)</div><div class="line">		tx.Rollback()</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	delta := time.Now().Sub(start).String()</div><div class="line">	fmt.Println(<span class="string">"Bulk One Insert Total Time: "</span>, delta)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>最对3种状况的插入时间排名:</p>
+<table>
+<thead>
+<tr>
+<th>Ranking</th>
+<th style="text-align:center">Function Name</th>
+<th style="text-align:center">Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td style="text-align:center">bulkoneInsert</td>
+<td style="text-align:center">283.548003ms</td>
+</tr>
+<tr>
+<td>2</td>
+<td style="text-align:center">withTxInsert</td>
+<td style="text-align:center">4.047390845s</td>
+</tr>
+<tr>
+<td>3</td>
+<td style="text-align:center">forInsert</td>
+<td style="text-align:center">1m55.580310398s</td>
+</tr>
+</tbody>
+</table>
+<p>结论很明显: <strong>构造一条SQL插入效率高很多</strong></p>
+<h2 id="批量更新"><a href="#批量更新" class="headerlink" title="批量更新"></a>批量更新</h2><p>我们可以使用多个<code>UPDATE</code>语句批量提交, 同时MySQL也支持一个SQL语句批量更新多条记录, 标准的SQL是使用<code>UPDATE WHEN</code>来实现, 除此之外 他的SQL扩展还支持<code>INSERT INTO</code> 和<code>REPLACE INTO</code>用于record的批量更新, 但是最好别用REPLACE INTO, 因为他是先删除再新增, 因此本质上它不是更新操作, 请谨慎使用。而INSERT INTO则不会这样。 最后使用临时表也能进行批量更新(先更新临时表，然后从临时表中update),效率也相当不错,但是需要用户有temporary表的create权限, 因此使用也受限。<br>我一般会使用INSERT INTO来构造批量更新的SQL, 因为该语法方便构造, 下面会对各种操作做简单的性能对比。</p>
+<p>这里以更新10000条数据为例进行测试(基于上面插入的数据), 关于下面的测试代码见: <a href="https://github.com/yumaojun03/golang/blob/master/mysql/bulk_perf_test.go" target="_blank" rel="external">测试代码完整示例</a></p>
+<h3 id="循环更新"><a href="#循环更新" class="headerlink" title="循环更新"></a>循环更新</h3><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 循环更新</span></div><div class="line"><span class="comment">// UPDATE table SET column1=?,column2=? WHERE column=?</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">withTxUpdate</span><span class="params">()</span></span> &#123;</div><div class="line">	start := time.Now()</div><div class="line"></div><div class="line">	tx, err := db.Begin()</div><div class="line">	checkErr(err)</div><div class="line"></div><div class="line">	stmt, err := tx.Prepare(<span class="string">"UPDATE `user` SET `user_name`=? WHERE `user_id`=?;"</span>)</div><div class="line">	checkErr(err)</div><div class="line"></div><div class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10000</span>; i++ &#123;</div><div class="line">		name := <span class="string">"forupdate"</span> + strconv.Itoa(i)</div><div class="line">		_, err := stmt.Exec(name, i+<span class="number">1</span>)</div><div class="line">		checkErr(err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		err := tx.Rollback()</div><div class="line">		checkErr(err)</div><div class="line">		<span class="keyword">return</span></div><div class="line">	&#125;</div><div class="line"></div><div class="line">	err = tx.Commit()</div><div class="line">	checkErr(err)</div><div class="line"></div><div class="line">	delta := time.Now().Sub(start).String()</div><div class="line">	fmt.Println(<span class="string">"Bulk With Transaction Update Total Time: "</span>, delta)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="标准的UPDATE语句批量更新"><a href="#标准的UPDATE语句批量更新" class="headerlink" title="标准的UPDATE语句批量更新"></a>标准的UPDATE语句批量更新</h3><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 标准Update语句更新</span></div><div class="line"><span class="comment">// UPDATE categories</span></div><div class="line"><span class="comment">//     SET dingdan = CASE id</span></div><div class="line"><span class="comment">//         WHEN 1 THEN 3</span></div><div class="line"><span class="comment">//         WHEN 2 THEN 4</span></div><div class="line"><span class="comment">//         WHEN 3 THEN 5</span></div><div class="line"><span class="comment">//     END,</span></div><div class="line"><span class="comment">//     title = CASE id</span></div><div class="line"><span class="comment">//         WHEN 1 THEN 'New Title 1'</span></div><div class="line"><span class="comment">//         WHEN 2 THEN 'New Title 2'</span></div><div class="line"><span class="comment">//         WHEN 3 THEN 'New Title 3'</span></div><div class="line"><span class="comment">//     END</span></div><div class="line"><span class="comment">// WHERE id IN (1,2,3)</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">bulkStandardUpdate</span><span class="params">()</span></span> &#123;</div><div class="line">	start := time.Now()</div><div class="line"></div><div class="line">	core := <span class="string">""</span></div><div class="line">	where := <span class="string">""</span></div><div class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10000</span>; i++ &#123;</div><div class="line">		name := <span class="string">"standardupdate"</span> + strconv.Itoa(i)</div><div class="line">		core += fmt.Sprintf(<span class="string">"WHEN '%d' THEN '%s' "</span>, i+<span class="number">1</span>, name)</div><div class="line">		<span class="keyword">if</span> i == <span class="number">0</span> &#123;</div><div class="line">			where += fmt.Sprintf(<span class="string">"'%d'"</span>, i+<span class="number">1</span>)</div><div class="line">		&#125; <span class="keyword">else</span> &#123;</div><div class="line">			where += fmt.Sprintf(<span class="string">",'%d'"</span>, i+<span class="number">1</span>)</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	sql := fmt.Sprintf(<span class="string">"UPDATE `user` SET `user_name`= CASE `user_id` %s END WHERE `user_id` IN (%s)"</span>, core, where)</div><div class="line"></div><div class="line">	tx, err := db.Begin()</div><div class="line">	checkErr(err)</div><div class="line">	_, err = tx.Exec(sql)</div><div class="line">	<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</div><div class="line">		tx.Commit()</div><div class="line">	&#125; <span class="keyword">else</span> &#123;</div><div class="line">		fmt.Println(err)</div><div class="line">		tx.Rollback()</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	delta := time.Now().Sub(start).String()</div><div class="line">	fmt.Println(<span class="string">"Bulk Standard Update Total Time: "</span>, delta)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="SQL扩展-INSERT-INTO-…-ON-DUPLICATE-KEY-UPDATE"><a href="#SQL扩展-INSERT-INTO-…-ON-DUPLICATE-KEY-UPDATE" class="headerlink" title="SQL扩展(INSERT INTO … ON DUPLICATE KEY UPDATE)"></a>SQL扩展(INSERT INTO … ON DUPLICATE KEY UPDATE)</h3><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// insert into语句更新</span></div><div class="line"><span class="comment">// INSERT INTO test_tbl (id,dr) VALUES (1,'2'),(2,'3'),...(x,'y') ON DUPLICATE KEY UPDATE dr=values(dr);</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">bulkInsertIntoUpdate</span><span class="params">()</span></span> &#123;</div><div class="line">	start := time.Now()</div><div class="line"></div><div class="line">	core := <span class="string">""</span></div><div class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10000</span>; i++ &#123;</div><div class="line">		name := <span class="string">"insertintoupdate"</span> + strconv.Itoa(i)</div><div class="line">		<span class="keyword">if</span> i == <span class="number">0</span> &#123;</div><div class="line">			core += fmt.Sprintf(<span class="string">"('%d', '%s')"</span>, i+<span class="number">1</span>, name)</div><div class="line">		&#125; <span class="keyword">else</span> &#123;</div><div class="line">			core += fmt.Sprintf(<span class="string">",('%d', '%s')"</span>, i+<span class="number">1</span>, name)</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	sql := fmt.Sprintf(<span class="string">"INSERT INTO `user` (`user_id`, `user_name`) VALUES %s ON DUPLICATE KEY UPDATE `user_name`=values(`user_name`);"</span>, core)</div><div class="line"></div><div class="line">	tx, err := db.Begin()</div><div class="line">	checkErr(err)</div><div class="line">	_, err = tx.Exec(sql)</div><div class="line">	<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</div><div class="line">		tx.Commit()</div><div class="line">	&#125; <span class="keyword">else</span> &#123;</div><div class="line">		fmt.Println(err)</div><div class="line">		tx.Rollback()</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	delta := time.Now().Sub(start).String()</div><div class="line">	fmt.Println(<span class="string">"Bulk Insert Into Update Total Time: "</span>, delta)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="SQL扩展-REPLACE-INTO"><a href="#SQL扩展-REPLACE-INTO" class="headerlink" title="SQL扩展(REPLACE INTO)"></a>SQL扩展(REPLACE INTO)</h3><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// replace inot语句更新</span></div><div class="line"><span class="comment">// REPLACE INTO test_tbl (id,dr) VALUES (1,'2'),(2,'3'),...(x,'y');</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">bulkReplaceIntoUpdate</span><span class="params">()</span></span> &#123;</div><div class="line">	start := time.Now()</div><div class="line"></div><div class="line">	core := <span class="string">""</span></div><div class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10000</span>; i++ &#123;</div><div class="line">		name := <span class="string">"replaceintoupdate"</span> + strconv.Itoa(i)</div><div class="line">		<span class="keyword">if</span> i == <span class="number">0</span> &#123;</div><div class="line">			core += fmt.Sprintf(<span class="string">"('%d', '%s')"</span>, i+<span class="number">1</span>, name)</div><div class="line">		&#125; <span class="keyword">else</span> &#123;</div><div class="line">			core += fmt.Sprintf(<span class="string">",('%d', '%s')"</span>, i+<span class="number">1</span>, name)</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	sql := fmt.Sprintf(<span class="string">"REPLACE INTO `user` (`user_id`, `user_name`) VALUES %s;"</span>, core)</div><div class="line"></div><div class="line">	tx, err := db.Begin()</div><div class="line">	checkErr(err)</div><div class="line">	_, err = tx.Exec(sql)</div><div class="line">	<span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</div><div class="line">		tx.Commit()</div><div class="line">	&#125; <span class="keyword">else</span> &#123;</div><div class="line">		fmt.Println(err)</div><div class="line">		tx.Rollback()</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	delta := time.Now().Sub(start).String()</div><div class="line">	fmt.Println(<span class="string">"Bulk Replace Into Update Total Time: "</span>, delta)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h3><p>最对4种状况的插入时间排名:</p>
+<table>
+<thead>
+<tr>
+<th>Ranking</th>
+<th style="text-align:center">Function Name</th>
+<th style="text-align:center">Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td style="text-align:center">bulkInsertIntoUpdate</td>
+<td style="text-align:center">462.575115ms</td>
+</tr>
+<tr>
+<td>2</td>
+<td style="text-align:center">bulkReplaceIntoUpdate</td>
+<td style="text-align:center">564.974107ms</td>
+</tr>
+<tr>
+<td>3</td>
+<td style="text-align:center">bulkStandardUpdate</td>
+<td style="text-align:center">3.160858907s</td>
+</tr>
+<tr>
+<td>4</td>
+<td style="text-align:center">withTxUpdate</td>
+<td style="text-align:center">3.998437161s</td>
+</tr>
+</tbody>
+</table>
+<p>结论很明显: <strong>InsertInto更新效率高很多</strong></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://oiw1gzfww.bkt.clouddn.com/alipay.jpg" alt="紫川秀 Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/MySQL/" rel="tag"># MySQL</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/05/14/unicode-war/" rel="next" title="编码知识与常见乱码问题的解决办法">
+                <i class="fa fa-chevron-left"></i> 编码知识与常见乱码问题的解决办法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://oiw1gzfww.bkt.clouddn.com/me.png"
+               alt="紫川秀" />
+          <p class="site-author-name" itemprop="name">紫川秀</p>
+           
+              <p class="site-description motion-element" itemprop="description">喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">30</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">17</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">23</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/yumaojun03" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://douban.com/people/155892492" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/zi-chuan-xiu-86" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.liaoxuefeng.com/" title="廖雪峰官网" target="_blank">廖雪峰官网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://xiaorui.cc/" title="峰云,就她了" target="_blank">峰云,就她了</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#调整MySQL配置-MariaDB10"><span class="nav-number">1.</span> <span class="nav-text">调整MySQL配置(MariaDB10)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用事物"><span class="nav-number">2.</span> <span class="nav-text">使用事物</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#批量插入"><span class="nav-number">3.</span> <span class="nav-text">批量插入</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#直接循环提交"><span class="nav-number">3.1.</span> <span class="nav-text">直接循环提交</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基于事物循环提交"><span class="nav-number">3.2.</span> <span class="nav-text">基于事物循环提交</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#构造成一条语句提交"><span class="nav-number">3.3.</span> <span class="nav-text">构造成一条语句提交</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">3.4.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#批量更新"><span class="nav-number">4.</span> <span class="nav-text">批量更新</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#循环更新"><span class="nav-number">4.1.</span> <span class="nav-text">循环更新</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#标准的UPDATE语句批量更新"><span class="nav-number">4.2.</span> <span class="nav-text">标准的UPDATE语句批量更新</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SQL扩展-INSERT-INTO-…-ON-DUPLICATE-KEY-UPDATE"><span class="nav-number">4.3.</span> <span class="nav-text">SQL扩展(INSERT INTO … ON DUPLICATE KEY UPDATE)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SQL扩展-REPLACE-INTO"><span class="nav-number">4.4.</span> <span class="nav-text">SQL扩展(REPLACE INTO)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结-1"><span class="nav-number">4.5.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">紫川秀</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+    
+    <script>
+      var cloudTieConfig = {
+        url: document.location.href, 
+        sourceId: "",
+        productKey: "e99572b1efa1462db097e904eb19556a",
+        target: "cloud-tie-wrapper"
+      };
+    </script>
+    <script src="https://img1.ws.126.net/f2e/tie/yun/sdk/loader.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("51RM6PwqfSuyOFX9MxLeq5yY-gzGzoHsz", "dNQYvnf4KlnN364JVGClL7bp");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
