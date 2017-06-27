@@ -1,0 +1,1141 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="pythonic," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="紫川秀的博客" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="最近做项目一直使用Golang, 距离上次使用Python已经半年之久了, 对于Go来说有fmt帮忙格式化, 解决了绝大部分编码风格问题, 而Python则需要自己注意,根据官方指导PEP8或者一些最佳实践比如Google Style来控制风格。时间久了 一些细节部分就忘记了, 于是翻阅之前写的博客, 受益良多, 于是打算把之前的这几篇博客迁移过来, 顺便更新, 方便以后查阅。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python编码风格">
+<meta property="og:url" content="https://blog.yumaojun.net/2017/06/24/python-style-pep8/index.html">
+<meta property="og:site_name" content="紫川秀的博客">
+<meta property="og:description" content="最近做项目一直使用Golang, 距离上次使用Python已经半年之久了, 对于Go来说有fmt帮忙格式化, 解决了绝大部分编码风格问题, 而Python则需要自己注意,根据官方指导PEP8或者一些最佳实践比如Google Style来控制风格。时间久了 一些细节部分就忘记了, 于是翻阅之前写的博客, 受益良多, 于是打算把之前的这几篇博客迁移过来, 顺便更新, 方便以后查阅。">
+<meta property="og:updated_time" content="2017-06-27T05:33:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python编码风格">
+<meta name="twitter:description" content="最近做项目一直使用Golang, 距离上次使用Python已经半年之久了, 对于Go来说有fmt帮忙格式化, 解决了绝大部分编码风格问题, 而Python则需要自己注意,根据官方指导PEP8或者一些最佳实践比如Google Style来控制风格。时间久了 一些细节部分就忘记了, 于是翻阅之前写的博客, 受益良多, 于是打算把之前的这几篇博客迁移过来, 顺便更新, 方便以后查阅。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 'undefined',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://blog.yumaojun.net/2017/06/24/python-style-pep8/"/>
+
+
+
+
+
+  <title>Python编码风格 | 紫川秀的博客</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?035e345b7c80cdf05aec8bc846b2f227";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">紫川秀的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">比你优秀的人不可怕,可怕的是比你优秀的人比你更努力。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/06/24/python-style-pep8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="紫川秀">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://oiw1gzfww.bkt.clouddn.com/me.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="紫川秀的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Python编码风格</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-24T18:49:39+08:00">
+                2017-06-24
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2017-06-27T13:33:18+08:00">
+                2017-06-27
+              </time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开发语言/" itemprop="url" rel="index">
+                    <span itemprop="name">开发语言</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开发语言/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a class="cloud-tie-join-count" href="/2017/06/24/python-style-pep8/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count join-count" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/06/24/python-style-pep8/" class="leancloud_visitors" data-flag-title="Python编码风格">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近做项目一直使用Golang, 距离上次使用Python已经半年之久了, 对于Go来说有fmt帮忙格式化, 解决了绝大部分编码风格问题, 而Python则需要自己注意,根据官方指导PEP8或者一些最佳实践比如Google Style来控制风格。时间久了 一些细节部分就忘记了, 于是翻阅之前写的博客, 受益良多, 于是打算把之前的这几篇博客迁移过来, 顺便更新, 方便以后查阅。<br><a id="more"></a></p>
+<h2 id="关于本文"><a href="#关于本文" class="headerlink" title="关于本文"></a>关于本文</h2><p>本文主要参考PEP8(Python版本标准库的编码约定),以及Google Style编码风格, 但却不会完全按照PEP8进行翻译, 我不会贴出不合规范的代码, 尽量简洁易懂, 方便快速阅读, 如果想看完整版本的PEP8相关文档, 请移步参考文档部分。 </p>
+<h2 id="风格指南的目的"><a href="#风格指南的目的" class="headerlink" title="风格指南的目的"></a>风格指南的目的</h2><p>风格指南的目的在于统一编码风格,让代码有规可循,这样人们就可以专注于”你在说什么”, 而不是”你在怎么说”.从而改善Python代码的可读性,即<a href="https://www.python.org/dev/peps/pep-0020/" target="_blank" rel="external">PEP 20</a>所说的“可读性计数”(Readability counts).</p>
+<p>风格指针在于统一风格, PEP8仅仅是官方指导, 本地编码风格同样重要, 如果满足可读性, 优先保持本地风格, 使得你整体项目的代码风格一致。 </p>
+<h2 id="代码布局"><a href="#代码布局" class="headerlink" title="代码布局"></a>代码布局</h2><ol>
+<li><p>每级缩进用4个空格(强烈建议使用4个空格作为缩进), 不要混用空格和Tab, Python3中不允许混合使用Tab和空格缩进</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_version</span><span class="params">(version=None)</span>:</span></div><div class="line">    <span class="string">"Returns a PEP 386-compliant version number from VERSION."</span></div><div class="line">    version = get_complete_version(version)</div></pre></td></tr></table></figure>
+</li>
+<li><p>括号中使用垂直隐式缩进或使用悬挂缩进（对准左括号）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">foo = long_function_name(var_one, var_two,</div><div class="line">                         var_three, var_four)</div></pre></td></tr></table></figure>
+</li>
+<li><p>if语句跨行时，两个字符关键字(比如if)加上一个空格，再加上左括号构成了很好的缩进。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># Add some extra indentation on the conditional continuation line.</span></div><div class="line"><span class="keyword">if</span> (this_is_one_thing</div><div class="line">        <span class="keyword">and</span> that_is_another_thing):</div><div class="line">    do_something()</div></pre></td></tr></table></figure>
+</li>
+<li><p>右边括号也可以另起一行（右括号回退）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">my_list = [</div><div class="line">    <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>,</div><div class="line">    <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>,</div><div class="line">]</div><div class="line">result = some_function_that_takes_arguments(</div><div class="line">    <span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>,</div><div class="line">    <span class="string">'d'</span>, <span class="string">'e'</span>, <span class="string">'f'</span>,</div><div class="line">)</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="最大行宽"><a href="#最大行宽" class="headerlink" title="最大行宽"></a>最大行宽</h2><p>限制所有行的最大行宽为79字符。文本长块，比如文档字符串或注释，行长度应限制为72个字符。<br>续行的首选方法是使用小括号、中括号和大括号反斜线仍可能在适当的时候。其次是反斜杠。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">with</span> open(<span class="string">'/path/to/some/file/you/want/to/read'</span>) <span class="keyword">as</span> file_1, \</div><div class="line">     open(<span class="string">'/path/to/some/file/being/written'</span>, <span class="string">'w'</span>) <span class="keyword">as</span> file_2:</div><div class="line">    file_2.write(file_1.read())</div></pre></td></tr></table></figure></p>
+<h2 id="空行"><a href="#空行" class="headerlink" title="空行"></a>空行</h2><ul>
+<li>空二行: 顶级定义之间空两行, 比如函数或者类定义. </li>
+<li>空一行: 方法定义, 类定义与第一个方法之间, 都应该空一行. 函数或方法中, 某些地方要是你觉得合适, 就空一行.<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">StreamingHttpResponse</span><span class="params">(HttpResponseBase)</span>:</span></div><div class="line">    <span class="string">"""</span></div><div class="line">    A streaming HTTP response class with an iterator as content.</div><div class="line"> </div><div class="line">    This should only be iterated once, when the response is streamed to the</div><div class="line">    client. However, it can be appended to or replaced with a new iterator</div><div class="line">    that wraps the original content (or yields entirely new content).</div><div class="line">    """</div><div class="line"> </div><div class="line">    streaming = <span class="keyword">True</span></div><div class="line"> </div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, streaming_content=<span class="params">()</span>, *args, **kwargs)</span>:</span></div><div class="line">        super(StreamingHttpResponse, self).__init__(*args, **kwargs)</div><div class="line">        <span class="comment"># `streaming_content` should be an iterable of bytestrings.</span></div><div class="line">        <span class="comment"># See the `streaming_content` property methods.</span></div><div class="line">        self.streaming_content = streaming_content</div><div class="line"> </div><div class="line"><span class="meta">    @property</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">content</span><span class="params">(self)</span>:</span></div><div class="line">        <span class="keyword">raise</span> AttributeError(<span class="string">"This %s instance has no `content` attribute. "</span></div><div class="line">            <span class="string">"Use `streaming_content` instead."</span> % self.__class__.__name__)</div><div class="line"> </div><div class="line"><span class="meta">    @property</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">streaming_content</span><span class="params">(self)</span>:</span></div><div class="line">        <span class="keyword">return</span> map(self.make_bytes, self._iterator)</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="模块导入"><a href="#模块导入" class="headerlink" title="模块导入"></a>模块导入</h2><ul>
+<li>导入在单独成行, 同一个模块的多个对象被导出时使用()</li>
+<li>导入始终在文件的顶部，在模块注释和文档字符串之后，在模块全局变量和常量之前。</li>
+<li>推荐绝对路径导入，因为它们通常更可读，而且往往是表现更好的（或至少提供更好的错误消息。</li>
+<li>禁止使用通配符导入。</li>
+<li>导入顺序如下：标准库进口,相关的第三方库，本地库。各组的导入之间要有空行。<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 标准库</span></div><div class="line"><span class="keyword">import</span> asyncio</div><div class="line"><span class="keyword">import</span> os</div><div class="line"><span class="keyword">import</span> traceback</div><div class="line"><span class="keyword">from</span> functools <span class="keyword">import</span> partial</div><div class="line"><span class="keyword">from</span> inspect <span class="keyword">import</span> isawaitable</div><div class="line"><span class="keyword">from</span> multiprocessing <span class="keyword">import</span> Process</div><div class="line"><span class="keyword">from</span> signal <span class="keyword">import</span> (</div><div class="line">    SIGTERM, SIGINT,</div><div class="line">    signal <span class="keyword">as</span> signal_func,</div><div class="line">    Signals</div><div class="line">)</div><div class="line"><span class="keyword">from</span> socket <span class="keyword">import</span> (</div><div class="line">    socket,</div><div class="line">    SOL_SOCKET,</div><div class="line">    SO_REUSEADDR,</div><div class="line">)</div><div class="line"><span class="keyword">from</span> time <span class="keyword">import</span> time</div><div class="line"></div><div class="line"><span class="comment"># 第三方库</span></div><div class="line"><span class="keyword">from</span> httptools <span class="keyword">import</span> HttpRequestParser</div><div class="line"><span class="keyword">from</span> httptools.parser.errors <span class="keyword">import</span> HttpParserError</div><div class="line"><span class="keyword">try</span>:</div><div class="line">    <span class="keyword">import</span> uvloop <span class="keyword">as</span> async_loop</div><div class="line"><span class="keyword">except</span> ImportError:</div><div class="line">    async_loop = asyncio</div><div class="line"></div><div class="line"><span class="comment"># 本地库</span></div><div class="line"><span class="keyword">from</span> sanic.log <span class="keyword">import</span> log, netlog</div><div class="line"><span class="keyword">from</span> sanic.response <span class="keyword">import</span> HTTPResponse</div><div class="line"><span class="keyword">from</span> sanic.request <span class="keyword">import</span> Request</div><div class="line"><span class="keyword">from</span> sanic.exceptions <span class="keyword">import</span> (</div><div class="line">    RequestTimeout, PayloadTooLarge, InvalidUsage, ServerError)</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="字符串引用"><a href="#字符串引用" class="headerlink" title="字符串引用"></a>字符串引用</h2><p>Python中单引号字符串和双引号字符串都是相同的。注意尽量避免在字符串中的反斜杠以提高可读性。<br>比如一段字符串里面既有单引号，又有双引号，就的使用 多行字符串的方式，避免使用 \” 或\’<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">error = <span class="string">"""My Class hasn't "test" attribute."""</span></div></pre></td></tr></table></figure></p>
+<h2 id="表达式和语句中的空格"><a href="#表达式和语句中的空格" class="headerlink" title="表达式和语句中的空格"></a>表达式和语句中的空格</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 括号里边避免空格 </span></div><div class="line">spam(ham[<span class="number">1</span>], &#123;eggs: <span class="number">2</span>&#125;)</div><div class="line"><span class="comment"># 逗号，冒号，分号之前避免空格</span></div><div class="line"><span class="keyword">if</span> x == <span class="number">4</span>: <span class="keyword">print</span> x, y; x, y = y, x</div><div class="line"><span class="comment"># 索引操作符不留空格</span></div><div class="line">ham[<span class="number">1</span>:<span class="number">9</span>:<span class="number">3</span>]</div><div class="line"><span class="comment"># 函数调用的左括号之前不能有空格</span></div><div class="line">spam(<span class="number">1</span>)</div><div class="line"><span class="comment"># 二元操作符两边留一个空格,涉及 =、符合操作符 ( += , -=等)、比较( == , &lt; , &gt; , != , &lt;&gt; , &lt;= , &gt;= , in , not in , is , is not )、布尔( and , or , not )</span></div><div class="line">x = <span class="number">1</span></div><div class="line"><span class="comment"># 搞优先级运算符前后不留空格</span></div><div class="line">hypot2 = x*x + y*y</div><div class="line">c = (a+b) * (a-b)</div><div class="line"><span class="comment"># 关键字参数和默认值参数的前后不要加空格</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">complex</span><span class="params">(real, imag=<span class="number">0.0</span>)</span>:</span></div><div class="line">    <span class="keyword">return</span> magic(r=real, i=imag)</div><div class="line"><span class="comment"># 函数注释中，=前后要有空格，冒号和"-&gt;"的前面无空格，后面有空格。</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">munge</span><span class="params">(sep: AnyStr = None)</span>:</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">munge</span><span class="params">()</span> -&gt; AnyStr:</span></div><div class="line"><span class="comment"># 尽量不使用复合语句(Compound statements: 多条语句写在同一行)</span></div><div class="line"><span class="keyword">if</span> foo == <span class="string">'blah'</span>:</div><div class="line">    do_blah_thing()</div></pre></td></tr></table></figure>
+<h2 id="普通注释"><a href="#普通注释" class="headerlink" title="普通注释"></a>普通注释</h2><p>通用规则:</p>
+<ul>
+<li>与代码自相矛盾的注释比没注释更差。修改代码时要优先更新注释！</li>
+<li>注释是完整的句子。如果注释是断句，首字母应该大写，除非它是小写字母开头的标识符(永远不要修改标识符的大小写)。</li>
+<li>如果注释很短，可以省略末尾的句号。注释块通常由一个或多个段落组成。段落由完整的句子构成且每个句子应该以点号(后面要有两个空格)结束，并注意断词和空格。</li>
+<li>非英语国家的程序员请用英语书写你的注释，除非你200%确信代码永远不会被不懂你的语言的人阅读。</li>
+</ul>
+<p>注释块:</p>
+<ul>
+<li>注释块通常应用在代码前，并和这些代码有同样的缩进。每行以 ‘# ‘(除非它是注释内的缩进文本，注意#后面有空格)。</li>
+<li>注释块内的段落用仅包含单个 ‘#’ 的行分割。</li>
+</ul>
+<p>行内注释:</p>
+<ul>
+<li>慎用行内注释(Inline Comments) 节俭使用行内注释。 行内注释是和语句在同一行，至少用两个空格和语句分开。行内注释不是必需的，重复罗嗦会使人分心。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># We use a weighted dictionary search to find out where i is in</span></div><div class="line"><span class="comment"># the array.  We extrapolate position based on the largest num</span></div><div class="line"><span class="comment"># in the array and the array size and then do binary search to</span></div><div class="line"><span class="comment"># get the exact number.</span></div><div class="line"></div><div class="line"><span class="keyword">if</span> i &amp; (i<span class="number">-1</span>) == <span class="number">0</span>:        <span class="comment"># true iff i is a power of 2</span></div></pre></td></tr></table></figure>
+<h2 id="文档注释"><a href="#文档注释" class="headerlink" title="文档注释"></a>文档注释</h2><p>这部分很重要, 他是Python独有的, 为所有公共模块、函数、类和方法书写文档字符串。非公开方法不一定有文档字符串，建议有注释(出现在def行之后)来描述这个方法做什么, 详情参考<a href="https://www.python.org/dev/peps/pep-0257/" target="_blank" rel="external">PEP 257 文档字符串约定</a><br>, 但是这部分我比较推崇Google Style风格。</p>
+<h3 id="文档字符串"><a href="#文档字符串" class="headerlink" title="文档字符串"></a>文档字符串</h3><p>什么是文档字符串(Document String):<br>文档字符串是包, 模块, 类或函数里的第一个语句. 这些字符串可以通过对象的<code>__doc__</code>成员被自动提取, 并且被pydoc所用.</p>
+<p>文档字符串的格式:<br>首先是一行以句号, 问号或惊叹号结尾的概述(或者该文档字符串单纯只有一行). 接着是一个空行. 接着是文档字符串剩下的部分,它应该与文档字符串的第一行的第一个引号对齐. 下面有更多文档字符串的格式化规范.</p>
+<h3 id="模块文档"><a href="#模块文档" class="headerlink" title="模块文档"></a>模块文档</h3><p>模块说明: 对这个模块进行概貌性的描述, 比如Json库的说明<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="string">r"""JSON (JavaScript Object Notation) &lt;http://json.org&gt; is a subset of</span></div><div class="line">JavaScript syntax (ECMA-262 3rd edition) used as a lightweight data</div><div class="line">interchange format.</div><div class="line"></div><div class="line">:mod:`json` exposes an API familiar to users of the standard library</div><div class="line">:mod:`marshal` and :mod:`pickle` modules. It is the externally maintained</div><div class="line">version of the :mod:`json` library contained in Python 2.6, but maintains</div><div class="line">compatibility with Python 2.4 and Python 2.5 and (currently) has</div><div class="line">significant performance advantages, even without using the optional C</div><div class="line">extension for speedups.</div><div class="line"></div><div class="line">Compact encoding::</div><div class="line"></div><div class="line">    &gt;&gt;&gt; import json</div><div class="line">    &gt;&gt;&gt; json.dumps([1,2,3,&#123;'4': 5, '6': 7&#125;], sort_keys=True, separators=(',',':'))</div><div class="line">    '[1,2,3,&#123;"4":5,"6":7&#125;]'</div><div class="line"></div><div class="line">Using json.tool from the shell to validate and pretty-print::</div><div class="line"></div><div class="line">    $ echo '&#123;"json":"obj"&#125;' | python -m json.tool</div><div class="line">    &#123;</div><div class="line">        "json": "obj"</div><div class="line">    &#125;</div><div class="line">    $ echo '&#123; 1.2:3.4&#125;' | python -m json.tool</div><div class="line">    Expecting property name enclosed in double quotes: line 1 column 3 (char 2)</div><div class="line">"""</div></pre></td></tr></table></figure></p>
+<h3 id="函数和方法文档"><a href="#函数和方法文档" class="headerlink" title="函数和方法文档"></a>函数和方法文档</h3><p>这里说的函数,包括函数, 方法, 以及生成器。 一个函数必须要有文档字符串, 除非它满足以下条件:</p>
+<ul>
+<li>外部不可见</li>
+<li>非常短小</li>
+<li>简单明了</li>
+</ul>
+<p>文档字符串应该提供足够的信息, 当别人编写代码调用该函数时, 他不需要看一行代码, 只要看文档字符串就可以了.因此需要描述清楚以下几点:</p>
+<ul>
+<li><p>函数参数: Args<br>列出每个参数的名字, 并在名字后使用一个冒号和一个空格, 分隔对该参数的描述.如果描述太长超过了单行80字符,使用2或者4个空格的悬挂缩进(与文件其他部分保持一致). 描述应该包括所需的类型和含义. 如果一个函数接受<em>foo(可变长度参数列表)或者**bar (任意关键字参数), 应该详细列出</em>foo和**bar.</p>
+</li>
+<li><p>正常返回: Returns/Yields<br>描述返回值的类型和语义. 如果函数返回None, 这一部分可以省略.</p>
+</li>
+<li><p>异常返回: Raises:<br>列出与接口有关的所有异常.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">fetch_bigtable_rows</span><span class="params">(big_table, keys, other_silly_variable=None)</span>:</span></div><div class="line">    <span class="string">"""Fetches rows from a Bigtable.</span></div><div class="line"></div><div class="line">    Retrieves rows pertaining to the given keys from the Table instance</div><div class="line">    represented by big_table.  Silly things may happen if</div><div class="line">    other_silly_variable is not None.</div><div class="line"></div><div class="line">    Args:</div><div class="line">        big_table: An open Bigtable Table instance.</div><div class="line">        keys: A sequence of strings representing the key of each table row</div><div class="line">            to fetch.</div><div class="line">        other_silly_variable: Another optional variable, that has a much</div><div class="line">            longer name than the other args, and which does nothing.</div><div class="line"></div><div class="line">    Returns:</div><div class="line">        A dict mapping keys to the corresponding table row data</div><div class="line">        fetched. Each row is represented as a tuple of strings. For</div><div class="line">        example:</div><div class="line"></div><div class="line">        &#123;'Serak': ('Rigel VII', 'Preparer'),</div><div class="line">         'Zim': ('Irk', 'Invader'),</div><div class="line">         'Lrrr': ('Omicron Persei 8', 'Emperor')&#125;</div><div class="line"></div><div class="line">        If a key from the keys argument is missing from the dictionary,</div><div class="line">        then that row was not found in the table.</div><div class="line"></div><div class="line">    Raises:</div><div class="line">        IOError: An error occurred accessing the bigtable.Table object.</div><div class="line">    """</div><div class="line">    <span class="keyword">pass</span></div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="类文档"><a href="#类文档" class="headerlink" title="类文档"></a>类文档</h3><p>同理类也需要做详尽的描述:</p>
+<ul>
+<li>该类的目的, 以及概貌描述</li>
+<li>类有公共属性(Attributes), 需要描述其意义</li>
+<li>注意事项</li>
+<li>继承object, 因为object实现了一些内置方法,方便兼容。 <figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">SampleClass</span><span class="params">(object)</span>:</span></div><div class="line">    <span class="string">"""Summary of class here.</span></div><div class="line"></div><div class="line">    Longer class information....</div><div class="line">    Longer class information....</div><div class="line"></div><div class="line">    Attributes:</div><div class="line">        likes_spam: A boolean indicating if we like SPAM or not.</div><div class="line">        eggs: An integer count of the eggs we have laid.</div><div class="line">    """</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, likes_spam=False)</span>:</span></div><div class="line">        <span class="string">"""Inits SampleClass with blah."""</span></div><div class="line">        self.likes_spam = likes_spam</div><div class="line">        self.eggs = <span class="number">0</span></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">public_method</span><span class="params">(self)</span>:</span></div><div class="line">        <span class="string">"""Performs operation blah."""</span></div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="TODO注释"><a href="#TODO注释" class="headerlink" title="TODO注释"></a>TODO注释</h3><p>如果类或者方法，函数 没有实现完整功能, 请使用TODO标记, 很多IDE都能找到这个标记, 方便以后改进, 别留坑.<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># TODO(kl@gmail.com): Use a "*" here for string repetition.</span></div><div class="line"><span class="comment"># TODO(Zeke) Change this to use relations.</span></div></pre></td></tr></table></figure></p>
+<h2 id="访问控制"><a href="#访问控制" class="headerlink" title="访问控制"></a>访问控制</h2><p>合理的访问控制会使得代码更加健壮</p>
+<ul>
+<li><code>__slots__</code>: 控制对象可以绑定的属性, 避免对象被临时添加属性，造成对象的不可预期行为。</li>
+<li><code>@property</code>: 通过属性装饰器控制属性的读和写的行为, 防止不符合规范数据的录入。</li>
+<li><code>__</code>或者<code>_</code>: 使用下划线开头的变量，为私有变量(只是别名了, 你真想访问还是有办法的, 但是请不要这样做)。</li>
+<li><code>__all__</code>: 对于from import来说, 导出指定对象, 防止导出全局变量。</li>
+</ul>
+<p>注意: 对暴露出去的共有变量请慎重, 因为如果你暴露出去过会, 下次在调整就需要考虑到兼容性了, 所以优先使用私有变量(<code>__</code>或者<code>_</code>)。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Student</span><span class="params">(object)</span>:</span></div><div class="line"></div><div class="line">    __slots__ = [<span class="string">'birth'</span>, <span class="string">'age'</span>]</div><div class="line"></div><div class="line"><span class="meta">    @property</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">birth</span><span class="params">(self)</span>:</span></div><div class="line">        <span class="keyword">return</span> self._birth</div><div class="line"></div><div class="line"><span class="meta">    @birth.setter</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">birth</span><span class="params">(self, value)</span>:</span></div><div class="line">        self._birth = value</div><div class="line"></div><div class="line"><span class="meta">    @property</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">age</span><span class="params">(self)</span>:</span></div><div class="line">        <span class="keyword">return</span> <span class="number">2015</span> - self._birth</div></pre></td></tr></table></figure>
+<h2 id="命名约定"><a href="#命名约定" class="headerlink" title="命名约定"></a>命名约定</h2><p>Python库的命名约定有点混乱，不可能完全一致。但依然有些普遍推荐的命名规范的。新的模块和包 (包括第三方的框架) 应该遵循这些标准。对不同风格的已有的库，建议保持内部的一致性。</p>
+<ul>
+<li>包和模块名: 模块名要简短，全部用小写字母，可使用下划线以提高可读性。包名和模块名类似，但不推荐使用下划线</li>
+<li>类名: 遵循CapWord。</li>
+<li>函数和方法的参数: 实例方法第一个参数是 ‘self’。类方法第一个参数是 ‘cls’。如果函数的参数名与保留关键字冲突，通常在参数名后加一个下划线。</li>
+<li>方法名和实例变量: 同函数命名规则。</li>
+<li>非公开方法和实例变量增加一个前置下划线。</li>
+<li>为避免与子类命名冲突，采用两个前置下划线来触发重整。类Foo属性名为<code>__a</code>， 不能以 <code>Foo.__a</code>访问。(执著的用户还是可以通过<code>Foo._Foo__a</code>。) 通常双前置下划线仅被用来避免与基类的属性发生命名冲突。</li>
+<li>函数名: 函数名应该为小写，必要时可用下划线分隔单词以增加可读性。 mixedCase(混合大小写)仅被允许用于兼容性考虑(如: threading.py)。</li>
+<li>异常名: 如果确实是错误，需要在类名添加后缀 “Error”。</li>
+<li>全局变量名: 变量尽量只用于模块内部，约定类似函数。</li>
+<li>对设计为通过 “from M import ” 来使用的模块，应采用<code>__all__</code>机制来防止导入全局变量；或者为全局变量加一个前置下划线。</li>
+<li>常量: 常量通常在模块级定义,由大写字母用下划线分隔组成。比如括MAX_OVERFLOW和TOTAL。</li>
+</ul>
+<h2 id="合理的设计"><a href="#合理的设计" class="headerlink" title="合理的设计"></a>合理的设计</h2><h3 id="接口设计"><a href="#接口设计" class="headerlink" title="接口设计"></a>接口设计</h3><p>考虑类的方法和实例变量(统称为属性)是否公开。如果有疑问，选择不公开；把其改为公开比把公开属性改为非公开要容易。<br>公开属性可供所有人使用，并通常向后兼容。非公开属性不给第三方使用、可变甚至被移除。<br>这里不使用术语”private”， Python中没有属性是真正私有的。<br>另一类属性是子类API(在其他语言中通常称为 “protected”)。 一些类被设计为基类，可以扩展和修改。</p>
+<p>谨记这些Python指南：</p>
+<ul>
+<li>公开属性应该没有前导下划线</li>
+<li>如果公开属性名和保留关键字冲突，可以添加后置下划线</li>
+<li>简单的公开数据属性，最好只公开属性名，没有复杂的访问/修改方法，python的Property提供了很好的封装方法。 如果不希望子类使用的属性，考虑用两个前置下划线(没有后置下划线)命名</li>
+<li>任何向后兼容的保证只适用于公共接口。</li>
+<li>文档化的接口通常是公共的，除非明说明是临时的或为内部接口、其他所有接口默认是内部的。</li>
+<li>为了更好地支持内省，模块要在<code>__all__</code>属性列出公共API。</li>
+<li>内部接口要有前置下划线。</li>
+<li>如果命名空间(包、模块或类)是内部的，里面的接口也是内部的。</li>
+<li>导入名称应视为实现细节。其他模块不能间接访名字，除非在模块的API文档中明确记载，如os.path中或包的<code>__init__</code>暴露了子模块。</li>
+</ul>
+<h3 id="函数设计"><a href="#函数设计" class="headerlink" title="函数设计"></a>函数设计</h3><p>当流程足够繁杂时，就要考虑函数，及如何将函数组合在一起。在Python中做函数设计，主要考虑到函数大小、聚合性、耦合性三个方面，这三者应该归结于规划与设计的范畴。高内聚、低耦合则是任何语言函数设计的总体原则。</p>
+<ul>
+<li>如何将任务分解成更有针对性的函数从而导致了聚合性</li>
+<li>如何设计函数间的通信则又涉及到耦合性</li>
+<li>如何设计函数的大小用以加强其聚合性及降低其耦合性</li>
+</ul>
+<p>聚合</p>
+<ul>
+<li>完美的程序设计，每个函数应该而且只需做一件事</li>
+<li>比如说:把大象放进冰箱分三步:把门打开、把大象放进去、把门关上。</li>
+<li>这样就应该写三个函数而不是一个函数拿所有的事全做了。这样结构清晰，层次分明，也好理解！</li>
+</ul>
+<p>大小</p>
+<ul>
+<li>Python代码以简单明了著称，一个过长或者有着深层嵌套的函数往往成为设计缺陷的征兆。</li>
+<li>如果项目中设计的一个函数需要翻页才能看完的话，就要考虑将函数拆分了。</li>
+</ul>
+<p>耦合</p>
+<ul>
+<li>参数传入，return结果, 这样做可以让函数独立于它外部的东西。参数和return语句就是隔离外部依赖的最好的办法。</li>
+<li>慎用全局变量, 全局变量通常是一种蹩脚的函数间的进行通信的方式。它会引发依赖关系和计时的问题，从而会导致程序调试和修改的困难。而且从代码及性能优化来考虑，本地变量远比全局变量快。</li>
+<li>避免修改可变类型的参数（或者直接避免传入可变类型的参数，而使用<em>args， 或者*</em>kwargs 收集）Python数据类型比如说列表、字典属于可变对象。在作为参数传递给函数时，有时会像全局变量一样被修改。这样做的坏处是：增强了函数之间的耦合性，从而导致函数过于特殊和不友好。维护起来也困难。这个时候就要考虑使用切片S[:]和copy模块中的copy()函数和deepcopy()函数来做个拷贝，避免修改可变对象</li>
+</ul>
+<h2 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h2><ul>
+<li><a href="https://www.python.org/dev/peps/pep-0008/" target="_blank" rel="external">PEP8官方文档</a></li>
+<li><a href="https://my.oschina.net/u/1433482/blog/464444" target="_blank" rel="external">PEP8中文翻译</a></li>
+<li><a href="http://zh-google-styleguide.readthedocs.io/en/latest/google-python-styleguide/background/" target="_blank" rel="external">Google Python风格指南</a></li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://oiw1gzfww.bkt.clouddn.com/alipay.jpg" alt="紫川秀 Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/pythonic/" rel="tag"># pythonic</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/06/19/mysql-performance-for-bulk-action/" rel="next" title="MySQL批量更新与插入">
+                <i class="fa fa-chevron-left"></i> MySQL批量更新与插入
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://oiw1gzfww.bkt.clouddn.com/me.png"
+               alt="紫川秀" />
+          <p class="site-author-name" itemprop="name">紫川秀</p>
+           
+              <p class="site-description motion-element" itemprop="description">喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">31</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">17</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/yumaojun03" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://douban.com/people/155892492" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/zi-chuan-xiu-86" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.liaoxuefeng.com/" title="廖雪峰官网" target="_blank">廖雪峰官网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://xiaorui.cc/" title="峰云,就她了" target="_blank">峰云,就她了</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#关于本文"><span class="nav-number">1.</span> <span class="nav-text">关于本文</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#风格指南的目的"><span class="nav-number">2.</span> <span class="nav-text">风格指南的目的</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#代码布局"><span class="nav-number">3.</span> <span class="nav-text">代码布局</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最大行宽"><span class="nav-number">4.</span> <span class="nav-text">最大行宽</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#空行"><span class="nav-number">5.</span> <span class="nav-text">空行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#模块导入"><span class="nav-number">6.</span> <span class="nav-text">模块导入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#字符串引用"><span class="nav-number">7.</span> <span class="nav-text">字符串引用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#表达式和语句中的空格"><span class="nav-number">8.</span> <span class="nav-text">表达式和语句中的空格</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#普通注释"><span class="nav-number">9.</span> <span class="nav-text">普通注释</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#文档注释"><span class="nav-number">10.</span> <span class="nav-text">文档注释</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#文档字符串"><span class="nav-number">10.1.</span> <span class="nav-text">文档字符串</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#模块文档"><span class="nav-number">10.2.</span> <span class="nav-text">模块文档</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#函数和方法文档"><span class="nav-number">10.3.</span> <span class="nav-text">函数和方法文档</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#类文档"><span class="nav-number">10.4.</span> <span class="nav-text">类文档</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TODO注释"><span class="nav-number">10.5.</span> <span class="nav-text">TODO注释</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#访问控制"><span class="nav-number">11.</span> <span class="nav-text">访问控制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#命名约定"><span class="nav-number">12.</span> <span class="nav-text">命名约定</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#合理的设计"><span class="nav-number">13.</span> <span class="nav-text">合理的设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#接口设计"><span class="nav-number">13.1.</span> <span class="nav-text">接口设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#函数设计"><span class="nav-number">13.2.</span> <span class="nav-text">函数设计</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考文档"><span class="nav-number">14.</span> <span class="nav-text">参考文档</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">紫川秀</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+    
+    <script>
+      var cloudTieConfig = {
+        url: document.location.href, 
+        sourceId: "",
+        productKey: "e99572b1efa1462db097e904eb19556a",
+        target: "cloud-tie-wrapper"
+      };
+    </script>
+    <script src="https://img1.ws.126.net/f2e/tie/yun/sdk/loader.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("51RM6PwqfSuyOFX9MxLeq5yY-gzGzoHsz", "dNQYvnf4KlnN364JVGClL7bp");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
