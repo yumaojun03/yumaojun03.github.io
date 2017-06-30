@@ -1178,7 +1178,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;据记载，公元前400年，古希腊人发明了置换密码。1881年世界上的第一个电话保密专利出现。在第二次世界大战期间，德国军方启用“恩尼格玛”密码机，密码学在战争中起着非常重要的作用, 这段历史很有趣,建议看看&lt;a href=&quot;https://www.zhihu.com/question/28397034&quot;&gt;恩格玛机破解历史&lt;/a&gt;。&lt;br&gt;随着信息化和数字化社会的发展，人们对信息安全和保密的重要性认识不断提高，于是在1997年，美国国家标准局公布实施了“美国数据加密标准（DES）”，民间力量开始全面介入密码学的研究和应用中，采用的加密算法有DES、RSA、SHA等。随着对加密强度需求的不断提高，近期又出现了AES、ECC等。&lt;br&gt;
+      &lt;p&gt;据记载，公元前400年，古希腊人发明了置换密码。1881年世界上的第一个电话保密专利出现。在第二次世界大战期间，德国军方启用“恩尼格玛”密码机，密码学在战争中起着非常重要的作用, 这段历史很有趣,建议看看&lt;a href=&quot;https://www.zhihu.com/question/28397034&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;恩格玛机破解历史&lt;/a&gt;。&lt;br&gt;随着信息化和数字化社会的发展，人们对信息安全和保密的重要性认识不断提高，于是在1997年，美国国家标准局公布实施了“美国数据加密标准（DES）”，民间力量开始全面介入密码学的研究和应用中，采用的加密算法有DES、RSA、SHA等。随着对加密强度需求的不断提高，近期又出现了AES、ECC等。&lt;br&gt;
     
     </summary>
     
@@ -1513,7 +1513,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;浏览网上博客时发现了这么一篇测试文章&lt;a href=&quot;http://www.qingpingshan.com/jb/go/148453.html&quot;&gt;nginx vs iris&lt;/a&gt;, 结果是&lt;code&gt;iris&lt;/code&gt;越胜一筹, 而&lt;code&gt;Iris&lt;/code&gt;底层使用的并不是Golang的HTTP的标准库, 而是使用的第三方库&lt;code&gt;fasthttp&lt;/code&gt;, 之前读过一点关于golang的&lt;code&gt;net/http&lt;/code&gt;, 在处理用户的请求时的确有点粗暴, 直接一个连接一个&lt;code&gt;goroutine&lt;/code&gt;, 完全没有并发的控制。按捺不做内心的好奇, 想感受一把&lt;code&gt;fasthttp&lt;/code&gt;, 来一起走进fasthttp的世界看看。&lt;br&gt;
+      &lt;p&gt;浏览网上博客时发现了这么一篇测试文章&lt;a href=&quot;http://www.qingpingshan.com/jb/go/148453.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;nginx vs iris&lt;/a&gt;, 结果是&lt;code&gt;iris&lt;/code&gt;越胜一筹, 而&lt;code&gt;Iris&lt;/code&gt;底层使用的并不是Golang的HTTP的标准库, 而是使用的第三方库&lt;code&gt;fasthttp&lt;/code&gt;, 之前读过一点关于golang的&lt;code&gt;net/http&lt;/code&gt;, 在处理用户的请求时的确有点粗暴, 直接一个连接一个&lt;code&gt;goroutine&lt;/code&gt;, 完全没有并发的控制。按捺不做内心的好奇, 想感受一把&lt;code&gt;fasthttp&lt;/code&gt;, 来一起走进fasthttp的世界看看。&lt;br&gt;
     
     </summary>
     
