@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog.yumaojun.net/"/>
-  <updated>2017-06-27T05:33:18.000Z</updated>
+  <updated>2017-07-04T10:29:05.000Z</updated>
   <id>https://blog.yumaojun.net/</id>
   
   <author>
@@ -14,6 +14,74 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>以正确的姿势使用mqtt</title>
+    <link href="https://blog.yumaojun.net/2017/07/04/mqtt-reconnect/"/>
+    <id>https://blog.yumaojun.net/2017/07/04/mqtt-reconnect/</id>
+    <published>2017-07-04T07:21:58.000Z</published>
+    <updated>2017-07-04T10:29:05.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>最近使用Python写一个后台服务处理mqtt里面的事件时遇到了一个麻烦: mqtt连接重置时(重启mqtt服务后), 之前pub消息的线程不能正常工作了, 进过多次踩坑, 终于解决.<br><a id="more"></a></p>
+<h2 id="MQTT简介"><a href="#MQTT简介" class="headerlink" title="MQTT简介"></a>MQTT简介</h2><p>MQTT是一个客户端服务端架构的发布/订阅模式的消息传输协议。它的设计思想是轻巧、开放、简单、规范，易于实现。这些特点使得它对很多场景来说都是很好的选择，特别是对于受限的环境如机器与机器的通信(M2M)以及物联网环境(IoT)。</p>
+<h2 id="环境介绍"><a href="#环境介绍" class="headerlink" title="环境介绍"></a>环境介绍</h2><p>介绍下我的测试环境:</p>
+<ul>
+<li>Python Version: 3.6</li>
+<li>MQTT Server: emqttserver:2.2-rc1</li>
+<li>MQTT Client: paho-mqtt: 1.3.0</li>
+</ul>
+<p>emqtt server安装参考<a href="http://emqtt.io/docs/v2/install.html#install-via-docker-image" target="_blank" rel="external">emqtt docker安装</a><br>python mqtt客户端的安装请参考<a href="https://github.com/eclipse/paho.mqtt.python" target="_blank" rel="external">Github地址</a></p>
+<h2 id="客户端使用介绍"><a href="#客户端使用介绍" class="headerlink" title="客户端使用介绍"></a>客户端使用介绍</h2><p>paho-mqtt有一个客户端类, 我们主要使用该类来和mqttserver进行交互, 那么如何使用这个类喃: </p>
+<ul>
+<li>建立连接: 使用connect()/connect_async()来链接到broker(mqtt server)</li>
+<li>断开连接: 使用disconnect()方法来断开和broker(mqtt server)之间的网络连接。</li>
+<li>处理网络事件: 请频繁调用loop()来维持和broker(mqtt server)之间的网络事件。如果不想自己频繁的调用这些来维护网络事件, 可以使用loop_forever()方法来处理,该方法会帮你循环调用loop, 因此该方法式一个阻塞的方法。如果不想在程序里面阻塞,可以使用loop_start()方法,该方法会启动一个线程在后台执行loop_forever。</li>
+<li>订阅消息: 使用subscribe()方法来订阅topic和接收数据</li>
+<li>发布消息: 使用publish()方法来发布消息</li>
+</ul>
+<p>mqtt的通信是异步的, 通过网络事件来进行回调处理, 因此我们基本采用回调来编程, 回调函数的签名如下, 所有的回调函数都2个固定参数: </p>
+<blockquote>
+<ol>
+<li>client: 回调时传递来的客户端实例 </li>
+<li>userdata: user的任何类型的数据, 实例化client时传入, 用户自己使用。</li>
+</ol>
+</blockquote>
+<ul>
+<li><p>on_connect(client, userdata, flags, rc):当客户端与broker建立连接过后调用</p>
+<blockquote>
+<ol>
+<li>flags: 是一个字典, 包含broker返回的响应标志，比如 flags[‘session present’]</li>
+<li>rc: retrun code, 返回状态码</li>
+</ol>
+</blockquote>
+</li>
+<li><p>on_disconnect(client, userdata, rc)</p>
+</li>
+</ul>
+<ul>
+<li><p>on_message(client, userdata, message)</p>
+</li>
+<li><p>on_publish(client, userdata, mid)</p>
+</li>
+<li><p>on_subscribe(client, userdata, mid, granted_qos)</p>
+</li>
+<li><p>on_unsubscribe(client, userdata, mid)</p>
+</li>
+<li><p>on_log(client, userdata, level, buf)</p>
+</li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;最近使用Python写一个后台服务处理mqtt里面的事件时遇到了一个麻烦: mqtt连接重置时(重启mqtt服务后), 之前pub消息的线程不能正常工作了, 进过多次踩坑, 终于解决.&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="mqtt" scheme="https://blog.yumaojun.net/tags/mqtt/"/>
+    
+  </entry>
   
   <entry>
     <title>Python编码风格</title>
@@ -671,9 +739,9 @@
       <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
     
     
-      <category term="cobra" scheme="https://blog.yumaojun.net/tags/cobra/"/>
-    
       <category term="openstack" scheme="https://blog.yumaojun.net/tags/openstack/"/>
+    
+      <category term="cobra" scheme="https://blog.yumaojun.net/tags/cobra/"/>
     
   </entry>
   
@@ -1523,52 +1591,6 @@
     
     
       <category term="fasthttp" scheme="https://blog.yumaojun.net/tags/fasthttp/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>利用Polipo构建基于SS的http proxy</title>
-    <link href="https://blog.yumaojun.net/2017/01/24/http-proxy/"/>
-    <id>https://blog.yumaojun.net/2017/01/24/http-proxy/</id>
-    <published>2017-01-24T01:04:33.000Z</published>
-    <updated>2017-01-24T02:10:38.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>搞这个的主要原因是golang的很多依赖包需要翻墙下载, 这不像Python和NodeJS有官方源仓库的语言(配置国内源可以加速). 之前用windows的时候也是使用ss, 而<code>http proxy</code>是通过chrome的一个插件<code>Proxy SwitchyOmega</code>来做的，但是在mac下面这招不灵了, 下面主要介绍mac如何利用ss搭建<code>http proxy</code>.<br><a id="more"></a></p>
-<h2 id="安装Shadowsocks"><a href="#安装Shadowsocks" class="headerlink" title="安装Shadowsocks"></a>安装Shadowsocks</h2><p>ss的安装和运行是前提, 这里不多做介绍，具体请查看<a href="http://www.ishadowsocks.mobi/" target="_blank" rel="external">Shadowsocks安装和使用</a></p>
-<h2 id="Polipo简介"><a href="#Polipo简介" class="headerlink" title="Polipo简介"></a>Polipo简介</h2><p>这里主要使用<code>Polipo</code>来做<code>http proxy</code>, <code>polipo</code>的官方是这样介绍它的：<em>“Polipo 是一个小而快速的缓存 web 代理程序(web 缓存, HTTP 代理, 代理服务器)。尽管 Polipo 是为一个人或一小群人使用而设计的，但并不妨碍它为一大群人所使用。”</em>,<br>该项目的地址 <a href="https://github.com/jech/polipo" target="_blank" rel="external">polipo Github地址</a>, 该项目的官方文档<a href="https://www.irzhenif.fr/~jch/software/polipo/" target="_blank" rel="external">polipo官方文档</a><br>可惜该项目的作者已经停止该项目的维护了, 且用且珍惜。</p>
-<h2 id="Polipo安装"><a href="#Polipo安装" class="headerlink" title="Polipo安装"></a>Polipo安装</h2><p>Shadowsocks官方推荐<code>http proxy</code>代理也是<code>Polipo</code>, 官方对此也做了简单的描述，我直接抄过来了</p>
-<ul>
-<li>安装<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">apt-get install polipo</div><div class="line">service polipo stop</div><div class="line">polipo socksParentProxy=localhost:1080</div></pre></td></tr></table></figure>
-</li>
-</ul>
-<p>以上是官方文档里面的说明，在mac下使用polipo要稍做修改</p>
-<ul>
-<li>mac的安装<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">brew install polipo</div></pre></td></tr></table></figure>
-</li>
-</ul>
-<h2 id="Polipo使用"><a href="#Polipo使用" class="headerlink" title="Polipo使用"></a>Polipo使用</h2><ul>
-<li><p>ss对polipo的使用样例</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">http_proxy=http://localhost:8123 apt-get update</div><div class="line"></div><div class="line">http_proxy=http://localhost:8123 curl www.google.com</div><div class="line"></div><div class="line">http_proxy=http://localhost:8123 wget www.google.com</div><div class="line"></div><div class="line">git config --global http.proxy 127.0.0.1:8123</div><div class="line">git clone https://github.com/xxx/xxx.git</div><div class="line">git xxx</div><div class="line">git xxx</div><div class="line">git config --global --unset-all http.proxy</div></pre></td></tr></table></figure>
-</li>
-<li><p>mac的使用<br>打开一个terminal, 不要关掉，象genymotion之类的其他程序就可使用Http代理了.</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">➜  ~ polipo socksParentProxy=localhost:1080</div><div class="line">Established listening socket on port 8123.</div></pre></td></tr></table></figure>
-</li>
-</ul>
-<p>然后我们使用使用该<code>http proxy</code>来安装golang包,记得开启的你的ss<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">➜  Blogs https_proxy=http://localhost:8123 go get -u -v github.com/valyala/fasthttp</div><div class="line">github.com/valyala/fasthttp (download)</div><div class="line">github.com/klauspost/compress (download)</div><div class="line">github.com/klauspost/cpuid (download)</div><div class="line">github.com/klauspost/crc32 (download)</div><div class="line">github.com/valyala/bytebufferpool (download)</div></pre></td></tr></table></figure></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;搞这个的主要原因是golang的很多依赖包需要翻墙下载, 这不像Python和NodeJS有官方源仓库的语言(配置国内源可以加速). 之前用windows的时候也是使用ss, 而&lt;code&gt;http proxy&lt;/code&gt;是通过chrome的一个插件&lt;code&gt;Proxy SwitchyOmega&lt;/code&gt;来做的，但是在mac下面这招不灵了, 下面主要介绍mac如何利用ss搭建&lt;code&gt;http proxy&lt;/code&gt;.&lt;br&gt;
-    
-    </summary>
-    
-      <category term="开发工具" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/"/>
-    
-      <category term="Shadowsocks" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/Shadowsocks/"/>
-    
-    
-      <category term="http-proxy" scheme="https://blog.yumaojun.net/tags/http-proxy/"/>
     
   </entry>
   
