@@ -53,7 +53,7 @@
     <link href="https://blog.yumaojun.net/2017/07/04/mqtt-reconnect/"/>
     <id>https://blog.yumaojun.net/2017/07/04/mqtt-reconnect/</id>
     <published>2017-07-04T07:21:58.000Z</published>
-    <updated>2017-07-06T05:33:07.000Z</updated>
+    <updated>2017-07-06T05:34:58.000Z</updated>
     
     <content type="html"><![CDATA[<p>最近使用Python写一个后台服务处理mqtt里面的事件时遇到了一个麻烦: mqtt连接重置时(重启mqtt服务后), 之前pub消息的线程不能正常工作了, 经过多次踩坑, 终于解决. 引发问题的原因是我使用姿势不对造成的, 一旦你使用姿势不对 会造成一些奇怪的问题,并且很难解决。 因此请正确使用mqtt。<br><a id="more"></a></p>
 <h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><p>关于MQTT协议的介绍请参考之前博客: <a href="/2017/07/05/mqtt-introduce/" title="物联网之MQTT">物联网之MQTT</a>, 只有在了解MQTT协议过后, 我们才能以正确的姿势使用她, 以下是我觉得需要注意的地方:</p>
@@ -855,9 +855,9 @@
       <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
     
     
-      <category term="openstack" scheme="https://blog.yumaojun.net/tags/openstack/"/>
-    
       <category term="cobra" scheme="https://blog.yumaojun.net/tags/cobra/"/>
+    
+      <category term="openstack" scheme="https://blog.yumaojun.net/tags/openstack/"/>
     
   </entry>
   
