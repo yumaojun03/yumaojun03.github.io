@@ -102,17 +102,17 @@
 
 
 
-<meta name="description" content="最近使用Python写一个后台服务处理mqtt里面的事件时遇到了一个麻烦: mqtt连接重置时(重启mqtt服务后), 之前pub消息的线程不能正常工作了, 进过多次踩坑, 终于解决.">
+<meta name="description" content="最近使用Python写一个后台服务处理mqtt里面的事件时遇到了一个麻烦: mqtt连接重置时(重启mqtt服务后), 之前pub消息的线程不能正常工作了, 经过多次踩坑, 终于解决. 引发问题的原因是我使用姿势不对造成的, 一旦你使用姿势不对 会造成一些奇怪的问题,并且很难解决。 因此请正确使用mqtt。">
 <meta name="keywords" content="mqtt">
 <meta property="og:type" content="article">
-<meta property="og:title" content="以正确的姿势使用mqtt">
+<meta property="og:title" content="Python的mqtt客户端使用说明">
 <meta property="og:url" content="https://blog.yumaojun.net/2017/07/04/mqtt-reconnect/index.html">
 <meta property="og:site_name" content="紫川秀的博客">
-<meta property="og:description" content="最近使用Python写一个后台服务处理mqtt里面的事件时遇到了一个麻烦: mqtt连接重置时(重启mqtt服务后), 之前pub消息的线程不能正常工作了, 进过多次踩坑, 终于解决.">
-<meta property="og:updated_time" content="2017-07-04T10:29:05.000Z">
+<meta property="og:description" content="最近使用Python写一个后台服务处理mqtt里面的事件时遇到了一个麻烦: mqtt连接重置时(重启mqtt服务后), 之前pub消息的线程不能正常工作了, 经过多次踩坑, 终于解决. 引发问题的原因是我使用姿势不对造成的, 一旦你使用姿势不对 会造成一些奇怪的问题,并且很难解决。 因此请正确使用mqtt。">
+<meta property="og:updated_time" content="2017-07-06T05:15:25.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="以正确的姿势使用mqtt">
-<meta name="twitter:description" content="最近使用Python写一个后台服务处理mqtt里面的事件时遇到了一个麻烦: mqtt连接重置时(重启mqtt服务后), 之前pub消息的线程不能正常工作了, 进过多次踩坑, 终于解决.">
+<meta name="twitter:title" content="Python的mqtt客户端使用说明">
+<meta name="twitter:description" content="最近使用Python写一个后台服务处理mqtt里面的事件时遇到了一个麻烦: mqtt连接重置时(重启mqtt服务后), 之前pub消息的线程不能正常工作了, 经过多次踩坑, 终于解决. 引发问题的原因是我使用姿势不对造成的, 一旦你使用姿势不对 会造成一些奇怪的问题,并且很难解决。 因此请正确使用mqtt。">
 
 
 
@@ -146,7 +146,7 @@
 
 
 
-  <title>以正确的姿势使用mqtt | 紫川秀的博客</title>
+  <title>Python的mqtt客户端使用说明 | 紫川秀的博客</title>
   
 
 
@@ -302,7 +302,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">以正确的姿势使用mqtt</h1>
+          <h1 class="post-title" itemprop="name headline">Python的mqtt客户端使用说明</h1>
         
 
         <div class="post-meta">
@@ -330,8 +330,8 @@
               
                 <span class="post-meta-item-text">更新于</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2017-07-04T18:29:05+08:00">
-                2017-07-04
+              <time title="更新于" itemprop="dateModified" datetime="2017-07-06T13:15:25+08:00">
+                2017-07-06
               </time>
             
           </span>
@@ -344,7 +344,7 @@
 
           
           
-             <span id="/2017/07/04/mqtt-reconnect/" class="leancloud_visitors" data-flag-title="以正确的姿势使用mqtt">
+             <span id="/2017/07/04/mqtt-reconnect/" class="leancloud_visitors" data-flag-title="Python的mqtt客户端使用说明">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -372,8 +372,16 @@
       
 
       
-        <p>最近使用Python写一个后台服务处理mqtt里面的事件时遇到了一个麻烦: mqtt连接重置时(重启mqtt服务后), 之前pub消息的线程不能正常工作了, 进过多次踩坑, 终于解决.<br><a id="more"></a></p>
-<h2 id="MQTT简介"><a href="#MQTT简介" class="headerlink" title="MQTT简介"></a>MQTT简介</h2><p>MQTT是一个客户端服务端架构的发布/订阅模式的消息传输协议。它的设计思想是轻巧、开放、简单、规范，易于实现。这些特点使得它对很多场景来说都是很好的选择，特别是对于受限的环境如机器与机器的通信(M2M)以及物联网环境(IoT)。</p>
+        <p>最近使用Python写一个后台服务处理mqtt里面的事件时遇到了一个麻烦: mqtt连接重置时(重启mqtt服务后), 之前pub消息的线程不能正常工作了, 经过多次踩坑, 终于解决. 引发问题的原因是我使用姿势不对造成的, 一旦你使用姿势不对 会造成一些奇怪的问题,并且很难解决。 因此请正确使用mqtt。<br><a id="more"></a></p>
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><p>关于MQTT协议的介绍请参考之前博客: <a href="/2017/07/05/mqtt-introduce/" title="物联网之MQTT">物联网之MQTT</a>, 只有在了解MQTT协议过后, 我们才能以正确的姿势使用她, 以下是我觉得需要注意的地方:</p>
+<ul>
+<li>按需使用MQTT的Qos, 当Qos=2时可靠性最高, 但是会损失性能。</li>
+<li>尽量使用<code>client_id</code>来标示客户端, 但是注意 如果2个客户端使用同一个<code>client_id</code>, 会出现client争抢连接的状态, 所以全局持有一个client是不错的选择。</li>
+<li>注意异步处理, 在回调函数中不能阻塞。</li>
+<li>将所有数据处理逻辑放到回调函数里面, 防止链接重置时，漏掉处理逻</li>
+<li>在on_message的回调里面 处理所有的订阅消息</li>
+<li>断开连接时尽量从新连接, 避免mqtt离线后, 重新上线, 造成服务连接异常。(注意loop的返回, 保证loop网络事件持续处理中)</li>
+</ul>
 <h2 id="环境介绍"><a href="#环境介绍" class="headerlink" title="环境介绍"></a>环境介绍</h2><p>介绍下我的测试环境:</p>
 <ul>
 <li>Python Version: 3.6</li>
@@ -396,30 +404,105 @@
 <li>userdata: user的任何类型的数据, 实例化client时传入, 用户自己使用。</li>
 </ol>
 </blockquote>
+<h3 id="on-connect-client-userdata-flags-rc"><a href="#on-connect-client-userdata-flags-rc" class="headerlink" title="on_connect(client, userdata, flags, rc)"></a>on_connect(client, userdata, flags, rc)</h3><p>当broker响应了我们链接之后调用, 涉及到的参数:</p>
 <ul>
-<li><p>on_connect(client, userdata, flags, rc):当客户端与broker建立连接过后调用</p>
-<blockquote>
-<ol>
-<li>flags: 是一个字典, 包含broker返回的响应标志，比如 flags[‘session present’]</li>
-<li>rc: retrun code, 返回状态码</li>
-</ol>
-</blockquote>
+<li><p>flags: 是一个字典, 包含broker返回的响应标志<br>现在只有1中标准: session present, 通过flags[‘session present’]获取到该标准里面的内容, 当clean session为0时(clean_session=False), broker会保存client的的session信息, 该信息会在client重新上线时, 通过session present这个标志 返回给客户端。</p>
 </li>
-<li><p>on_disconnect(client, userdata, rc)</p>
+<li><p>rc: retrun code, 返回状态码</p>
 </li>
 </ul>
+<table>
+<thead>
+<tr>
+<th>RC</th>
+<th style="text-align:center">Status</th>
+<th style="text-align:center">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td style="text-align:center">successful</td>
+<td style="text-align:center">connected</td>
+</tr>
+<tr>
+<td>1</td>
+<td style="text-align:center">refused</td>
+<td style="text-align:center">incorrect protocol version</td>
+</tr>
+<tr>
+<td>2</td>
+<td style="text-align:center">refused</td>
+<td style="text-align:center">invalid client identifier</td>
+</tr>
+<tr>
+<td>3</td>
+<td style="text-align:center">refused</td>
+<td style="text-align:center">server unavailable</td>
+</tr>
+<tr>
+<td>4</td>
+<td style="text-align:center">refused</td>
+<td style="text-align:center">bad username or password</td>
+</tr>
+<tr>
+<td>5</td>
+<td style="text-align:center">refused</td>
+<td style="text-align:center">not authorised</td>
+</tr>
+<tr>
+<td>6-255</td>
+<td style="text-align:center">refused</td>
+<td style="text-align:center">Currently unused</td>
+</tr>
+</tbody>
+</table>
+<h3 id="on-disconnect-client-userdata-rc"><a href="#on-disconnect-client-userdata-rc" class="headerlink" title="on_disconnect(client, userdata, rc)"></a>on_disconnect(client, userdata, rc)</h3><p>当client和broker断开连接时调用. rc表示断开连接是的状态</p>
+<table>
+<thead>
+<tr>
+<th>RC</th>
+<th style="text-align:center">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td style="text-align:center">MQTT_ERR_SUCCESS, 客户端调用disconnect()方法断开连接, 属于正常断开</td>
+</tr>
+<tr>
+<td>1</td>
+<td style="text-align:center">网络等其他原因照成的连接断开, 异常断开</td>
+</tr>
+</tbody>
+</table>
+<h3 id="on-message-client-userdata-message"><a href="#on-message-client-userdata-message" class="headerlink" title="on_message(client, userdata, message)"></a>on_message(client, userdata, message)</h3><p>当客户端订阅的topic上有数据 被接收时调用, message是一个MQTTMessage的类, 该类包含了message的所有数据:</p>
 <ul>
-<li><p>on_message(client, userdata, message)</p>
-</li>
-<li><p>on_publish(client, userdata, mid)</p>
-</li>
-<li><p>on_subscribe(client, userdata, mid, granted_qos)</p>
-</li>
-<li><p>on_unsubscribe(client, userdata, mid)</p>
-</li>
-<li><p>on_log(client, userdata, level, buf)</p>
-</li>
+<li>topic: 数据所在的topic</li>
+<li>payload: message的数据部分</li>
+<li>qos: 该消息的质量: 0, 1, 2</li>
+<li>retain: 该消息是否是保留消息, 如果为True 这为保留消息, 如果为False就是最新的消息。</li>
+<li>mid: message id</li>
 </ul>
+<h3 id="on-publish-client-userdata-mid"><a href="#on-publish-client-userdata-mid" class="headerlink" title="on_publish(client, userdata, mid)"></a>on_publish(client, userdata, mid)</h3><p>当使用publish方法将message传输到broker后调用, 但是这要针对不同的qos, 对于qos1和2而言, 这表示消息已经到达后的回调, 如果qos是0那么仅仅表示消息离开了客户端之后的回调。这个回调很重要，因为即使publish()调用返回成功，并不总是意味着已经发送了消息</p>
+<ul>
+<li>mid: 表示已经publish出去的消息的message id</li>
+</ul>
+<h3 id="on-subscribe-client-userdata-mid-granted-qos"><a href="#on-subscribe-client-userdata-mid-granted-qos" class="headerlink" title="on_subscribe(client, userdata, mid, granted_qos)"></a>on_subscribe(client, userdata, mid, granted_qos)</h3><p>当broker响应了subscribe请求之后调用。</p>
+<ul>
+<li>mid: 被订阅消息的message id</li>
+<li>granted_qos: broker为不同的订阅请求授权的qos级别。是一个列表。</li>
+</ul>
+<h3 id="on-unsubscribe-client-userdata-mid"><a href="#on-unsubscribe-client-userdata-mid" class="headerlink" title="on_unsubscribe(client, userdata, mid)"></a>on_unsubscribe(client, userdata, mid)</h3><p>当broker响应了取消订阅的请求过后调用。</p>
+<ul>
+<li>mid: 取消订阅的消息的message id</li>
+</ul>
+<h3 id="on-log-client-userdata-level-buf"><a href="#on-log-client-userdata-level-buf" class="headerlink" title="on_log(client, userdata, level, buf)"></a>on_log(client, userdata, level, buf)</h3><p>MQTT通信过程中的一些Debug信息</p>
+<ul>
+<li>level: 日志级别MQTT_LOG_INFO, MQTT_LOG_NOTICE, MQTT_LOG_WARNING, MQTT_LOG_ERR, and MQTT_LOG_DEBUG</li>
+<li>buf: message buffer, debug信息本身。</li>
+</ul>
+<h2 id="示例代码"><a href="#示例代码" class="headerlink" title="示例代码"></a>示例代码</h2><p>我Github上有: <a href="https://github.com/yumaojun03/python/blob/master/mqtt/main.py" target="_blank" rel="external">完整示例代码</a><br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#!/usr/bin/env python3</span></div><div class="line"><span class="comment"># -*- coding: utf8 -*-</span></div><div class="line"></div><div class="line"><span class="keyword">import</span> threading</div><div class="line"><span class="keyword">import</span> logging</div><div class="line"><span class="keyword">import</span> time</div><div class="line"></div><div class="line"><span class="keyword">from</span> paho.mqtt.client <span class="keyword">import</span> Client</div><div class="line"></div><div class="line">FORMAT = <span class="string">'%(asctime)s - %(name)s - %(levelname)s - %(message)s'</span></div><div class="line">logging.basicConfig(format=FORMAT, level=logging.INFO)</div><div class="line">logger = logging.getLogger()</div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">pub_topic_test01</span><span class="params">(client)</span>:</span></div><div class="line">    <span class="keyword">while</span> <span class="keyword">True</span>:</div><div class="line">        client.publish(topic=<span class="string">"test01"</span>, qos=<span class="number">2</span>, payload=<span class="string">"test01 topic data"</span>)</div><div class="line">        time.sleep(<span class="number">2</span>)</div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">pub_topic_test02</span><span class="params">(client)</span>:</span></div><div class="line">    <span class="keyword">while</span> <span class="keyword">True</span>:</div><div class="line">        client.publish(topic=<span class="string">"test02"</span>, qos=<span class="number">2</span>, payload=<span class="string">"test02 topic data"</span>)</div><div class="line">        time.sleep(<span class="number">2</span>)</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyMQTTClass</span><span class="params">(Client)</span>:</span></div><div class="line">    <span class="string">"""</span></div><div class="line">    mqtt client for deal data</div><div class="line">    """</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></div><div class="line">        super(MyMQTTClass, self).__init__(client_id=<span class="string">"test client"</span>, clean_session=<span class="keyword">False</span>)</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">on_connect</span><span class="params">(self, client, obj, flags, rc)</span>:</span></div><div class="line">        logger.info(<span class="string">"on connect, rc: %s"</span> % rc)</div><div class="line"></div><div class="line">        <span class="comment"># 链接过后先处理sub</span></div><div class="line">        client.subscribe(topic=<span class="string">"test01"</span>, qos=<span class="number">2</span>)</div><div class="line">        client.subscribe(topic=<span class="string">"test02"</span>, qos=<span class="number">2</span>)</div><div class="line"></div><div class="line">        logger.info(<span class="string">"start topic service1..."</span>)</div><div class="line">        t1 = threading.Thread(target=pub_topic_test01, args=(client,))</div><div class="line">        t1.start()</div><div class="line">        self.worker1 = t1</div><div class="line"></div><div class="line">        logger.info(<span class="string">"start topic service2..."</span>)</div><div class="line">        t2 = threading.Thread(target=pub_topic_test02, args=(client,))</div><div class="line">        t2.start()</div><div class="line">        self.worker2 = t2</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">on_message</span><span class="params">(self, client, obj, msg)</span>:</span></div><div class="line">        logger.debug(<span class="string">"on message, topic: %s, qos: %s, data: %s"</span> % (msg.topic, msg.qos, msg.payload))</div><div class="line"></div><div class="line">        <span class="keyword">if</span> msg.topic == <span class="string">"test01"</span>:</div><div class="line">            logger.info(<span class="string">"deal test01, data: %s"</span> % msg.payload)</div><div class="line"></div><div class="line">        <span class="keyword">elif</span> msg.topic == <span class="string">"test02"</span>:</div><div class="line">            logger.info(<span class="string">"deal test02, data: %s"</span> % msg.payload)</div><div class="line"></div><div class="line">        <span class="keyword">else</span>:</div><div class="line">            logger.info(<span class="string">"other topic %s, data: %s"</span> %(msg.topic, msg.payload))</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">on_publish</span><span class="params">(self, client, obj, mid)</span>:</span></div><div class="line">        logger.debug(<span class="string">"publish -&gt; ,mid: %s"</span> % mid)</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">on_subscribe</span><span class="params">(self, client, obj, mid, granted_qos)</span>:</span></div><div class="line">        logger.debug(<span class="string">"subscribed &lt;- ,mid: %s, qos: %s"</span> %(mid, granted_qos))</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">on_log</span><span class="params">(self, mqttc, obj, level, string)</span>:</span></div><div class="line">        logger.debug(<span class="string">"mqtt debug: %s"</span> % string)</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">on_disconnect</span><span class="params">(self, client, userdata, rc)</span>:</span></div><div class="line">        logger.info(<span class="string">"disconnect: %s"</span> % rc)</div><div class="line"></div><div class="line">        <span class="keyword">while</span> rc == <span class="number">1</span>:</div><div class="line">            <span class="keyword">try</span>:</div><div class="line">                client.reconnect()</div><div class="line">                logger.info(<span class="string">"reconnect success"</span>)</div><div class="line">                rc = <span class="number">0</span></div><div class="line">            <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</div><div class="line">                logger.error(<span class="string">"reconnect error, %s retry after 3s"</span> % e)</div><div class="line">                time.sleep(<span class="number">3</span>)</div><div class="line"></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(self)</span>:</span></div><div class="line">        self.connect(<span class="string">"172.16.112.251"</span>, <span class="number">1883</span>, <span class="number">60</span>)</div><div class="line"></div><div class="line">        <span class="keyword">while</span> <span class="keyword">True</span>:</div><div class="line">            rc = self.loop()</div><div class="line">            <span class="keyword">if</span> rc != <span class="number">0</span>:</div><div class="line">                time.sleep(<span class="number">1</span>)</div><div class="line">                rc = self.loop()</div><div class="line">                logger.info(<span class="string">"recovery from error loop, %s"</span> % rc)</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></div><div class="line">    client = MyMQTTClass()</div><div class="line">    client.run()</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</div><div class="line">    main()</div></pre></td></tr></table></figure></p>
 
       
     </div>
@@ -487,6 +570,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/07/05/mqtt-introduce/" rel="prev" title="物联网之MQTT">
+                物联网之MQTT <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -558,7 +645,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">32</span>
+                <span class="site-state-item-count">33</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -669,7 +756,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#MQTT简介"><span class="nav-number">1.</span> <span class="nav-text">MQTT简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#环境介绍"><span class="nav-number">2.</span> <span class="nav-text">环境介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#客户端使用介绍"><span class="nav-number">3.</span> <span class="nav-text">客户端使用介绍</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#注意事项"><span class="nav-number">1.</span> <span class="nav-text">注意事项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#环境介绍"><span class="nav-number">2.</span> <span class="nav-text">环境介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#客户端使用介绍"><span class="nav-number">3.</span> <span class="nav-text">客户端使用介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#on-connect-client-userdata-flags-rc"><span class="nav-number">3.1.</span> <span class="nav-text">on_connect(client, userdata, flags, rc)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#on-disconnect-client-userdata-rc"><span class="nav-number">3.2.</span> <span class="nav-text">on_disconnect(client, userdata, rc)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#on-message-client-userdata-message"><span class="nav-number">3.3.</span> <span class="nav-text">on_message(client, userdata, message)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#on-publish-client-userdata-mid"><span class="nav-number">3.4.</span> <span class="nav-text">on_publish(client, userdata, mid)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#on-subscribe-client-userdata-mid-granted-qos"><span class="nav-number">3.5.</span> <span class="nav-text">on_subscribe(client, userdata, mid, granted_qos)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#on-unsubscribe-client-userdata-mid"><span class="nav-number">3.6.</span> <span class="nav-text">on_unsubscribe(client, userdata, mid)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#on-log-client-userdata-level-buf"><span class="nav-number">3.7.</span> <span class="nav-text">on_log(client, userdata, level, buf)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#示例代码"><span class="nav-number">4.</span> <span class="nav-text">示例代码</span></a></li></ol></div>
             
 
           </div>
