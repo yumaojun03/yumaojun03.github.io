@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog.yumaojun.net/"/>
-  <updated>2017-07-06T05:22:46.000Z</updated>
+  <updated>2017-07-06T05:24:34.000Z</updated>
   <id>https://blog.yumaojun.net/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="https://blog.yumaojun.net/2017/07/05/mqtt-introduce/"/>
     <id>https://blog.yumaojun.net/2017/07/05/mqtt-introduce/</id>
     <published>2017-07-05T04:46:42.000Z</published>
-    <updated>2017-07-06T05:22:46.000Z</updated>
+    <updated>2017-07-06T05:24:34.000Z</updated>
     
     <content type="html"><![CDATA[<p>是时候搞IOT了<br><a id="more"></a></p>
 <h2 id="MQTT简介"><a href="#MQTT简介" class="headerlink" title="MQTT简介"></a>MQTT简介</h2><p>MQTT是一个客户端服务端架构的发布/订阅模式的消息传输协议。它的设计思想是轻巧、开放、简单、规范，易于实现。这些特点使得它对很多场景来说都是很好的选择，特别是对于受限的环境如机器与机器的通信(M2M)以及物联网环境(IoT)。<br>总体来说MQTT有如下特性:</p>
