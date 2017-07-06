@@ -3,7 +3,7 @@
   <entry>
     <title><![CDATA[物联网之MQTT]]></title>
     <url>%2F2017%2F07%2F05%2Fmqtt-introduce%2F</url>
-    <content type="text"><![CDATA[MQTT简介MQTT是一个客户端服务端架构的发布/订阅模式的消息传输协议。它的设计思想是轻巧、开放、简单、规范，易于实现。这些特点使得它对很多场景来说都是很好的选择，特别是对于受限的环境如机器与机器的通信(M2M)以及物联网环境(IoT)。总体来说MQTT有如下特性: 轻量级的 machine-to-machine 通信协议。 publish/subscribe模式。 基于TCP/IP。 支持QoS。 适合于低带宽、不可靠连接、嵌入式设备、CPU内存资源紧张。 是一种比较不错的Android消息推送方案。 FacebookMessenger采用了MQTT。 MQTT有可能成为物联网的重要协议]]></content>
+    <content type="text"><![CDATA[是时候搞IOT了 MQTT简介MQTT是一个客户端服务端架构的发布/订阅模式的消息传输协议。它的设计思想是轻巧、开放、简单、规范，易于实现。这些特点使得它对很多场景来说都是很好的选择，特别是对于受限的环境如机器与机器的通信(M2M)以及物联网环境(IoT)。总体来说MQTT有如下特性: 轻量级的 machine-to-machine 通信协议。 publish/subscribe模式。 基于TCP/IP。 支持QoS。 适合于低带宽、不可靠连接、嵌入式设备、CPU内存资源紧张。 是一种比较不错的Android消息推送方案。 FacebookMessenger采用了MQTT。 MQTT有可能成为物联网的重要协议]]></content>
       <tags>
         <tag>mqtt</tag>
       </tags>
