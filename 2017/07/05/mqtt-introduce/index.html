@@ -84,7 +84,7 @@
 <link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="mqtt," />
+  <meta name="keywords" content="mqtt,iot," />
 
 
 
@@ -102,19 +102,21 @@
 
 
 
-<meta name="description" content="是时候搞IOT了">
-<meta name="keywords" content="mqtt">
+<meta name="description" content="物联网物接入协议MQTT">
+<meta name="keywords" content="mqtt,iot">
 <meta property="og:type" content="article">
 <meta property="og:title" content="物联网之MQTT">
 <meta property="og:url" content="https://blog.yumaojun.net/2017/07/05/mqtt-introduce/index.html">
 <meta property="og:site_name" content="紫川秀的博客">
-<meta property="og:description" content="是时候搞IOT了">
-<meta property="og:image" content="http://www.eeiot.com/Public/Upload/attached/image/20150529/20150529151253_23315.jpg">
-<meta property="og:updated_time" content="2017-07-06T05:24:34.000Z">
+<meta property="og:description" content="物联网物接入协议MQTT">
+<meta property="og:image" content="https://image.slidesharecdn.com/mqttiotprotocolscomparison-140219090749-phpapp01/95/mqtt-iot-protocols-comparison-8-638.jpg?cb=1392817944">
+<meta property="og:image" content="http://www.sharetechnote.com/html/IoT/image/IoT_MQTT_ProtocolOverview_01.png">
+<meta property="og:image" content="https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.iotsdk.v0.9.0/msc_mqtt.png">
+<meta property="og:updated_time" content="2017-07-31T01:25:20.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="物联网之MQTT">
-<meta name="twitter:description" content="是时候搞IOT了">
-<meta name="twitter:image" content="http://www.eeiot.com/Public/Upload/attached/image/20150529/20150529151253_23315.jpg">
+<meta name="twitter:description" content="物联网物接入协议MQTT">
+<meta name="twitter:image" content="https://image.slidesharecdn.com/mqttiotprotocolscomparison-140219090749-phpapp01/95/mqtt-iot-protocols-comparison-8-638.jpg?cb=1392817944">
 
 
 
@@ -332,8 +334,8 @@
               
                 <span class="post-meta-item-text">更新于</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2017-07-06T13:24:34+08:00">
-                2017-07-06
+              <time title="更新于" itemprop="dateModified" datetime="2017-07-31T09:25:20+08:00">
+                2017-07-31
               </time>
             
           </span>
@@ -374,7 +376,9 @@
       
 
       
-        <p>是时候搞IOT了<br><a id="more"></a></p>
+        <p>物联网物接入协议MQTT<br><a id="more"></a></p>
+<p>相对来说，IoT的技术挑战，主要在安全隐患、连接管理、海量数据管理，用关键字来说就是海量、通用、可扩展、简单。<br>物接入云端，有很多挑战, 数据的安全尤为重要 </p>
+<h2 id="协议比较"><a href="#协议比较" class="headerlink" title="协议比较"></a>协议比较</h2><p><a href="http://www.365yg.com/group/6408407122584879362/" target="_blank" rel="external">协议比较</a></p>
 <h2 id="MQTT简介"><a href="#MQTT简介" class="headerlink" title="MQTT简介"></a>MQTT简介</h2><p>MQTT是一个客户端服务端架构的发布/订阅模式的消息传输协议。它的设计思想是轻巧、开放、简单、规范，易于实现。这些特点使得它对很多场景来说都是很好的选择，特别是对于受限的环境如机器与机器的通信(M2M)以及物联网环境(IoT)。<br>总体来说MQTT有如下特性:</p>
 <ul>
 <li>轻量级的 machine-to-machine 通信协议。</li>
@@ -386,7 +390,94 @@
 <li>FacebookMessenger采用了MQTT。</li>
 <li>MQTT有可能成为物联网的重要协议</li>
 </ul>
-<p><img src="http://www.eeiot.com/Public/Upload/attached/image/20150529/20150529151253_23315.jpg" alt="基于MQTT的物联网架构"></p>
+<p><a href="http://dataguild.org/?p=6817" target="_blank" rel="external">mqtt协议简介</a></p>
+<p><a href="http://www.cnblogs.com/caca/p/mqtt.html" target="_blank" rel="external">协议简介</a></p>
+<h2 id="报文格式"><a href="#报文格式" class="headerlink" title="报文格式"></a>报文格式</h2><table class="tg"><tr><th class="tg-baqh">bit</th><th class="tg-yw4l">7</th><th class="tg-yw4l">6</th><th class="tg-yw4l">5</th><th class="tg-yw4l">4</th><th class="tg-yw4l">3</th><th class="tg-yw4l">2</th><th class="tg-yw4l">1</th><th class="tg-yw4l">0</th></tr><tr><td class="tg-q1yk">byte 1</td><td class="tg-6k2t" colspan="4">Message type</td><td class="tg-6k2t">DUP</td><td class="tg-6k2t" colspan="2">QoS level</td><td class="tg-6k2t">RETAIN</td></tr><tr><td class="tg-jogk">byte 2</td><td class="tg-yw4l" colspan="8">Message length (between one and four bytes)</td></tr><tr><td class="tg-r78f">byte 3</td><td class="tg-j0tj" colspan="8">… if needed to encode message length</td></tr><tr><td class="tg-574v">byte 4</td><td class="tg-baqh" colspan="8">… if needed to encode message length</td></tr><tr><td class="tg-r78f">byte 5</td><td class="tg-j0tj" colspan="8">… if needed to encode message length</td></tr></table>
+
+<h2 id="控制指令"><a href="#控制指令" class="headerlink" title="控制指令"></a>控制指令</h2><table>
+<thead>
+<tr>
+<th>Message Type</th>
+<th style="text-align:center">Value</th>
+<th style="text-align:center">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CONNECT</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">Client request to connect to Server</td>
+</tr>
+<tr>
+<td>CONNACK</td>
+<td style="text-align:center">2</td>
+<td style="text-align:center">Connect Acknowledgment</td>
+</tr>
+<tr>
+<td>PUBLISH</td>
+<td style="text-align:center">3</td>
+<td style="text-align:center">Publish message</td>
+</tr>
+<tr>
+<td>PUBACK</td>
+<td style="text-align:center">4</td>
+<td style="text-align:center">Publish Acknowledgment</td>
+</tr>
+<tr>
+<td>PUBREC</td>
+<td style="text-align:center">5</td>
+<td style="text-align:center">Publish Received (assured delivery part 1)</td>
+</tr>
+<tr>
+<td>PUBREL</td>
+<td style="text-align:center">6</td>
+<td style="text-align:center">Publish Release (assured delivery part 2)</td>
+</tr>
+<tr>
+<td>PUBCOMP</td>
+<td style="text-align:center">7</td>
+<td style="text-align:center">Publish Complete (assured delivery part 3)</td>
+</tr>
+<tr>
+<td>SUBSCRIBE</td>
+<td style="text-align:center">8</td>
+<td style="text-align:center">Client Subscribe request</td>
+</tr>
+<tr>
+<td>SUBACK</td>
+<td style="text-align:center">9</td>
+<td style="text-align:center">Subscribe Acknowledgment</td>
+</tr>
+<tr>
+<td>UNSUBSCRIBE</td>
+<td style="text-align:center">10</td>
+<td style="text-align:center">Client Unsubscribe request</td>
+</tr>
+<tr>
+<td>UNSUBACK</td>
+<td style="text-align:center">11</td>
+<td style="text-align:center">Unsubscribe Acknowledgment</td>
+</tr>
+<tr>
+<td>PINGREQ</td>
+<td style="text-align:center">12</td>
+<td style="text-align:center">PING Request</td>
+</tr>
+<tr>
+<td>PINGRESP</td>
+<td style="text-align:center">13</td>
+<td style="text-align:center">PING Response</td>
+</tr>
+<tr>
+<td>DISCONNECT</td>
+<td style="text-align:center">14</td>
+<td style="text-align:center">Client is Disconnecting</td>
+</tr>
+</tbody>
+</table>
+<h2 id="Qos"><a href="#Qos" class="headerlink" title="Qos"></a>Qos</h2><p><img src="https://image.slidesharecdn.com/mqttiotprotocolscomparison-140219090749-phpapp01/95/mqtt-iot-protocols-comparison-8-638.jpg?cb=1392817944" alt=""></p>
+<h2 id="mqtt的状态机"><a href="#mqtt的状态机" class="headerlink" title="mqtt的状态机"></a>mqtt的状态机</h2><p><img src="http://www.sharetechnote.com/html/IoT/image/IoT_MQTT_ProtocolOverview_01.png" alt=""><br>wo </p>
+<p><img src="https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.iotsdk.v0.9.0/msc_mqtt.png" alt=""></p>
 
       
     </div>
@@ -434,6 +525,8 @@
           
             <a href="/tags/mqtt/" rel="tag"># mqtt</a>
           
+            <a href="/tags/iot/" rel="tag"># iot</a>
+          
         </div>
       
 
@@ -454,6 +547,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/07/17/iot-architecture/" rel="prev" title="IOT架构">
+                IOT架构 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -525,7 +622,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-count">34</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -547,7 +644,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-count">26</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -636,7 +733,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#MQTT简介"><span class="nav-number">1.</span> <span class="nav-text">MQTT简介</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#协议比较"><span class="nav-number">1.</span> <span class="nav-text">协议比较</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MQTT简介"><span class="nav-number">2.</span> <span class="nav-text">MQTT简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#报文格式"><span class="nav-number">3.</span> <span class="nav-text">报文格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#控制指令"><span class="nav-number">4.</span> <span class="nav-text">控制指令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Qos"><span class="nav-number">5.</span> <span class="nav-text">Qos</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mqtt的状态机"><span class="nav-number">6.</span> <span class="nav-text">mqtt的状态机</span></a></li></ol></div>
             
 
           </div>

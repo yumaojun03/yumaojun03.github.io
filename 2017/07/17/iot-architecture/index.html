@@ -1,0 +1,1246 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="iot," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="紫川秀的博客" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="最近开发了一次IOT组件, 在此期间也参考了下其他IOT平台的设计架构, 有所感想, 因此将其记录下来, 和大家分享, 欢迎交流。">
+<meta name="keywords" content="iot">
+<meta property="og:type" content="article">
+<meta property="og:title" content="IOT架构">
+<meta property="og:url" content="https://blog.yumaojun.net/2017/07/17/iot-architecture/index.html">
+<meta property="og:site_name" content="紫川秀的博客">
+<meta property="og:description" content="最近开发了一次IOT组件, 在此期间也参考了下其他IOT平台的设计架构, 有所感想, 因此将其记录下来, 和大家分享, 欢迎交流。">
+<meta property="og:image" content="http://www.mr-wu.cn/wp-content/uploads/2015/12/The-internet-of-things.jpg">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/iot-tech.png">
+<meta property="og:image" content="http://www.eeiot.com/Public/Upload/attached/image/20150529/20150529151253_23315.jpg">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/iot-define.png">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/local_agent_arch.png">
+<meta property="og:updated_time" content="2017-07-31T01:51:35.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="IOT架构">
+<meta name="twitter:description" content="最近开发了一次IOT组件, 在此期间也参考了下其他IOT平台的设计架构, 有所感想, 因此将其记录下来, 和大家分享, 欢迎交流。">
+<meta name="twitter:image" content="http://www.mr-wu.cn/wp-content/uploads/2015/12/The-internet-of-things.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 'undefined',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: "",
+      labels: ""
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://blog.yumaojun.net/2017/07/17/iot-architecture/"/>
+
+
+
+
+
+  <title>IOT架构 | 紫川秀的博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">紫川秀的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">比你优秀的人不可怕,可怕的是比你优秀的人比你更努力。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/07/17/iot-architecture/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="紫川秀">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://oiw1gzfww.bkt.clouddn.com/me.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="紫川秀的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">IOT架构</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-17T16:58:05+08:00">
+                2017-07-17
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2017-07-31T09:51:35+08:00">
+                2017-07-31
+              </time>
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/07/17/iot-architecture/" class="leancloud_visitors" data-flag-title="IOT架构">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近开发了一次IOT组件, 在此期间也参考了下其他IOT平台的设计架构, 有所感想, 因此将其记录下来, 和大家分享, 欢迎交流。<br><a id="more"></a></p>
+<h2 id="IOT是什么"><a href="#IOT是什么" class="headerlink" title="IOT是什么"></a>IOT是什么</h2><p>IoT是Internet of Things的缩写, 它是互联网从人向物的延伸, 核心和基础仍然是互联网技术，是互联网技术基础上的延伸和扩展。 它将各种信息传感设备，如射频识别装置、红外感应器、全球定位系统、激光扫描器等种种装置, 按约定的协议, 将任何物品与互联网相连接, 达到物品之间进行信息交换和通讯的目的，以实现智能化识别、定位、追踪、监控和管理等。<br>IOT也将加速AI的觉醒, 它将万物互联, 再加上成熟的大数据处理, 深度学习的应用 会让万物都带有灵性, 这是多么宏大的一个时代, 2016被称为AI的元年, 随着IOT的加速, 我们将是这样一个时代的见证者,见证AI觉醒的第一代人。<br>下面是一张物联网在工业引用的一张图<br><img src="http://www.mr-wu.cn/wp-content/uploads/2015/12/The-internet-of-things.jpg" alt="应用场景"><br>这样看来未来很美好, 但是现实很残酷, 如何实现落地一套可靠的IOT方案任然是个难题, 在参考了一些国外的方案过后, 结合自己的实践, 给出了一种我认为的可落到的IOT方案架构。</p>
+<h2 id="IOT的难点"><a href="#IOT的难点" class="headerlink" title="IOT的难点"></a>IOT的难点</h2><p>IOT在落地过程中有诸多难点, 国内很多IOT也是刚起步的状态, 能参考的就国外几家云的大厂商。</p>
+<h3 id="涉及技术众多"><a href="#涉及技术众多" class="headerlink" title="涉及技术众多"></a>涉及技术众多</h3><p>IOT涉及到很多技术, 下面一张图 从几个维度展示了IOT涉及到的一些技术点:<br><img src="http://oiw1gzfww.bkt.clouddn.com/iot-tech.png" alt="技术体系"><br>从技术上看, 涉及众多技术, 因此对开发者有一定的要求, 招人是个问题。</p>
+<h3 id="架构难设计"><a href="#架构难设计" class="headerlink" title="架构难设计"></a>架构难设计</h3><p>IOT面对的是万物, 在万物接入时需要考虑到 数据的安全, 链接的管理, 海量流数据上传, 海量数据的存储 管理 分析。综合来说 架构设计必须满足: 海量、通用、可扩展、简单 因此这是一套庞大灵活的系统, 而这样的系统 往往云厂商比较有经验, 比如Openstack的设计就是一个不错的架构。<br>整体而言IOT的架构应该属于微服务架构, 微服务架构的设计和开发 往往都是把双刃剑, 如果划不清服务的边界(领域划分)和规范不了服务交互的流程和方式, 那么这样的架构也是一个灾难, 最终造成 理不断剪还乱的一个局面。<br>下面是一张基础的IOT架构图, 能很好的描述IOT中核心的关键点:<br><img src="http://www.eeiot.com/Public/Upload/attached/image/20150529/20150529151253_23315.jpg" alt="基于MQTT的物联网架构"></p>
+<h2 id="架构概述"><a href="#架构概述" class="headerlink" title="架构概述"></a>架构概述</h2><p>再复杂的事儿, 也需要抓住其核心点 才能有效展开。因此我们需要知道这个架构的精髓是啥, 在围绕那核心点。<br>参考上面那张架构图, 我们可以理解IOT的核心在完成这样几件事:</p>
+<ul>
+<li>连接设备</li>
+<li>设备数据分析</li>
+<li>设备数据运营与可视化</li>
+</ul>
+<p>核心之外是以下周边服务, 用于提升和扩展功能:</p>
+<ul>
+<li>功能平台: 比如消息通知, 提供对平台核心功能以外的一些补充。</li>
+</ul>
+<h2 id="架构详解"><a href="#架构详解" class="headerlink" title="架构详解"></a>架构详解</h2><p>在参考了AWS和Azure的IOT过后, 结合自己的认识,总结出来的IOT架构图。<br><img src="http://oiw1gzfww.bkt.clouddn.com/iot-define.png" alt="iot架构图"><br>按照领域对模块进行划分, 主要由几下几个模块组成:</p>
+<ul>
+<li>连接设备: <ul>
+<li>本地: 负责设备数据的采集上报与反向控制。</li>
+<li>云端: 将所有设备接入云，接收数据，同时负责管理这些设备的授权和限制 </li>
+</ul>
+</li>
+<li>数据分析: 通过提供 离线计算或者在线计算的可编程接口 为用户提供数据分析的能力</li>
+<li>数据可视化与运营: 采集上报的数据以及分析过后的数据的可视化, 数据标记, 数据授权等带业务性质的数据管理。</li>
+<li>API网关: 负责请求的统一代理, 屏蔽掉内部系统的复杂性。</li>
+<li>用户管理: 统一的用户体系 用于用户管理, 权限管理 </li>
+</ul>
+<h3 id="概念简介"><a href="#概念简介" class="headerlink" title="概念简介"></a>概念简介</h3><p>整个架构中 设计到如下一些概念:</p>
+<ul>
+<li>业务概念: 与数据相关, 用户自己定义的<ol>
+<li>设备(device): 用户的需要接入互联网的实体设备</li>
+</ol>
+</li>
+<li>系统概念: 与系统组件相关, 通过系统组件来接入的数据的组件<ol>
+<li>代理(agent): 获取设备信息和控制设备的代理</li>
+<li>设备网关代理(device-gateway-proxy): 代理device-gateway验证设备, 代理设备与云端通信</li>
+<li>设备网关(device-gateway): 云端设备网关, 管理设备接入<br>整个系统对于不同角色的划分:</li>
+<li>超级管理员: 具有系统已经数据的所有权限</li>
+<li>设备管理员: 负责将设备加入系统, 查看设备的数据, 以及以设备为维度的数据权限分配</li>
+<li>数据运营员: 负责点位数据的多维度管理(基础维度是设备), 以业务为维度的数据权限分配</li>
+<li>算法管理员: 负责管理和运行相应维度的算法(基础维度是设备), 以及数据的查看权限</li>
+<li>普通用户或者第三方开发者: 负责点位数据的多维度查看(基础维度是设备)</li>
+</ol>
+</li>
+</ul>
+<h3 id="设备连接"><a href="#设备连接" class="headerlink" title="设备连接"></a>设备连接</h3><p>设备的连接分为2部分云端和本地2部分构成, 由于云端和本地网络的差异, 需要考虑:</p>
+<ul>
+<li>网络的安全</li>
+<li>网络的不稳定<br>为了方便本地设备与云端相连, 需要约定一个协议, 因此需要考虑:</li>
+<li>通信协议的多适配: 比如MQTT, HTTP, CoAP等</li>
+<li>数据格式定义<br>由于本地网络的复杂多变性, 我们可能需要面对不同的场景:</li>
+<li>设备能直接联网上报数据</li>
+<li>设备无法联网, 需要将数据发生给本地一个网关代理, 由网关代理统一上报数据<br>设备连接的一个架构示意图:<br><img src="http://oiw1gzfww.bkt.clouddn.com/local_agent_arch.png" alt="设备连接"></li>
+</ul>
+<h4 id="本地"><a href="#本地" class="headerlink" title="本地"></a>本地</h4><p>本地会负责设备数据的采集上报以及控制, 这些功能由一个agent负责完成, 它功能方向如下:</p>
+<ul>
+<li>数据采集与上报: 配置云端凭证, 按照约定协议上报设备数据。</li>
+<li>接收云端控制: 向云端汇报控制指令, 接收云端发起的控制,以及返回执行结果。</li>
+</ul>
+<h5 id="设备代理-agent"><a href="#设备代理-agent" class="headerlink" title="设备代理(agent)"></a>设备代理(agent)</h5><p>设备代理负责收集设备的数据, 然后上报给云端网关, agent位于数据第一线, 需要考虑良好的扩展性, 因此适合采用 插件式 驱动开发模式。<br>采集器需要从云端获取证书, 配置云端设备编号, 然后按照指定的报文格式 将数据上报给云端。比如云端规范的数据上报格式,以influxDB的数据写入格式为例说明:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">measurement[,tag_key1=tag_value1...] field_key=field_value[,field_key2=field_value2] [timestamp]</div><div class="line"></div><div class="line">1. 一类设备一个库, 比如车, 比如飞机, 一个库里面存放所有这类设备的指标, 一组相关的指标一个组, 比如变速器, 齿轮箱, 算法计算的平均飞速</div><div class="line">2. 所有与数据无关的数据 均以标签的方式录入, 这些Tag分为2类: 1.系统标签: device-id, collector-id 2. 用户自定义标签</div></pre></td></tr></table></figure></p>
+<p>agent核心功能点概述:</p>
+<ul>
+<li>数据采集与上报<ol>
+<li>数据采集: 以插件的形式, 支持多协议适配,  默认情况下 只要数据符合规范 就可以上报</li>
+<li>数据处理: 如何数据不符合规范, 需要编写 数据处理插件, 处理成合法规则</li>
+<li>聚合数据: 如果数据量过大, 可以编写聚合插件, 对数据进行聚合, 比如针对设备震频数据。</li>
+<li>数据上报: 经历所有以上步骤过后, 将数据通过设备的数据上报管道上报云端</li>
+</ol>
+</li>
+<li>设备控制:<ol>
+<li>控制指令上报: agent启动时需要将 已经实现的控制指令通过控制上传通道向云端汇报。</li>
+<li>执行控制指令: agent订阅控制下发管道, 当有命令到来时, 立马执行, 并且将结果写回控制上传管道。</li>
+</ol>
+</li>
+<li>异常处理:<ol>
+<li>设备下线异常: 由于设备下线无法和设备建立连接, 无法采集数据(DeviceOffLineError), 通过控制上传通道上报</li>
+<li>点位采集异常: 由于设备没有该点位, 无法获取到该点位数据(NoPointError), 通过控制上传通道上报</li>
+</ol>
+</li>
+<li>agent控制:<ol>
+<li>代理配置: 通过控制下发通道, 下发代理配置.</li>
+<li>代理重启: 通过控制下发通道, 得知代理重新通知, 重启代理.</li>
+<li>状态上报: 通过控制上传通道, 汇报代理状态</li>
+</ol>
+</li>
+<li>agent异常:<ol>
+<li>代理运行异常: 代理异常下线及时通知云端(AgentRuntimeError)</li>
+</ol>
+</li>
+</ul>
+<h5 id="网关代理-device-gateway-proxy"><a href="#网关代理-device-gateway-proxy" class="headerlink" title="网关代理(device-gateway-proxy)"></a>网关代理(device-gateway-proxy)</h5><p>网关代理主要运用于代理无法访问公网的场景(有火墙), 它在本地网络中扮演着云端网关的角色, 控制着所有设备的连接, 因为他是代理, 所有相关控制信息均从云端网关获取。<br>网关代理在设计时需要满足如下原则:</p>
+<ul>
+<li>透明性: 对于云端来说, 不能因为代理而带来设备处理的差异性, 因此代理主要功能是代理设备 与 云端通信, 对于云网关来说 看到的依然是设备,而不是代理。</li>
+<li>缓存性: 代理需要面临网络中断,所以需要有数据缓存机制, 并且可以配置存储策略。<br>以下是gateway-proxy的核心功能概述:</li>
+<li>数据上报:<ol>
+<li>检查设备合法性: 网关代理能代理那些设备建立连接 需要从云端网关获取, 如果设备不合法, 则拒绝为该设备建立连接。</li>
+<li>数据上报: 网关代理模拟agent与真正的网关建立连接, 通过设备数据上报通道上报数据到云端。 </li>
+</ol>
+</li>
+<li>设备控制:<ol>
+<li>控制指令上报: 代理设备建立控制上传通道, 上报控制指令到云端。</li>
+<li>执行控制指令: 代理设备接收控制下发通道里面的 控制指令, 调度给agent执行, 将结果返回到控制上去通道。</li>
+</ol>
+</li>
+<li>异常处理:<ol>
+<li>设备下线异常: 由于设备下线无法和设备建立连接, 无法采集数据(DeviceOffLineError), 通过控制上传通道上报</li>
+<li>点位采集异常: 由于设备没有该点位, 无法获取到该点位数据(NoPointError), 通过控制上传通道上报</li>
+</ol>
+</li>
+<li>网关代理控制:<ol>
+<li>proxy配置: 通过proxy的控制上传通道 请求 proxy的配置信息, 配置proxy需要代理的设备列表</li>
+<li>proxy从启: 通过proxy的控制下发通道 执行云端对proxy的操作</li>
+<li>proxy状态上报: proxy通过控制上传通道 上报自身状态</li>
+<li>agent状态代理上报: proxy代理agent 上报状态(proxy控制上传通道)</li>
+<li>agent异常代理上报: proxy代理agent 上报异常(proxy控制上传通道)</li>
+</ol>
+</li>
+<li>网关代理异常:<ol>
+<li>proxy运行异常: 及时向云端上报(ProxyRuntimeError), 通过proxy控制上传通道</li>
+</ol>
+</li>
+</ul>
+<h4 id="云端-device-gateway"><a href="#云端-device-gateway" class="headerlink" title="云端(device-gateway)"></a>云端(device-gateway)</h4><p>云端负责设备的连接的组件我们称之为设备网关(device-gateway), 它负责接收设备上传的数据与设备的控制。<br>设备网关在设计时需要满足如下原则:</p>
+<ul>
+<li>数据安全: 为了确保网关和数据上报者之间这段公网数据链路的安全, 需采用TLS进行加密和双向认证。 数据网关需充当CA的角色, 向agent或者颁发数字证书 </li>
+<li>接入设备资产的管理</li>
+<li>数据存储: 在数据存入数据库之前,这些数据被称为事件, 数据被存储之后成为历史数据, 事件和历史数据分别对应不同的场景<br>device-gateway的控制层功能概述:</li>
+<li>类型管理:<br>连接上云端的设备必须要指明设备的类型, 设备类型用于校验 设备上传的数据 是否合规, 如果不合规,就丢弃掉, 但是需要记录日志, 让用户可以查看<br>类型的定义以Json为主, 需要定义 属性名称(字段名称), 字段的值的数据类型, 以及其他字段的相关信息。<ol>
+<li>类型的增删改查</li>
+</ol>
+</li>
+<li>设备管理<ol>
+<li>设备创建: 必须参数参数: 设备名称, 接入方式(通过agent接入还是通过proxy接入), 设备类型(先定义类型)  可选参数: 地理位置, 设备标签, 其他属性,<br>真正创建时我们需要考虑:<ol>
+<li>配额检查(限制一个用户可以创建的设备数)</li>
+<li>如果通过agent接入, 为agent颁发设备接入证书和私钥</li>
+<li>生成接入云端的用户和密码</li>
+<li>配置设备和云端通信的通道</li>
+<li>云端订阅这些通道, 等待数据上报或者来自agent的请求</li>
+</ol>
+</li>
+<li>查看设备:<br>设备创建成功过后用户可以查看到:<ol>
+<li>设备的基本信息, 比如名称, ID, 接入方式, 地理位置, 创建时间</li>
+<li>设备标签信息, 这是简单的资产, 用于通过标签分类设备, 简单的资产分类管理</li>
+<li>设备通道信息, 数据上报通道和设备控制通道的名称</li>
+<li>接入信息, 接入云端的用户名和密码</li>
+<li>设备状态信息, 设备是否下线, 能否和设备通信</li>
+<li>agent状态信息, agent是否运行</li>
+<li>如果是通过proxy接入, 显示proxy名称和状态信息</li>
+</ol>
+</li>
+<li>修改设备:<br>  提供设备基本信息的修改:<ol>
+<li>设备名称, 接入方式, 地理位置, 以及其他用户自定义属性的修改</li>
+</ol>
+</li>
+<li>禁用设备:<br>  禁用设备后, 将禁止设备与云端建立连接:<ol>
+<li>如果是agent接入, 剔除该agent的回话, 并禁止该设备 与云端建立连接</li>
+<li>如果是proxy接入, 通知proxy, 停止为该设备建立与云端的连接</li>
+</ol>
+</li>
+<li>启用设备:<br>  启用设备后, 恢复允许设备与云端建立连接:<ol>
+<li>如果是agent接入, 撤销设备禁止接入云端的控制</li>
+<li>如果是proxy接入, 通知proxy, 重新为该设备建立与云端的连接</li>
+</ol>
+</li>
+<li>删除设备:<br>  删除设备后, 与设备相关的所有连接都将断开, 该设备从此以后将无法与云端建立连接<ol>
+<li>取消该设备通道的所有处理</li>
+<li>清除接入用户信息, 用户无法和云端建立连接</li>
+<li>如果是proxy接入, 通知代理 该设备已经删除, 更新代理列表, 停止为该设备代理</li>
+<li>清除设备相关元数据</li>
+</ol>
+</li>
+<li>设备配额管理:<br>  限制用户可以创建的设备数量<ol>
+<li>查询配置:</li>
+<li>修改配额: 由管理员修改配额</li>
+</ol>
+</li>
+<li>设备标签管理:<br>  基于标签的资产管理<ol>
+<li>标签的创建,查看,修改,删除</li>
+<li>为设备添加标签</li>
+<li>移除设备的标签</li>
+</ol>
+</li>
+<li>设备状态影子:<ol>
+<li>查看设备最新状态, 设备数据接入云端时需要通过 设备类型 检查设备的上报的数据是否合法, 并且经最新状态 录入, 用户可以看到该设备的 最新状态数据.</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>设备的反向控制:<ol>
+<li>控制指令查看<br>控制指令由agent的控制器实现, 在agent启动时上报给云端:<ol>
+<li>控制指令的基本信息: 控制指令的名称, 功能说明, 使用方式, 预期结果, 异常说明。</li>
+<li>控制指令的上报时间, 执行权使用者列表</li>
+<li>控制指令的执行记录</li>
+</ol>
+</li>
+<li>执行权分配<br>将控制指令的执行权分配给有个用户, 该用户可以执行该控制指令</li>
+<li>执行权回收<br>将控制指令的执行权回收。用户将没有改指令的执行权</li>
+<li>执行控制指令<br>默认仅有管理员可以执行控制指令, 执行控制指令, 得到执行结果</li>
+<li>禁用控制指令<br> 由管理员决定是否禁用该控制指令</li>
+<li>启用控制指令<br>由管理员决定是否启用该控制指令</li>
+</ol>
+</li>
+<li>proxy管理:<ol>
+<li>创建代理: 必须参数: 代理名称, 可选参数: 地理位置, 其他创建属性</li>
+<li>查看代理:<ol>
+<li>名称, 地理位置, 其他属性, 创建时间</li>
+<li>代理状态: 未接入, 运行中, 禁用</li>
+<li>代理的 数字签名证书, CA证书, 代理私钥</li>
+<li>代理自己使用的控制通道(代理和云端通信的接口), 和异常上报通道</li>
+</ol>
+</li>
+<li>修改代理:<br>名称, 地理位置, 其他属性</li>
+<li>删除代理:<ol>
+<li>确认该代理下面没有设备后方可以删除, 移除后的设备属于无上报方式的设备, </li>
+<li>吊销代理的证书</li>
+<li>剔除代理 的上报回话(非常危险, 如果代理正在上报数据)</li>
+<li>清除代理信息</li>
+</ol>
+</li>
+<li>禁用代理: 禁止该代理发布数据到云端(的数据管道)</li>
+<li>启用代理: 禁止该代理发布数据到云端(的数据管道)</li>
+<li>查看代理下的设备: 列出该代理下面的设备列表</li>
+<li>添加设备到该代理下面</li>
+<li>移除该代理下面的设备</li>
+</ol>
+</li>
+</ul>
+<p>device-gateway后台功能概述:</p>
+<ul>
+<li>数据存储<br>负责将数据存储到后端存储<ol>
+<li>状态数据存储</li>
+<li>热数据存储</li>
+<li>历史数据存储</li>
+</ol>
+</li>
+</ul>
+<h3 id="数据可视化与运营-data-manager"><a href="#数据可视化与运营-data-manager" class="headerlink" title="数据可视化与运营(data-manager)"></a>数据可视化与运营(data-manager)</h3><p>主要负责数据的管理和查看, 数据以类型组织在一起, 以点位为核心, 用户通过为这些 数据添加标签 来添加 数据维度, 方便业务使用。</p>
+<ul>
+<li>数据分类<br>提供数据的查看与运营管理, 数据以指标的方式存储, 用户通过标签来运营数据。运营的数据主要由2类构成: </li>
+</ul>
+<ol>
+<li>物理指标数据: 采集上来的原始数据, 以点位的最小逻辑单元为指标,比如 齿轮箱等。</li>
+<li>分析过后的指标数据: 经过分析过后的数据 以算法为指标, 分析根据需要为这些数据打算标签。(比如打算设备标签)</li>
+</ol>
+<ul>
+<li>数据查看<br>提供对数据的基本展现的支持, 但不提供大量原始数据的导出功能, 大量原始数据是留给计算平台使用的, 如需导出请使用导出工具进行导出。</li>
+</ul>
+<ol>
+<li>数据查询配置查看: <ol>
+<li>历史数据分层配置: 1. 按时间为维度进行划分, 默认为3个月 2. 按容量进行划分, 默认为最近1w条数据, 默认按规则1执行。</li>
+<li>状态数据查询容量限制: 默认为1000条数据, 及设备点位不得默认不得超过1000</li>
+<li>历史数据查询容量限制: 默认为100 * 100条数据, 及设备点位不能超过100个，每个点位的数据不得超过100条</li>
+</ol>
+</li>
+<li>数据查询配置修改: 修改以上那些默认配置</li>
+<li>查询数据: <ol>
+<li>状态查询:  也就是当前接入事件的查询(用于查看当下接入的数据, 不能查看历史数据), 如果设备接入异常 请显示接入异常信息, 以websocket 进行实时提供</li>
+<li>历史查询: 也就是趋势查询<ol>
+<li>热数据查询:   如果数据量过大，需要分组进行聚合</li>
+<li>冷数据查询:   如果数据量过大，需要分组进行聚合</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<ul>
+<li>数据标签管理<ol>
+<li>数据标签查询, 默认标签属于系统标签(比如数据属于那台设备, 数据是由那个采集器采集上来的), 禁止修改, 为只读状态, 其他是用户为数据 进行的自定义标签</li>
+<li>添加标签: 为数据 添加标签， 标签有长度限制(最长不得超过16个字符)</li>
+<li>删除标签: 删除标签,但是删除之前 需要确认数据是否已经授权, 如果已经授权分享, 需要撤销分享 才能删除</li>
+</ol>
+</li>
+<li>数据授权<br> 用户按照自己的需要 将数据打上标签, 或者使用默认标签, 将对应的数据 分析给其他用户访问.<ol>
+<li>数据分享查询: 查询那些数据,被分析给了那些用户</li>
+<li>分享权限撤销: 撤销已经分析出去的数据授权</li>
+<li>数据分享: 指定某些用户可以访问那些标签的数据。</li>
+</ol>
+</li>
+</ul>
+<h3 id="数据分析"><a href="#数据分析" class="headerlink" title="数据分析"></a>数据分析</h3><p>数据分析围绕算法和任务进行展开, 关键的在于 算法的高度可定制化, 算法测试, 运行时检查, 以及算法执行过程中任务的可视化。功能是满足高级用户 对于数据分析的需求。 通过算法对数据进行深度分析的功能。</p>
+<ul>
+<li>实时计算</li>
+<li>离线计算(报表统计和深度学习, 深度需要依赖大量数据训练出模型，然后通过模型 应用到事件分析, 达到智能分析的目的)</li>
+<li>混合计算: 比如先使用离线计算训练模型, 然后将模型 应用到实时计算, 或者使用实时计算作为测试数据,以历史数据作为训练数据 进行交叉验证,以便训练准确的模型。</li>
+</ul>
+<h4 id="算法管"><a href="#算法管" class="headerlink" title="算法管"></a>算法管</h4><p>管理算法文件, 算法文件表现为一个脚本文件, 对于storm 平台而已, 算法文件是groove脚本, 对于spark 平台而言, 算法文件 可以是spark支持的多种语言的脚本。</p>
+<ul>
+<li>上传算法: 上传脚本文件,  算法名称(默认是算法文件的名称,去掉后缀), 算法描述信息(包含算法要解决的问题, 输入参数的解释和输出参数的解释), 算法运行平台()</li>
+<li>下载算法: 下载算法文件。</li>
+<li>删除算法: 删除算法文件.</li>
+<li>更新算法元数据: 更新算法的名称 或者算法的描述信息</li>
+<li>查看算法: 查看所有算法。</li>
+<li>算法访问授权: 授权算法给某个用户访问。</li>
+<li>算法授权撤销: 撤销某个用户访问某个算法的权限。</li>
+</ul>
+<h4 id="任务执行"><a href="#任务执行" class="headerlink" title="任务执行"></a>任务执行</h4><p>算法 运行时产生一个真正的任务, 因此运行算法 需要有以下这些参数:</p>
+<ul>
+<li>算法文件, 通过指定算法文件的id来完成</li>
+<li>算法的输入和输出:<ol>
+<li>扫描获取算法文件的 输入和输出形参()</li>
+<li>选定输入源的形参对应的数据, 通过去输入源 查看得出, 选择输出源 对应的名称。(可以检查输入源是否有数据)</li>
+</ol>
+</li>
+<li>执行平台, 根据算法文件id, 得知该算法调度到那个平台上运行(jstrom, spark), 如果没有对应平台支持,  则报错</li>
+</ul>
+<h2 id="现有物联网平台参考"><a href="#现有物联网平台参考" class="headerlink" title="现有物联网平台参考"></a>现有物联网平台参考</h2><p><a href="http://www.cnblogs.com/kinging/category/881401.html" target="_blank" rel="external">国内外物联网平台架构</a><br><a href="http://www.chengshiluntan.com/wg/a/20160907/503c29c323fd2d59999501e91099ecf7.html" target="_blank" rel="external">微软Azure IoT</a><br><a href="http://www.cnblogs.com/kinging/articles/5865116.html" target="_blank" rel="external">亚马逊AWS IoT</a><br><a href="http://www.cnblogs.com/kinging/articles/5865139.html" target="_blank" rel="external">IBM Watson IOT</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://oiw1gzfww.bkt.clouddn.com/alipay.jpg" alt="紫川秀 Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/iot/" rel="tag"># iot</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/05/mqtt-introduce/" rel="next" title="物联网之MQTT">
+                <i class="fa fa-chevron-left"></i> 物联网之MQTT
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://oiw1gzfww.bkt.clouddn.com/me.png"
+               alt="紫川秀" />
+          <p class="site-author-name" itemprop="name">紫川秀</p>
+           
+              <p class="site-description motion-element" itemprop="description">喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">34</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">17</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/yumaojun03" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://douban.com/people/155892492" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/zi-chuan-xiu-86" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.liaoxuefeng.com/" title="廖雪峰官网" target="_blank">廖雪峰官网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://xiaorui.cc/" title="峰云,就她了" target="_blank">峰云,就她了</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#IOT是什么"><span class="nav-number">1.</span> <span class="nav-text">IOT是什么</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IOT的难点"><span class="nav-number">2.</span> <span class="nav-text">IOT的难点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#涉及技术众多"><span class="nav-number">2.1.</span> <span class="nav-text">涉及技术众多</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#架构难设计"><span class="nav-number">2.2.</span> <span class="nav-text">架构难设计</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#架构概述"><span class="nav-number">3.</span> <span class="nav-text">架构概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#架构详解"><span class="nav-number">4.</span> <span class="nav-text">架构详解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#概念简介"><span class="nav-number">4.1.</span> <span class="nav-text">概念简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设备连接"><span class="nav-number">4.2.</span> <span class="nav-text">设备连接</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#本地"><span class="nav-number">4.2.1.</span> <span class="nav-text">本地</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#设备代理-agent"><span class="nav-number">4.2.1.1.</span> <span class="nav-text">设备代理(agent)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#网关代理-device-gateway-proxy"><span class="nav-number">4.2.1.2.</span> <span class="nav-text">网关代理(device-gateway-proxy)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#云端-device-gateway"><span class="nav-number">4.2.2.</span> <span class="nav-text">云端(device-gateway)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据可视化与运营-data-manager"><span class="nav-number">4.3.</span> <span class="nav-text">数据可视化与运营(data-manager)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据分析"><span class="nav-number">4.4.</span> <span class="nav-text">数据分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#算法管"><span class="nav-number">4.4.1.</span> <span class="nav-text">算法管</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#任务执行"><span class="nav-number">4.4.2.</span> <span class="nav-text">任务执行</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#现有物联网平台参考"><span class="nav-number">5.</span> <span class="nav-text">现有物联网平台参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">紫川秀</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("51RM6PwqfSuyOFX9MxLeq5yY-gzGzoHsz", "dNQYvnf4KlnN364JVGClL7bp");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
