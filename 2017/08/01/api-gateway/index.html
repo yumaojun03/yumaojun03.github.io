@@ -1,0 +1,996 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="APIGateway," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="紫川秀的博客" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="微服务架构中那些单体微服务关注与自身领域, 而APIGateway关注服务全貌, 所以他是一个统筹者, 很多全局都需要的功能需要在APIGateway处进行实现, 这篇文章是设计一个API Gateway的概述, 讲述API网关的需求、价值、以及设计要求。">
+<meta name="keywords" content="APIGateway">
+<meta property="og:type" content="article">
+<meta property="og:title" content="微服务之API Gateway">
+<meta property="og:url" content="https://blog.yumaojun.net/2017/08/01/api-gateway/index.html">
+<meta property="og:site_name" content="紫川秀的博客">
+<meta property="og:description" content="微服务架构中那些单体微服务关注与自身领域, 而APIGateway关注服务全貌, 所以他是一个统筹者, 很多全局都需要的功能需要在APIGateway处进行实现, 这篇文章是设计一个API Gateway的概述, 讲述API网关的需求、价值、以及设计要求。">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/api-gateway-securety.png">
+<meta property="og:updated_time" content="2017-08-02T01:44:27.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="微服务之API Gateway">
+<meta name="twitter:description" content="微服务架构中那些单体微服务关注与自身领域, 而APIGateway关注服务全貌, 所以他是一个统筹者, 很多全局都需要的功能需要在APIGateway处进行实现, 这篇文章是设计一个API Gateway的概述, 讲述API网关的需求、价值、以及设计要求。">
+<meta name="twitter:image" content="http://oiw1gzfww.bkt.clouddn.com/api-gateway-securety.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 'undefined',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: "",
+      labels: ""
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://blog.yumaojun.net/2017/08/01/api-gateway/"/>
+
+
+
+
+
+  <title>微服务之API Gateway | 紫川秀的博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">紫川秀的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">比你优秀的人不可怕,可怕的是比你优秀的人比你更努力。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/08/01/api-gateway/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="紫川秀">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://oiw1gzfww.bkt.clouddn.com/me.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="紫川秀的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">微服务之API Gateway</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-01T10:01:45+08:00">
+                2017-08-01
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2017-08-02T09:44:27+08:00">
+                2017-08-02
+              </time>
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/08/01/api-gateway/" class="leancloud_visitors" data-flag-title="微服务之API Gateway">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>微服务架构中那些单体微服务关注与自身领域, 而APIGateway关注服务全貌, 所以他是一个统筹者, 很多全局都需要的功能需要在APIGateway处进行实现, 这篇文章是设计一个API Gateway的概述, 讲述API网关的需求、价值、以及设计要求。<br><a id="more"></a></p>
+<h2 id="SOA设计方法"><a href="#SOA设计方法" class="headerlink" title="SOA设计方法"></a>SOA设计方法</h2><p>SOA是一种架构的设计方法, 全称是Service-Oriented Architecture(面向服务的架构)，它将应用程序的不同功能单元拆解成独立的服务, 多个服务直接通过良好的接口和契约联系起来,采用网络进行通信。</p>
+<p>SOA可以让软件架构达到松耦合, 可以用来应对臃肿的单体应用, 比如多个终端用户应用程序可以共享同一个服务, 它的目标是在不影响其他任何人的情况下透明地替换一个服务,只要替换之后的服务的外部接口没有太大的变化即可。这种性质能够大大简化软件维护甚至是软件重写的过程。</p>
+<p>仅仅达到松耦合是不够的, 松耦合会带来复杂性问题, 因此同时也需要高内聚, API网关就是用来做这个的, 因此<code>对外</code>采用高内聚的表现形式来降低复杂性, <code>对内</code>采用松耦合的实现方式来应对快速变化的需求。</p>
+<h2 id="背景介绍"><a href="#背景介绍" class="headerlink" title="背景介绍"></a>背景介绍</h2><p>API网关的流行，源于近几年来，移动应用与企业间互联需求的兴起。移动应用、企业互联，使得后台服务支持的对象，从以前单一的Web应用，扩展到多种使用场景，且每种使用场景对后台服务的要求都不尽相同。这不仅增加了后台服务的响应量，还增加了后台服务的复杂性。随着微服务架构概念的提出，API网关成为了微服务架构的一个标配组件。</p>
+<p>它用于处理很多通用的问题, 比如访问认证、报文转换、访问统计、服务发现、限流等等。</p>
+<h2 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h2><p>王延炯在<a href="https://mp.weixin.qq.com/s?__biz=MzI5MDEzMzg5Nw==&amp;mid=2660393016&amp;idx=1&amp;sn=78596df454773ebfcbcdb62b56d5b6f1&amp;scene=21#wechat_redirect" target="_blank" rel="external">谈API网关的背景、架构以及落地方案</a>有如下5种场景介绍:</p>
+<ul>
+<li>面向Web App的网关<br>这类场景，在物理形态上类似前后端分离，此时的Web App已经不是全功能的Web App，而是根据场景定制、场景化的App。</li>
+<li>面向MobileApp的网关<br>这类场景，移动App是后端Service的使用者，此时的APIGW还需要承担一部分MDM（此处是指移动设备管理，不是主数据管理）的职能。</li>
+<li>面向PartnerOpenAPI的网关<br>这类场景，主要为了满足业务形态对外开放，与企业外部合作伙伴建立生态圈，此时的API GW需要增加配额、流控、令牌等一系列安全管控功能。</li>
+<li>面向PartnerExternalAPI的网关<br>这类场景，主要是为了满足企业自身业务的需要，实现对企业自有业务的映射。一个典型的例子就是使用「合作方账号登录」、「使用第三方支付平台支付」等等。此时的APIGW就需要在边界上，为企业内部Service 统一调用外部的API做统一的认证、授权、以及访问控制。</li>
+<li>面向IoTSmartDevice的网关<br>这类场景主要在传统企业，尤其是工业企业，传感器、物理设备从工业控制协议向IP转换，导致物理链路上会存在一部分公网链路。此时的API GW所需要满足的「内外兼修」的双向数据流，设备一般通过一个「客户侧」的集中网关在和企业的接入网关进行通信。</li>
+</ul>
+<p>在我们讲的微服务架构下的API网关，一般指的是前两种使用场景。即，主要是把企业内部的API能力，暴露给其他应用或合作伙伴使用。</p>
+<h2 id="网关的价值"><a href="#网关的价值" class="headerlink" title="网关的价值"></a>网关的价值</h2><p>网关层作为客户端与服务端的一层挡板，主要起到了三大类作用:</p>
+<ul>
+<li>内外隔离: 强调安全性, 企业系统的边界,隔离外网环境和内网环境。</li>
+<li>服务解耦: 有了网关和服务层的解耦, 使得微服务系统的各方能够独立、自由、高效、灵活地调整，而不用担心给其他方面带来影响, 便于各个团队工作的独立性。</li>
+<li>辅助功能: 提供了一个地点，方便通过扩展机制对请求进行一系列加工和处理。</li>
+</ul>
+<h3 id="内外隔离"><a href="#内外隔离" class="headerlink" title="内外隔离"></a>内外隔离</h3><p><img src="http://oiw1gzfww.bkt.clouddn.com/api-gateway-securety.png" alt="内外隔离"><br>企业为了保护内部系统的安全性，内网与外网都是隔离的，企业的服务应用都是运行在内网环境中，为了安全的考量，一般都不允许外部直接访问。API网关部署在防火墙外面，起到一层挡板作用，内部系统只接受API网关转发过来的请求。网关通过白名单或校验规则，对访问进行了初步的过滤。相比防火墙，这种软件实现的过滤规则，更加动态灵活。<br>在安全的角度而言, 此时网关充当着应用防火墙的作用(WAF)。</p>
+<h3 id="服务解耦"><a href="#服务解耦" class="headerlink" title="服务解耦"></a>服务解耦</h3><p>在微服务架构下，整个环境包括服务的提供者、服务的消费者、服务运维人员、安全管理人员等，每个角色的职责和述求都不同。例如：服务消费者已经需要提出一些新的服务需求，以快速应对业务变化；服务提供者，作为业务服务的沉淀方，希望保持服务的通用性与稳定性，很难应对快速的变化。有了API网关这一层，可以很好的解耦各方的相互依赖关系，让各方更加专注自己的目标。</p>
+<ul>
+<li>解耦功能与非功能<br>企业在把服务提供给外部访问时，除了实现业务逻辑功能外，还面临许多非功能性的要求。例如：需要防范黑客攻击，需要应对突发的访问量、需要确认用户的权限，需要对访问进行监控等。这些非功能逻辑，不能与业务逻辑的开发混在一起，需要有专业的人员甚至专业的团队来处理。</li>
+<li>解耦客户端与服务提供者<br>客户端与服务提供者分属于不同的团队，工作性质要求也不相同。对于服务提供者来说，他主要的职责是对业务进行抽象，提供可复用的业务功能，他们需要对业务模型进行深入的思考和沉淀，不能轻易为了响应外部的需求而破坏业务模型的稳定性。而业务的快速变化，又要求企业快速提供接口来满足客户端需求。这就需要一个中间层，来对服务层的接口进行封装，以及时响应客户端的需求。<br>通过解耦，服务层可以使用统一的接口、协议和报文格式来暴露服务，而不必考虑客户端的多种形态。<br>那么 网关层是否需要实现服务的编排？<br>在介绍API网关的一些文章中，提到了网关层的服务编排能力。从解耦的角度出发，服务的编排不适合在网关层进行。对服务的编排，其实是提供了一种业务能力，如果把服务的编排放在了网关层，实际上是把一部分业务能力放在了网关层，这样一来，服务层、网关层都有一些业务能力，造成团队职责的不清，也不利于业务能力的沉淀。</li>
+</ul>
+<h3 id="辅助功能"><a href="#辅助功能" class="headerlink" title="辅助功能"></a>辅助功能</h3><p>网关层除了请求的路由、转发外，还需要负责安全、鉴权、限流、监控等。这些功能的实现方式，往往随着业务的变化不断调整。例如权限控制方面，早期可能只需要简单的用户+密码方式，后续用户量大了后，可能会使用高性能的第三方解决方案。又例如，针对不同的监控方案，需要记录不同的日志文件。<br>所以，这些能力不能一开始就固化在网关平台上，而应该是一种可配置的方式，便于修改和替换。这就要求网关层提供一套机制，可以很好地支持这种动态扩展。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>有了API网关后, 会有以下优点</p>
+<ul>
+<li>网关层对外部和内部进行了隔离，保障了后台服务的安全性。</li>
+<li>对外访问控制由网络层面转换成了运维层面，减少变更的流程和错误成本</li>
+<li>减少客户端与服务的耦合，服务可以独立发展。通过网关层来做映射。</li>
+<li>通过网关层聚合，减少外部访问的频次，提升访问效率。</li>
+<li>节约后端服务开发成本，减少上线风险。</li>
+<li>为服务熔断，灰度发布，线上测试提供简单方案。</li>
+<li>便于扩展。</li>
+</ul>
+<h2 id="设计要求"><a href="#设计要求" class="headerlink" title="设计要求"></a>设计要求</h2><p>那么API网关在设计时需要考虑到那些点喃？</p>
+<h3 id="高性能"><a href="#高性能" class="headerlink" title="高性能"></a>高性能</h3><p>网关作为应用访问的唯一入口, 所有的请求都会经过API网关进行转发, 可想而知, 对API网关的访问压力是巨大的。因此API网关对性能要求比较高, 性能上至少不能比nginx弱太多, 因此业内使用nginx + lua的比较多。</p>
+<h3 id="高可用"><a href="#高可用" class="headerlink" title="高可用"></a>高可用</h3><p>API网关作为逻辑上的单点，一旦发生问题，将造成所有服务的不可用，对企业来说可能造成的致命的影响。计算短时间的不可用，也会给企业带来直接的经济损失。所以，如何保证API网关的7*24小时的稳定运行, 因此 网关在实现时一定要考虑横向扩展和API热更新的能力, 避免API网关宕机。</p>
+<h3 id="高扩展"><a href="#高扩展" class="headerlink" title="高扩展"></a>高扩展</h3><p>前面说到, 一些非业务功能的需求需要网关提供, 比如: 例如日志、安全、负载均衡策略、鉴权等, 这就需要网关层提供这样一种机制，使得可以灵活地进行这些调整和变化，而不用频繁对网关层进行改动，确保网关层的稳定性。比如nginx采用模块来进行扩展, 并且支持模块的动态加载。</p>
+<h3 id="高运维"><a href="#高运维" class="headerlink" title="高运维"></a>高运维</h3><p>API在上线、发布过程中，都需要涉及到网关层的配合，例如，需要网关层知道API发布的地址，API的接口形式、报文格式，也需要网关层对后台API进行封装。在API调整后，需要作出相应的修改。所以，API网关设计时，需要明确网关层与服务层的职责切分与协作模式，使得API的管理、发布更加高效。</p>
+<h2 id="落地方案"><a href="#落地方案" class="headerlink" title="落地方案"></a>落地方案</h2><p>针对以上的需要, 如何设计一款还靠谱的API网关喃?</p>
+<h3 id="设计原则"><a href="#设计原则" class="headerlink" title="设计原则"></a>设计原则</h3><ul>
+<li>高性能: 采用Golang来进行开发, 确保性能</li>
+<li>高可用: 1. 网关层采用无状态设计, 将认证模块独立处理 2. 优雅下线, 采用go 的graceful做处理</li>
+<li>高扩展: 采用http中间件的方式, 提供灵活的扩展能力</li>
+</ul>
+<h3 id="功能点"><a href="#功能点" class="headerlink" title="功能点"></a>功能点</h3><p>一个完整的API网关应该具有如下几方面的功能:</p>
+<ul>
+<li>服务发现, 负载均衡, 服务健康状态检查<br>API Gateway需要知道每一个微服务的IP和端口。在传统应用中，你可能会硬编码这些地址，但是在现在云基础的微服务应用中，这将是个简单的问题。基础服务通常会采用静态地址，可以采用操作系统环境变量来指定。但是，探测应用服务的地址就没那么容易了。应用服务通常动态分配地址和端口。同样的，由于扩展或者升级，服务的实例也会动态的改变。因此，API Gateway需要采用系统的服务发现机制，要么采用服务端发现，要么是客户端发现。如果采用客户端发现服务，API Gateway必须要去查询服务注册处，也就是微服务实例地址的数据库。<br>发现了多个微服务的实例过后, 需要采用负载均衡机制进行调度, 并且需要检查服务状态, 当服务离线时, 请求将不会调度到该节点。</li>
+<li>熔断模式<br>也叫circuit break模式，它可以将客户端从无响应服务的无尽等待中停止。如果一个服务的错误率超过预设值，将中断服务，并且在一段时间内所有请求立刻失效。<br>具体可以参考: <a href="https://eacdy.gitbooks.io/spring-cloud-book/content/2%20Spring%20Cloud/2.4%20%E7%86%94%E6%96%AD%E5%99%A8.html" target="_blank" rel="external">熔断器</a></li>
+<li>速率限制<br>无论如何 你后端的服务资源不可能无限动态扩展, 终有读, 为了保护后端服务不被击垮, 可以在网关层做访问速率的限制。</li>
+<li>基于IP的访问控制<br>这个是WAF的基本功能, 避免DOS, 封锁某个IP的恶意访问。</li>
+<li>协议转换<br>网关提供RESTful的HTTP的接口, 但是后端 可能提供服务的协议可能各不相同通, 比如gRPC, HTTP, MQ, 等。因此网关应该能适配多协议的支持。</li>
+<li>请求路由<br>基于URL的路由功能</li>
+<li>API使用统计<br>记录API Metric如请求次数、请求大小、响应状态和延迟，可视化API Metric</li>
+</ul>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="http://blog.dreamfever.me/api-gateway/" target="_blank" rel="external">浅谈 API Gateway</a><br><a href="http://www.yantinglam.com/2016/12/15/Microservices-2016-12-15-API-Gateway-of-micro-service/" target="_blank" rel="external">微服务架构中的API Gateway</a><br><a href="http://dockone.io/article/482" target="_blank" rel="external">微服务实战（二）：使用API Gateway</a><br><a href="https://mp.weixin.qq.com/s/RuN5RfQfksQZRPACloqHEq" target="_blank" rel="external">企业级API网关的设计</a><br><a href="https://baike.baidu.com/item/%E9%9D%A2%E5%90%91%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84/8258990?fr=aladdin&amp;fromid=5577988&amp;fromtitle=SOA%E6%9E%B6%E6%9E%84" target="_blank" rel="external">面向服务架构</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://oiw1gzfww.bkt.clouddn.com/alipay.jpg" alt="紫川秀 Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/APIGateway/" rel="tag"># APIGateway</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/17/iot-architecture/" rel="next" title="IOT架构">
+                <i class="fa fa-chevron-left"></i> IOT架构
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://oiw1gzfww.bkt.clouddn.com/me.png"
+               alt="紫川秀" />
+          <p class="site-author-name" itemprop="name">紫川秀</p>
+           
+              <p class="site-description motion-element" itemprop="description">喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">35</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">17</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">27</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/yumaojun03" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://douban.com/people/155892492" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/zi-chuan-xiu-86" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.liaoxuefeng.com/" title="廖雪峰官网" target="_blank">廖雪峰官网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://xiaorui.cc/" title="峰云,就她了" target="_blank">峰云,就她了</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#SOA设计方法"><span class="nav-number">1.</span> <span class="nav-text">SOA设计方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#背景介绍"><span class="nav-number">2.</span> <span class="nav-text">背景介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用场景"><span class="nav-number">3.</span> <span class="nav-text">使用场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#网关的价值"><span class="nav-number">4.</span> <span class="nav-text">网关的价值</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#内外隔离"><span class="nav-number">4.1.</span> <span class="nav-text">内外隔离</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#服务解耦"><span class="nav-number">4.2.</span> <span class="nav-text">服务解耦</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#辅助功能"><span class="nav-number">4.3.</span> <span class="nav-text">辅助功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">4.4.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#设计要求"><span class="nav-number">5.</span> <span class="nav-text">设计要求</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#高性能"><span class="nav-number">5.1.</span> <span class="nav-text">高性能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#高可用"><span class="nav-number">5.2.</span> <span class="nav-text">高可用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#高扩展"><span class="nav-number">5.3.</span> <span class="nav-text">高扩展</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#高运维"><span class="nav-number">5.4.</span> <span class="nav-text">高运维</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#落地方案"><span class="nav-number">6.</span> <span class="nav-text">落地方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#设计原则"><span class="nav-number">6.1.</span> <span class="nav-text">设计原则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#功能点"><span class="nav-number">6.2.</span> <span class="nav-text">功能点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">紫川秀</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("51RM6PwqfSuyOFX9MxLeq5yY-gzGzoHsz", "dNQYvnf4KlnN364JVGClL7bp");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
