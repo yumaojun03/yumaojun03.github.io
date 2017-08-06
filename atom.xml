@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog.yumaojun.net/"/>
-  <updated>2017-08-05T03:18:20.000Z</updated>
+  <updated>2017-08-06T08:16:00.000Z</updated>
   <id>https://blog.yumaojun.net/</id>
   
   <author>
@@ -16,11 +16,43 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>Golang HTTP服务优雅停止</title>
+    <link href="https://blog.yumaojun.net/2017/08/06/http-graceful/"/>
+    <id>https://blog.yumaojun.net/2017/08/06/http-graceful/</id>
+    <published>2017-08-06T06:36:42.000Z</published>
+    <updated>2017-08-06T08:16:00.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>RESTful API Gateway是一个高稳定性的组件, 因此需要有像Nginx Reload那样平滑升级的能力, 幸好Go在1.8对net/http进行了更新,添加了该功能。<br><a id="more"></a></p>
+<h2 id="官方说明"><a href="#官方说明" class="headerlink" title="官方说明"></a>官方说明</h2><p>我们看下server.go中关于Colse方法的描述:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Close将会立即关闭所有的活跃的监听器以及所有连接,比如新建的连接,活跃连接, 空闲连接</span></div><div class="line"><span class="comment">// 如果想要优雅关闭, 请使用Shutdown</span></div><div class="line"><span class="comment">// 并不尝试关闭或者等待 hijacked连接，如 WebSockets</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(srv *Server)</span> <span class="title">Close</span><span class="params">()</span> <span class="title">error</span></span> &#123;</div><div class="line">        srv.mu.Lock()</div><div class="line">        <span class="keyword">defer</span> srv.mu.Unlock()</div><div class="line">        srv.closeDoneChanLocked()</div><div class="line">        err := srv.closeListenersLocked()</div><div class="line">        <span class="keyword">for</span> c := <span class="keyword">range</span> srv.activeConn &#123;</div><div class="line">                c.rwc.Close()</div><div class="line">                <span class="built_in">delete</span>(srv.activeConn, c)</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> err</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>对比着close方法, 我们来看下Shutdown到底多做了什么工作:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Shutdown会启动一个定时器,定期巡检有那些空闲连接, 然后把这些空闲连接关闭</span></div><div class="line"><span class="comment">// 而这个巡检时间就是shutdownPollInterval, 可以看出默认为500毫秒</span></div><div class="line"><span class="comment">// </span></div><div class="line"><span class="comment">// 我们能找到最理想的不涉及投票的解决方案，同时它的运行消耗也很少(不涉及任何互斥锁)但互斥,</span></div><div class="line"><span class="comment">// 但是是留给读者作为练习。</span></div><div class="line"><span class="keyword">var</span> shutdownPollInterval = <span class="number">500</span> * time.Millisecond</div><div class="line"></div><div class="line"><span class="comment">// Shutdown 将无中断的关闭正在活跃的连接，然后平滑的停止服务。处理流程如下:</span></div><div class="line"><span class="comment">// 1) 首先关闭所有的监听</span></div><div class="line"><span class="comment">// 2) 然后关闭所有的空闲连接</span></div><div class="line"><span class="comment">// 3) 然后无限期等待连接处理完毕转为空闲，并关闭</span></div><div class="line"><span class="comment">// 4) 如果提供了 带有超时的Context，将在服务关闭前返回 Context的超时错误</span></div><div class="line"><span class="comment">// </span></div><div class="line"><span class="comment">// Shutdown 并不尝试关闭或者等待 hijacked连接，</span></div><div class="line"><span class="comment">// 如 WebSockets。如果需要的话调用者需要分别处理诸如长连接类型的等待和关闭。</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(srv *Server)</span> <span class="title">Shutdown</span><span class="params">(ctx context.Context)</span> <span class="title">error</span></span> &#123;</div><div class="line">        atomic.AddInt32(&amp;srv.inShutdown, <span class="number">1</span>)</div><div class="line">        <span class="keyword">defer</span> atomic.AddInt32(&amp;srv.inShutdown, <span class="number">-1</span>)</div><div class="line"></div><div class="line">        srv.mu.Lock()</div><div class="line">        lnerr := srv.closeListenersLocked()</div><div class="line">        srv.closeDoneChanLocked()</div><div class="line">        srv.mu.Unlock()</div><div class="line"></div><div class="line">        ticker := time.NewTicker(shutdownPollInterval)</div><div class="line">        <span class="keyword">defer</span> ticker.Stop()</div><div class="line">        <span class="keyword">for</span> &#123;</div><div class="line">                <span class="keyword">if</span> srv.closeIdleConns() &#123;</div><div class="line">                        <span class="keyword">return</span> lnerr</div><div class="line">                &#125;</div><div class="line">                <span class="keyword">select</span> &#123;</div><div class="line">                <span class="keyword">case</span> &lt;-ctx.Done():</div><div class="line">                        <span class="keyword">return</span> ctx.Err()</div><div class="line">                <span class="keyword">case</span> &lt;-ticker.C:</div><div class="line">                &#125;</div><div class="line">        &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="简单样例"><a href="#简单样例" class="headerlink" title="简单样例"></a>简单样例</h2><p>更加上面的分析, 我们写一个简单的栗子进行测试(Github地址: <a href="https://github.com/yumaojun03/golang/blob/master/http-graceful/main.go" target="_blank" rel="external">HTTP Graceful</a>)<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"context"</span></div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"log"</span></div><div class="line">	<span class="string">"net/http"</span></div><div class="line">	<span class="string">"os"</span></div><div class="line">	<span class="string">"os/signal"</span></div><div class="line">	<span class="string">"syscall"</span></div><div class="line">	<span class="string">"time"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	http.HandleFunc(<span class="string">"/"</span>, <span class="function"><span class="keyword">func</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> &#123;</div><div class="line">		<span class="comment">// for test active connection</span></div><div class="line">		time.Sleep(time.Second * <span class="number">2</span>)</div><div class="line">		fmt.Fprintf(w, <span class="string">"Hello World, %v\n"</span>, time.Now())</div><div class="line">	&#125;)</div><div class="line"></div><div class="line">	s := &amp;http.Server&#123;</div><div class="line">		Addr:           <span class="string">":8080"</span>,</div><div class="line">		Handler:        http.DefaultServeMux,</div><div class="line">		ReadTimeout:    <span class="number">10</span> * time.Second,</div><div class="line">		WriteTimeout:   <span class="number">10</span> * time.Second,</div><div class="line">		MaxHeaderBytes: <span class="number">1</span> &lt;&lt; <span class="number">20</span>,</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">		log.Printf(<span class="string">"server start at: 127.0.0.1:8080"</span>)</div><div class="line">		log.Println(s.ListenAndServe())</div><div class="line">		log.Println(<span class="string">"server shutdown"</span>)</div><div class="line">	&#125;()</div><div class="line"></div><div class="line">	<span class="comment">// Handle SIGINT, SIGTERM, SIGKILL, SIGHUP, SIGQUIT</span></div><div class="line">	ch := <span class="built_in">make</span>(<span class="keyword">chan</span> os.Signal)</div><div class="line">	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL, syscall.SIGHUP, syscall.SIGQUIT)</div><div class="line">	log.Println(&lt;-ch)</div><div class="line"></div><div class="line">	<span class="comment">// Stop the service gracefully.</span></div><div class="line">	ctx, cancel := context.WithTimeout(context.Background(), <span class="number">10</span>*time.Second)</div><div class="line">	<span class="keyword">defer</span> cancel()</div><div class="line">	log.Println(s.Shutdown(ctx))</div><div class="line"></div><div class="line">	<span class="comment">// Wait gorotine print shutdown message</span></div><div class="line">	time.Sleep(time.Second * <span class="number">10</span>)</div><div class="line">	log.Println(<span class="string">"done."</span>)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>启动服务端, 并关注日志:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$go</span> run main.go</div><div class="line">2017/08/06 16:06:47 server start at: 127.0.0.1:8080</div><div class="line">^C2017/08/06 16:07:10 interrupt</div><div class="line">2017/08/06 16:07:10 http: Server closed</div><div class="line">2017/08/06 16:07:10 server shutdown</div><div class="line">2017/08/06 16:07:11 &lt;nil&gt;</div><div class="line">2017/08/06 16:07:21 done.</div></pre></td></tr></table></figure></p>
+<p>使用curl请求一个连接, 在链接请求中关闭服务<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$curl</span> localhost:8080</div><div class="line">Hello World, 2017-08-06 16:07:11.341038687 +0800 CST</div><div class="line"><span class="variable">$curl</span> localhost:8080</div><div class="line">curl: (7) Failed to connect to localhost port 8080: Connection refused</div></pre></td></tr></table></figure></p>
+<p>从测试结果可以看出:</p>
+<ol>
+<li>正在进行访问的请求不会被关闭, 继续正常响应</li>
+<li>先的请求拒绝访问</li>
+</ol>
+<p>因此HTTP的Shutdown的确可以优雅关闭服务。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;RESTful API Gateway是一个高稳定性的组件, 因此需要有像Nginx Reload那样平滑升级的能力, 幸好Go在1.8对net/http进行了更新,添加了该功能。&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="HTTP" scheme="https://blog.yumaojun.net/tags/HTTP/"/>
+    
+  </entry>
+  
+  <entry>
     <title>gRPC服务发现和负载均衡</title>
     <link href="https://blog.yumaojun.net/2017/08/02/api-gateway-service-discovery-and-lb/"/>
     <id>https://blog.yumaojun.net/2017/08/02/api-gateway-service-discovery-and-lb/</id>
     <published>2017-08-02T01:48:56.000Z</published>
-    <updated>2017-08-05T03:18:20.000Z</updated>
+    <updated>2017-08-06T06:38:04.000Z</updated>
     
     <content type="html"><![CDATA[<p>API网关需要实现服务的自动发现和负载均衡, 由于后面的服务基本都采用gRPC实现, 因此需要验证gRPC如何实现这2个功能。<br><a id="more"></a></p>
 <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>构建高可用、高性能的通信服务，通常采用服务注册与发现、负载均衡和容错处理等机制实现。gRPC在设计时已有考虑, 官方也提供了一些基本的实现, 但是如何围绕官方设计实现服务发现和负载均衡却并不容易, 我会围绕以下几点进行展开:</p>
@@ -105,6 +137,8 @@
     
     </summary>
     
+    
+      <category term="gRPC" scheme="https://blog.yumaojun.net/tags/gRPC/"/>
     
       <category term="APIGateway" scheme="https://blog.yumaojun.net/tags/APIGateway/"/>
     
@@ -1447,9 +1481,9 @@
       <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
     
     
-      <category term="cobra" scheme="https://blog.yumaojun.net/tags/cobra/"/>
-    
       <category term="openstack" scheme="https://blog.yumaojun.net/tags/openstack/"/>
+    
+      <category term="cobra" scheme="https://blog.yumaojun.net/tags/cobra/"/>
     
   </entry>
   
@@ -2064,43 +2098,6 @@
       <category term="协议详解" scheme="https://blog.yumaojun.net/categories/%E5%8D%8F%E8%AE%AE%E8%AF%A6%E8%A7%A3/"/>
     
       <category term="ssh" scheme="https://blog.yumaojun.net/categories/%E5%8D%8F%E8%AE%AE%E8%AF%A6%E8%A7%A3/ssh/"/>
-    
-    
-      <category term="ssh-jumphost" scheme="https://blog.yumaojun.net/tags/ssh-jumphost/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>跳板机系列(一)-架构与简介</title>
-    <link href="https://blog.yumaojun.net/2017/02/15/go-ssh/"/>
-    <id>https://blog.yumaojun.net/2017/02/15/go-ssh/</id>
-    <published>2017-02-15T05:49:19.000Z</published>
-    <updated>2017-02-22T15:50:40.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>一直参与JumpServer的开发, 也一直在想如何设计一个相对完美的跳板机, 跳板机的本质是ssh协议的反向代理(主要还是ssh, 至于rdp还没想过), 虽然也经常使用ssh(做运维的时候还专门就ssh学习过), 但也仅仅是ssh客户端的使用以及服务端的配置, 我觉得一个完美的跳板机应该是从协议层面解决这个问题。因此打算以Golang为开发语言(因为ssh库完善，websocket编写简单),开发一个有基本功能的跳板机。<br><a id="more"></a></p>
-<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>这一系列的博客 包含很多篇, 主要目的是: 在之前的经验上, 把开发过程中涉及到的所有知识和感想记录下来(当然包含源码), 这一系列涉及如下文章, 由浅入深, 循序渐进的介绍开发过程中涉及到的各种知识:</p>
-<ul>
-<li><a href="/2017/02/15/go-ssh/" title="跳板机系列(一)-架构与简介">跳板机系列(一)-架构与简介</a></li>
-<li><a href="/2017/02/16/ssh-protocol/" title="跳板机系列(二)-ssh协议原理简介">跳板机系列(二)-ssh协议原理简介</a></li>
-<li><a href="/2017/02/22/ssh-protocol-go/" title="跳板机系列(三)-Golang中SSH客户端的实现">跳板机系列(三)-Golang中SSH客户端的实现</a>
-</li>
-</ul>
-<h2 id="简单架构"><a href="#简单架构" class="headerlink" title="简单架构"></a>简单架构</h2><p>之前JumpServer的核心是按照简单的架构来开发的, 一个简单的架构其实已经有很多不错的demo或者产品了, 比如这个项目<a href="http://git.oschina.net/shibingli/webconsole" target="_blank" rel="external">webconsole</a>, 当然他不完整仅仅实现了web，至于命令行并没有实现, 而jumpserver这2个都实现了。<br>为什么称之为简单的架构, 因为他的核心思想就是: 就是模拟一个终端(web端的xterm这个js库就是干这个事儿的, 而命令行同样模拟一个终端就行了, 比如golang的ssh/terminal这个库就可以完成这个事儿),然后通过一个ssh agent访问后面的真实的服务器，起到一个代理转发的作用。<br><img src="http://oiw1gzfww.bkt.clouddn.com/jump-design-simple.png" alt=""></p>
-<p>这种模式的缺陷主要体现在命令行终端上面, 因为此时终端后面接的就是ssh客户端, 因此这个终端是一个客户端和跳板机绑定在一起了, 用户只有先登录跳板机才能使用代理服务, 而这显然是不合理的,Jumpserver在此上进行了改进, 通过再添加一个ssh server监听, 实际上就是ssh-in-ssh。</p>
-<h2 id="架构改进"><a href="#架构改进" class="headerlink" title="架构改进"></a>架构改进</h2><p>改进过后主要加入一个ssh的代理服务,统一代理层, 抽离客户端。<br><img src="http://oiw1gzfww.bkt.clouddn.com/jump-design-update.png" alt=""></p>
-<h2 id="完美架构"><a href="#完美架构" class="headerlink" title="完美架构"></a>完美架构</h2><p>个人架构的能力还是很菜的, 对ssh协议的理解也不深, 当看到teleport这个开源产品的设计时, 完全被惊呆了。 这不就是我想要的架构嘛, 而且细节是做的那么的漂亮。<br><img src="http://gravitational.com/teleport/docs/img/everything.svg" alt=""><br>后期如果有时间的话, 打算写一个关于teleport源码解读的系列, 一点一个剖析这个完美架构的实现。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>写这一个系列不容易, 这是一个开篇和规划，希望最后能完美的收尾，有一个不错的demo展示给大家。<br>现在看来teleport已经很完善了, 也符合我心目中的跳板机的样子, 等读完teleport源码过后, 看其是否完善, 扩展是否方便, 因此很有可能是完善teleport,而不是从头开始。</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;一直参与JumpServer的开发, 也一直在想如何设计一个相对完美的跳板机, 跳板机的本质是ssh协议的反向代理(主要还是ssh, 至于rdp还没想过), 虽然也经常使用ssh(做运维的时候还专门就ssh学习过), 但也仅仅是ssh客户端的使用以及服务端的配置, 我觉得一个完美的跳板机应该是从协议层面解决这个问题。因此打算以Golang为开发语言(因为ssh库完善，websocket编写简单),开发一个有基本功能的跳板机。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
-    
-      <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
     
     
       <category term="ssh-jumphost" scheme="https://blog.yumaojun.net/tags/ssh-jumphost/"/>

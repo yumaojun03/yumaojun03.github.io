@@ -84,7 +84,7 @@
 <link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="iot,mqtt," />
+  <meta name="keywords" content="HTTP," />
 
 
 
@@ -102,21 +102,17 @@
 
 
 
-<meta name="description" content="物联网物接入协议MQTT">
-<meta name="keywords" content="iot,mqtt">
+<meta name="description" content="RESTful API Gateway是一个高稳定性的组件, 因此需要有像Nginx Reload那样平滑升级的能力, 幸好Go在1.8对net/http进行了更新,添加了该功能。">
+<meta name="keywords" content="HTTP">
 <meta property="og:type" content="article">
-<meta property="og:title" content="物联网之MQTT">
-<meta property="og:url" content="https://blog.yumaojun.net/2017/07/05/mqtt-introduce/index.html">
+<meta property="og:title" content="Golang HTTP服务优雅停止">
+<meta property="og:url" content="https://blog.yumaojun.net/2017/08/06/http-graceful/index.html">
 <meta property="og:site_name" content="紫川秀的博客">
-<meta property="og:description" content="物联网物接入协议MQTT">
-<meta property="og:image" content="https://image.slidesharecdn.com/mqttiotprotocolscomparison-140219090749-phpapp01/95/mqtt-iot-protocols-comparison-8-638.jpg?cb=1392817944">
-<meta property="og:image" content="http://www.sharetechnote.com/html/IoT/image/IoT_MQTT_ProtocolOverview_01.png">
-<meta property="og:image" content="https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.iotsdk.v0.9.0/msc_mqtt.png">
-<meta property="og:updated_time" content="2017-07-31T01:25:20.000Z">
+<meta property="og:description" content="RESTful API Gateway是一个高稳定性的组件, 因此需要有像Nginx Reload那样平滑升级的能力, 幸好Go在1.8对net/http进行了更新,添加了该功能。">
+<meta property="og:updated_time" content="2017-08-06T08:16:00.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="物联网之MQTT">
-<meta name="twitter:description" content="物联网物接入协议MQTT">
-<meta name="twitter:image" content="https://image.slidesharecdn.com/mqttiotprotocolscomparison-140219090749-phpapp01/95/mqtt-iot-protocols-comparison-8-638.jpg?cb=1392817944">
+<meta name="twitter:title" content="Golang HTTP服务优雅停止">
+<meta name="twitter:description" content="RESTful API Gateway是一个高稳定性的组件, 因此需要有像Nginx Reload那样平滑升级的能力, 幸好Go在1.8对net/http进行了更新,添加了该功能。">
 
 
 
@@ -144,13 +140,13 @@
 
 
 
-  <link rel="canonical" href="https://blog.yumaojun.net/2017/07/05/mqtt-introduce/"/>
+  <link rel="canonical" href="https://blog.yumaojun.net/2017/08/06/http-graceful/"/>
 
 
 
 
 
-  <title>物联网之MQTT | 紫川秀的博客</title>
+  <title>Golang HTTP服务优雅停止 | 紫川秀的博客</title>
   
 
 
@@ -289,7 +285,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/07/05/mqtt-introduce/">
+    <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/08/06/http-graceful/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="紫川秀">
@@ -306,7 +302,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">物联网之MQTT</h1>
+          <h1 class="post-title" itemprop="name headline">Golang HTTP服务优雅停止</h1>
         
 
         <div class="post-meta">
@@ -318,8 +314,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-05T12:46:42+08:00">
-                2017-07-05
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-06T14:36:42+08:00">
+                2017-08-06
               </time>
             
 
@@ -334,8 +330,8 @@
               
                 <span class="post-meta-item-text">更新于</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2017-07-31T09:25:20+08:00">
-                2017-07-31
+              <time title="更新于" itemprop="dateModified" datetime="2017-08-06T16:16:00+08:00">
+                2017-08-06
               </time>
             
           </span>
@@ -348,7 +344,7 @@
 
           
           
-             <span id="/2017/07/05/mqtt-introduce/" class="leancloud_visitors" data-flag-title="物联网之MQTT">
+             <span id="/2017/08/06/http-graceful/" class="leancloud_visitors" data-flag-title="Golang HTTP服务优雅停止">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -376,108 +372,18 @@
       
 
       
-        <p>物联网物接入协议MQTT<br><a id="more"></a></p>
-<p>相对来说，IoT的技术挑战，主要在安全隐患、连接管理、海量数据管理，用关键字来说就是海量、通用、可扩展、简单。<br>物接入云端，有很多挑战, 数据的安全尤为重要 </p>
-<h2 id="协议比较"><a href="#协议比较" class="headerlink" title="协议比较"></a>协议比较</h2><p><a href="http://www.365yg.com/group/6408407122584879362/" target="_blank" rel="external">协议比较</a></p>
-<h2 id="MQTT简介"><a href="#MQTT简介" class="headerlink" title="MQTT简介"></a>MQTT简介</h2><p>MQTT是一个客户端服务端架构的发布/订阅模式的消息传输协议。它的设计思想是轻巧、开放、简单、规范，易于实现。这些特点使得它对很多场景来说都是很好的选择，特别是对于受限的环境如机器与机器的通信(M2M)以及物联网环境(IoT)。<br>总体来说MQTT有如下特性:</p>
-<ul>
-<li>轻量级的 machine-to-machine 通信协议。</li>
-<li>publish/subscribe模式。</li>
-<li>基于TCP/IP。</li>
-<li>支持QoS。</li>
-<li>适合于低带宽、不可靠连接、嵌入式设备、CPU内存资源紧张。</li>
-<li>是一种比较不错的Android消息推送方案。</li>
-<li>FacebookMessenger采用了MQTT。</li>
-<li>MQTT有可能成为物联网的重要协议</li>
-</ul>
-<p><a href="http://dataguild.org/?p=6817" target="_blank" rel="external">mqtt协议简介</a></p>
-<p><a href="http://www.cnblogs.com/caca/p/mqtt.html" target="_blank" rel="external">协议简介</a></p>
-<h2 id="报文格式"><a href="#报文格式" class="headerlink" title="报文格式"></a>报文格式</h2><table class="tg"><tr><th class="tg-baqh">bit</th><th class="tg-yw4l">7</th><th class="tg-yw4l">6</th><th class="tg-yw4l">5</th><th class="tg-yw4l">4</th><th class="tg-yw4l">3</th><th class="tg-yw4l">2</th><th class="tg-yw4l">1</th><th class="tg-yw4l">0</th></tr><tr><td class="tg-q1yk">byte 1</td><td class="tg-6k2t" colspan="4">Message type</td><td class="tg-6k2t">DUP</td><td class="tg-6k2t" colspan="2">QoS level</td><td class="tg-6k2t">RETAIN</td></tr><tr><td class="tg-jogk">byte 2</td><td class="tg-yw4l" colspan="8">Message length (between one and four bytes)</td></tr><tr><td class="tg-r78f">byte 3</td><td class="tg-j0tj" colspan="8">… if needed to encode message length</td></tr><tr><td class="tg-574v">byte 4</td><td class="tg-baqh" colspan="8">… if needed to encode message length</td></tr><tr><td class="tg-r78f">byte 5</td><td class="tg-j0tj" colspan="8">… if needed to encode message length</td></tr></table>
-
-<h2 id="控制指令"><a href="#控制指令" class="headerlink" title="控制指令"></a>控制指令</h2><table>
-<thead>
-<tr>
-<th>Message Type</th>
-<th style="text-align:center">Value</th>
-<th style="text-align:center">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>CONNECT</td>
-<td style="text-align:center">1</td>
-<td style="text-align:center">Client request to connect to Server</td>
-</tr>
-<tr>
-<td>CONNACK</td>
-<td style="text-align:center">2</td>
-<td style="text-align:center">Connect Acknowledgment</td>
-</tr>
-<tr>
-<td>PUBLISH</td>
-<td style="text-align:center">3</td>
-<td style="text-align:center">Publish message</td>
-</tr>
-<tr>
-<td>PUBACK</td>
-<td style="text-align:center">4</td>
-<td style="text-align:center">Publish Acknowledgment</td>
-</tr>
-<tr>
-<td>PUBREC</td>
-<td style="text-align:center">5</td>
-<td style="text-align:center">Publish Received (assured delivery part 1)</td>
-</tr>
-<tr>
-<td>PUBREL</td>
-<td style="text-align:center">6</td>
-<td style="text-align:center">Publish Release (assured delivery part 2)</td>
-</tr>
-<tr>
-<td>PUBCOMP</td>
-<td style="text-align:center">7</td>
-<td style="text-align:center">Publish Complete (assured delivery part 3)</td>
-</tr>
-<tr>
-<td>SUBSCRIBE</td>
-<td style="text-align:center">8</td>
-<td style="text-align:center">Client Subscribe request</td>
-</tr>
-<tr>
-<td>SUBACK</td>
-<td style="text-align:center">9</td>
-<td style="text-align:center">Subscribe Acknowledgment</td>
-</tr>
-<tr>
-<td>UNSUBSCRIBE</td>
-<td style="text-align:center">10</td>
-<td style="text-align:center">Client Unsubscribe request</td>
-</tr>
-<tr>
-<td>UNSUBACK</td>
-<td style="text-align:center">11</td>
-<td style="text-align:center">Unsubscribe Acknowledgment</td>
-</tr>
-<tr>
-<td>PINGREQ</td>
-<td style="text-align:center">12</td>
-<td style="text-align:center">PING Request</td>
-</tr>
-<tr>
-<td>PINGRESP</td>
-<td style="text-align:center">13</td>
-<td style="text-align:center">PING Response</td>
-</tr>
-<tr>
-<td>DISCONNECT</td>
-<td style="text-align:center">14</td>
-<td style="text-align:center">Client is Disconnecting</td>
-</tr>
-</tbody>
-</table>
-<h2 id="Qos"><a href="#Qos" class="headerlink" title="Qos"></a>Qos</h2><p><img src="https://image.slidesharecdn.com/mqttiotprotocolscomparison-140219090749-phpapp01/95/mqtt-iot-protocols-comparison-8-638.jpg?cb=1392817944" alt=""></p>
-<h2 id="mqtt的状态机"><a href="#mqtt的状态机" class="headerlink" title="mqtt的状态机"></a>mqtt的状态机</h2><p><img src="http://www.sharetechnote.com/html/IoT/image/IoT_MQTT_ProtocolOverview_01.png" alt=""><br>wo </p>
-<p><img src="https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.iotsdk.v0.9.0/msc_mqtt.png" alt=""></p>
+        <p>RESTful API Gateway是一个高稳定性的组件, 因此需要有像Nginx Reload那样平滑升级的能力, 幸好Go在1.8对net/http进行了更新,添加了该功能。<br><a id="more"></a></p>
+<h2 id="官方说明"><a href="#官方说明" class="headerlink" title="官方说明"></a>官方说明</h2><p>我们看下server.go中关于Colse方法的描述:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Close将会立即关闭所有的活跃的监听器以及所有连接,比如新建的连接,活跃连接, 空闲连接</span></div><div class="line"><span class="comment">// 如果想要优雅关闭, 请使用Shutdown</span></div><div class="line"><span class="comment">// 并不尝试关闭或者等待 hijacked连接，如 WebSockets</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(srv *Server)</span> <span class="title">Close</span><span class="params">()</span> <span class="title">error</span></span> &#123;</div><div class="line">        srv.mu.Lock()</div><div class="line">        <span class="keyword">defer</span> srv.mu.Unlock()</div><div class="line">        srv.closeDoneChanLocked()</div><div class="line">        err := srv.closeListenersLocked()</div><div class="line">        <span class="keyword">for</span> c := <span class="keyword">range</span> srv.activeConn &#123;</div><div class="line">                c.rwc.Close()</div><div class="line">                <span class="built_in">delete</span>(srv.activeConn, c)</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> err</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>对比着close方法, 我们来看下Shutdown到底多做了什么工作:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Shutdown会启动一个定时器,定期巡检有那些空闲连接, 然后把这些空闲连接关闭</span></div><div class="line"><span class="comment">// 而这个巡检时间就是shutdownPollInterval, 可以看出默认为500毫秒</span></div><div class="line"><span class="comment">// </span></div><div class="line"><span class="comment">// 我们能找到最理想的不涉及投票的解决方案，同时它的运行消耗也很少(不涉及任何互斥锁)但互斥,</span></div><div class="line"><span class="comment">// 但是是留给读者作为练习。</span></div><div class="line"><span class="keyword">var</span> shutdownPollInterval = <span class="number">500</span> * time.Millisecond</div><div class="line"></div><div class="line"><span class="comment">// Shutdown 将无中断的关闭正在活跃的连接，然后平滑的停止服务。处理流程如下:</span></div><div class="line"><span class="comment">// 1) 首先关闭所有的监听</span></div><div class="line"><span class="comment">// 2) 然后关闭所有的空闲连接</span></div><div class="line"><span class="comment">// 3) 然后无限期等待连接处理完毕转为空闲，并关闭</span></div><div class="line"><span class="comment">// 4) 如果提供了 带有超时的Context，将在服务关闭前返回 Context的超时错误</span></div><div class="line"><span class="comment">// </span></div><div class="line"><span class="comment">// Shutdown 并不尝试关闭或者等待 hijacked连接，</span></div><div class="line"><span class="comment">// 如 WebSockets。如果需要的话调用者需要分别处理诸如长连接类型的等待和关闭。</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(srv *Server)</span> <span class="title">Shutdown</span><span class="params">(ctx context.Context)</span> <span class="title">error</span></span> &#123;</div><div class="line">        atomic.AddInt32(&amp;srv.inShutdown, <span class="number">1</span>)</div><div class="line">        <span class="keyword">defer</span> atomic.AddInt32(&amp;srv.inShutdown, <span class="number">-1</span>)</div><div class="line"></div><div class="line">        srv.mu.Lock()</div><div class="line">        lnerr := srv.closeListenersLocked()</div><div class="line">        srv.closeDoneChanLocked()</div><div class="line">        srv.mu.Unlock()</div><div class="line"></div><div class="line">        ticker := time.NewTicker(shutdownPollInterval)</div><div class="line">        <span class="keyword">defer</span> ticker.Stop()</div><div class="line">        <span class="keyword">for</span> &#123;</div><div class="line">                <span class="keyword">if</span> srv.closeIdleConns() &#123;</div><div class="line">                        <span class="keyword">return</span> lnerr</div><div class="line">                &#125;</div><div class="line">                <span class="keyword">select</span> &#123;</div><div class="line">                <span class="keyword">case</span> &lt;-ctx.Done():</div><div class="line">                        <span class="keyword">return</span> ctx.Err()</div><div class="line">                <span class="keyword">case</span> &lt;-ticker.C:</div><div class="line">                &#125;</div><div class="line">        &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="简单样例"><a href="#简单样例" class="headerlink" title="简单样例"></a>简单样例</h2><p>更加上面的分析, 我们写一个简单的栗子进行测试(Github地址: <a href="https://github.com/yumaojun03/golang/blob/master/http-graceful/main.go" target="_blank" rel="external">HTTP Graceful</a>)<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"context"</span></div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"log"</span></div><div class="line">	<span class="string">"net/http"</span></div><div class="line">	<span class="string">"os"</span></div><div class="line">	<span class="string">"os/signal"</span></div><div class="line">	<span class="string">"syscall"</span></div><div class="line">	<span class="string">"time"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	http.HandleFunc(<span class="string">"/"</span>, <span class="function"><span class="keyword">func</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> &#123;</div><div class="line">		<span class="comment">// for test active connection</span></div><div class="line">		time.Sleep(time.Second * <span class="number">2</span>)</div><div class="line">		fmt.Fprintf(w, <span class="string">"Hello World, %v\n"</span>, time.Now())</div><div class="line">	&#125;)</div><div class="line"></div><div class="line">	s := &amp;http.Server&#123;</div><div class="line">		Addr:           <span class="string">":8080"</span>,</div><div class="line">		Handler:        http.DefaultServeMux,</div><div class="line">		ReadTimeout:    <span class="number">10</span> * time.Second,</div><div class="line">		WriteTimeout:   <span class="number">10</span> * time.Second,</div><div class="line">		MaxHeaderBytes: <span class="number">1</span> &lt;&lt; <span class="number">20</span>,</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">		log.Printf(<span class="string">"server start at: 127.0.0.1:8080"</span>)</div><div class="line">		log.Println(s.ListenAndServe())</div><div class="line">		log.Println(<span class="string">"server shutdown"</span>)</div><div class="line">	&#125;()</div><div class="line"></div><div class="line">	<span class="comment">// Handle SIGINT, SIGTERM, SIGKILL, SIGHUP, SIGQUIT</span></div><div class="line">	ch := <span class="built_in">make</span>(<span class="keyword">chan</span> os.Signal)</div><div class="line">	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL, syscall.SIGHUP, syscall.SIGQUIT)</div><div class="line">	log.Println(&lt;-ch)</div><div class="line"></div><div class="line">	<span class="comment">// Stop the service gracefully.</span></div><div class="line">	ctx, cancel := context.WithTimeout(context.Background(), <span class="number">10</span>*time.Second)</div><div class="line">	<span class="keyword">defer</span> cancel()</div><div class="line">	log.Println(s.Shutdown(ctx))</div><div class="line"></div><div class="line">	<span class="comment">// Wait gorotine print shutdown message</span></div><div class="line">	time.Sleep(time.Second * <span class="number">10</span>)</div><div class="line">	log.Println(<span class="string">"done."</span>)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>启动服务端, 并关注日志:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$go</span> run main.go</div><div class="line">2017/08/06 16:06:47 server start at: 127.0.0.1:8080</div><div class="line">^C2017/08/06 16:07:10 interrupt</div><div class="line">2017/08/06 16:07:10 http: Server closed</div><div class="line">2017/08/06 16:07:10 server shutdown</div><div class="line">2017/08/06 16:07:11 &lt;nil&gt;</div><div class="line">2017/08/06 16:07:21 done.</div></pre></td></tr></table></figure></p>
+<p>使用curl请求一个连接, 在链接请求中关闭服务<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$curl</span> localhost:8080</div><div class="line">Hello World, 2017-08-06 16:07:11.341038687 +0800 CST</div><div class="line"><span class="variable">$curl</span> localhost:8080</div><div class="line">curl: (7) Failed to connect to localhost port 8080: Connection refused</div></pre></td></tr></table></figure></p>
+<p>从测试结果可以看出:</p>
+<ol>
+<li>正在进行访问的请求不会被关闭, 继续正常响应</li>
+<li>先的请求拒绝访问</li>
+</ol>
+<p>因此HTTP的Shutdown的确可以优雅关闭服务。</p>
 
       
     </div>
@@ -523,9 +429,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/iot/" rel="tag"># iot</a>
-          
-            <a href="/tags/mqtt/" rel="tag"># mqtt</a>
+            <a href="/tags/HTTP/" rel="tag"># HTTP</a>
           
         </div>
       
@@ -538,8 +442,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/07/04/mqtt-reconnect/" rel="next" title="Python的mqtt客户端使用说明">
-                <i class="fa fa-chevron-left"></i> Python的mqtt客户端使用说明
+              <a href="/2017/08/02/api-gateway-service-discovery-and-lb/" rel="next" title="gRPC服务发现和负载均衡">
+                <i class="fa fa-chevron-left"></i> gRPC服务发现和负载均衡
               </a>
             
           </div>
@@ -547,10 +451,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/07/17/iot-architecture/" rel="prev" title="IOT架构">
-                IOT架构 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -733,7 +633,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#协议比较"><span class="nav-number">1.</span> <span class="nav-text">协议比较</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MQTT简介"><span class="nav-number">2.</span> <span class="nav-text">MQTT简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#报文格式"><span class="nav-number">3.</span> <span class="nav-text">报文格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#控制指令"><span class="nav-number">4.</span> <span class="nav-text">控制指令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Qos"><span class="nav-number">5.</span> <span class="nav-text">Qos</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mqtt的状态机"><span class="nav-number">6.</span> <span class="nav-text">mqtt的状态机</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#官方说明"><span class="nav-number">1.</span> <span class="nav-text">官方说明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#简单样例"><span class="nav-number">2.</span> <span class="nav-text">简单样例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#测试"><span class="nav-number">3.</span> <span class="nav-text">测试</span></a></li></ol></div>
             
 
           </div>
