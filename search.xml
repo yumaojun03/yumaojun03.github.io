@@ -9,14 +9,14 @@
         <category>Golang</category>
       </categories>
       <tags>
-        <tag>APIGateway</tag>
         <tag>gRPC</tag>
+        <tag>APIGateway</tag>
       </tags>
   </entry>
   <entry>
-    <title><![CDATA[Golang HTTP服务优雅停止]]></title>
+    <title><![CDATA[Golang HTTP服务优雅重启]]></title>
     <url>%2F2017%2F08%2F06%2Fhttp-graceful%2F</url>
-    <content type="text"><![CDATA[RESTful API Gateway是一个高稳定性的组件, 因此需要有像Nginx Reload那样平滑升级的能力, 幸好Go在1.8对net/http进行了更新,添加了该功能。 官方说明我们看下server.go中关于Colse方法的描述:1234567891011121314// Close将会立即关闭所有活跃的监听器以及所有连接,比如新连接,活跃连接, 空闲连接// 如果想优雅关闭服务, 请使用Shutdown// 注意close并不尝试关闭或者等待hijacked连接，如WebSocketsfunc (srv *Server) Close() error &#123; srv.mu.Lock() defer srv.mu.Unlock() srv.closeDoneChanLocked() err := srv.closeListenersLocked() for c := range srv.activeConn &#123; c.rwc.Close() delete(srv.activeConn, c) &#125; return err&#125; 对比close方法, 我们看下Shutdown到底多做了什么工作:12345678910111213141516171819202122232425262728293031323334353637// Shutdown会启动一个定时器,定期巡检那些空闲连接, 然后把这些空闲连接关闭// 而这个巡检时间就是shutdownPollInterval, 可以看出默认为500毫秒// // 我们能找到不涉及投票的最理想解决方案，同时它的消耗也很少(不涉及任何互斥锁),// 但是是留给读者作为练习。var shutdownPollInterval = 500 * time.Millisecond// Shutdown 将无中断的关闭正在活跃的连接，然后平滑的停止服务。处理流程如下:// 1) 首先关闭所有的监听// 2) 然后关闭所有的空闲连接// 3) 然后无限期等待连接处理完毕转为空闲，并关闭// 4) 如果提供了 带有超时的Context，将在服务关闭前返回 Context的超时错误// // Shutdown 并不尝试关闭或者等待 hijacked连接，// 如 WebSockets。如果需要的话调用者需要分别处理诸如长连接类型的等待和关闭。func (srv *Server) Shutdown(ctx context.Context) error &#123; atomic.AddInt32(&amp;srv.inShutdown, 1) defer atomic.AddInt32(&amp;srv.inShutdown, -1) srv.mu.Lock() lnerr := srv.closeListenersLocked() srv.closeDoneChanLocked() srv.mu.Unlock() ticker := time.NewTicker(shutdownPollInterval) defer ticker.Stop() for &#123; if srv.closeIdleConns() &#123; return lnerr &#125; select &#123; case &lt;-ctx.Done(): return ctx.Err() case &lt;-ticker.C: &#125; &#125;&#125; 简单样例根据上面的分析, 我们写一个简单的栗子进行测试(Github地址: HTTP Graceful)123456789101112131415161718192021222324252627282930313233343536373839404142434445464748package mainimport ( "context" "fmt" "log" "net/http" "os" "os/signal" "syscall" "time")func main() &#123; http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) &#123; // for test active connection time.Sleep(time.Second * 2) fmt.Fprintf(w, "Hello World, %v\n", time.Now()) &#125;) s := &amp;http.Server&#123; Addr: ":8080", Handler: http.DefaultServeMux, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second, MaxHeaderBytes: 1 &lt;&lt; 20, &#125; go func() &#123; log.Printf("server start at: 127.0.0.1:8080") log.Println(s.ListenAndServe()) log.Println("server shutdown") &#125;() // Handle SIGINT, SIGTERM, SIGKILL, SIGHUP, SIGQUIT ch := make(chan os.Signal) signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL, syscall.SIGHUP, syscall.SIGQUIT) log.Println(&lt;-ch) // Stop the service gracefully. ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second) defer cancel() log.Println(s.Shutdown(ctx)) // Wait gorotine print shutdown message time.Sleep(time.Second * 10) log.Println("done.")&#125; 测试启动服务端, 并关注日志:1234567$go run main.go2017/08/06 16:06:47 server start at: 127.0.0.1:8080^C2017/08/06 16:07:10 interrupt2017/08/06 16:07:10 http: Server closed2017/08/06 16:07:10 server shutdown2017/08/06 16:07:11 &lt;nil&gt;2017/08/06 16:07:21 done. 使用curl发起一次请求, 在请求为结束前关闭服务1234$curl localhost:8080Hello World, 2017-08-06 16:07:11.341038687 +0800 CST$curl localhost:8080curl: (7) Failed to connect to localhost port 8080: Connection refused 从测试结果可以看出: 正在进行访问的请求不会被关闭, 继续正常响应 新增的请求则拒绝访问 因此HTTP的Shutdown的确可以起到优雅关闭服务的作用。]]></content>
+    <content type="text"><![CDATA[RESTful API Gateway是一个高稳定性的组件, 因此需要有像Nginx Reload那样平滑升级的能力, 即关闭正在运行的老程序，并启动新程序。 标准库的的实现Go在1.8对net/http进行了更新, 提供了http服务优雅关闭的能力。 官方说明我们看下server.go中关于Colse方法的描述:1234567891011121314// Close将会立即关闭所有活跃的监听器以及所有连接,比如新连接,活跃连接, 空闲连接// 如果想优雅关闭服务, 请使用Shutdown// 注意close并不尝试关闭或者等待hijacked连接，如WebSocketsfunc (srv *Server) Close() error &#123; srv.mu.Lock() defer srv.mu.Unlock() srv.closeDoneChanLocked() err := srv.closeListenersLocked() for c := range srv.activeConn &#123; c.rwc.Close() delete(srv.activeConn, c) &#125; return err&#125; 对比close方法, 我们看下Shutdown到底多做了什么工作:12345678910111213141516171819202122232425262728293031323334353637// Shutdown会启动一个定时器,定期巡检那些空闲连接, 然后把这些空闲连接关闭// 而这个巡检时间就是shutdownPollInterval, 可以看出默认为500毫秒// // 我们能找到不涉及投票的最理想解决方案，同时它的消耗也很少(不涉及任何互斥锁),// 但是是留给读者作为练习。var shutdownPollInterval = 500 * time.Millisecond// Shutdown 将无中断的关闭正在活跃的连接，然后平滑的停止服务。处理流程如下:// 1) 首先关闭所有的监听// 2) 然后关闭所有的空闲连接// 3) 然后无限期等待连接处理完毕转为空闲，并关闭// 4) 如果提供了 带有超时的Context，将在服务关闭前返回 Context的超时错误// // Shutdown 并不尝试关闭或者等待 hijacked连接，// 如 WebSockets。如果需要的话调用者需要分别处理诸如长连接类型的等待和关闭。func (srv *Server) Shutdown(ctx context.Context) error &#123; atomic.AddInt32(&amp;srv.inShutdown, 1) defer atomic.AddInt32(&amp;srv.inShutdown, -1) srv.mu.Lock() lnerr := srv.closeListenersLocked() srv.closeDoneChanLocked() srv.mu.Unlock() ticker := time.NewTicker(shutdownPollInterval) defer ticker.Stop() for &#123; if srv.closeIdleConns() &#123; return lnerr &#125; select &#123; case &lt;-ctx.Done(): return ctx.Err() case &lt;-ticker.C: &#125; &#125;&#125; 简单样例根据上面的分析, 我们写一个简单的栗子进行测试(Github地址: HTTP Graceful)123456789101112131415161718192021222324252627282930313233343536373839404142434445464748package mainimport ( "context" "fmt" "log" "net/http" "os" "os/signal" "syscall" "time")func main() &#123; http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) &#123; // for test active connection time.Sleep(time.Second * 2) fmt.Fprintf(w, "Hello World, %v\n", time.Now()) &#125;) s := &amp;http.Server&#123; Addr: ":8080", Handler: http.DefaultServeMux, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second, MaxHeaderBytes: 1 &lt;&lt; 20, &#125; go func() &#123; log.Printf("server start at: 127.0.0.1:8080") log.Println(s.ListenAndServe()) log.Println("server shutdown") &#125;() // Handle SIGINT, SIGTERM, SIGKILL, SIGHUP, SIGQUIT ch := make(chan os.Signal) signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL, syscall.SIGHUP, syscall.SIGQUIT) log.Println(&lt;-ch) // Stop the service gracefully. ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second) defer cancel() log.Println(s.Shutdown(ctx)) // Wait gorotine print shutdown message time.Sleep(time.Second * 10) log.Println("done.")&#125; 测试启动服务端, 并关注日志:1234567$go run main.go2017/08/06 16:06:47 server start at: 127.0.0.1:8080^C2017/08/06 16:07:10 interrupt2017/08/06 16:07:10 http: Server closed2017/08/06 16:07:10 server shutdown2017/08/06 16:07:11 &lt;nil&gt;2017/08/06 16:07:21 done. 使用curl发起一次请求, 在请求为结束前关闭服务1234$curl localhost:8080Hello World, 2017-08-06 16:07:11.341038687 +0800 CST$curl localhost:8080curl: (7) Failed to connect to localhost port 8080: Connection refused 从测试结果可以看出: 正在进行访问的请求不会被关闭, 继续正常响应 新增的请求则拒绝访问 因此HTTP的Shutdown的确可以起到优雅关闭服务的作用。 第三方实现官方仅仅实现了优雅的关闭, 并没有实现优雅重启, 想要实现像Nginx那样优雅重启, 还有很多工作要做, 有个不错的第三方库已经实现了该能力, 代理质量也不错, 值得使用具体可以参考Golang开发支持平滑升级（优雅重启）的HTTP服务]]></content>
       <categories>
         <category>开发语言</category>
         <category>Golang</category>
@@ -34,8 +34,8 @@
         <category>Golang</category>
       </categories>
       <tags>
-        <tag>APIGateway</tag>
         <tag>gRPC</tag>
+        <tag>APIGateway</tag>
       </tags>
   </entry>
   <entry>
@@ -83,8 +83,8 @@
         <category>Python</category>
       </categories>
       <tags>
-        <tag>iot</tag>
         <tag>mqtt</tag>
+        <tag>iot</tag>
       </tags>
   </entry>
   <entry>
