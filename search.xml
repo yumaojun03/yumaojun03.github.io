@@ -47,8 +47,8 @@
     <url>%2F2017%2F07%2F05%2Fmqtt-introduce%2F</url>
     <content type="text"><![CDATA[物联网物接入协议MQTT 相对来说，IoT的技术挑战，主要在安全隐患、连接管理、海量数据管理，用关键字来说就是海量、通用、可扩展、简单。物接入云端，有很多挑战, 数据的安全尤为重要 协议比较协议比较 MQTT简介MQTT是一个客户端服务端架构的发布/订阅模式的消息传输协议。它的设计思想是轻巧、开放、简单、规范，易于实现。这些特点使得它对很多场景来说都是很好的选择，特别是对于受限的环境如机器与机器的通信(M2M)以及物联网环境(IoT)。总体来说MQTT有如下特性: 轻量级的 machine-to-machine 通信协议。 publish/subscribe模式。 基于TCP/IP。 支持QoS。 适合于低带宽、不可靠连接、嵌入式设备、CPU内存资源紧张。 是一种比较不错的Android消息推送方案。 FacebookMessenger采用了MQTT。 MQTT有可能成为物联网的重要协议 mqtt协议简介 协议简介 报文格式bit76543210byte 1Message typeDUPQoS levelRETAINbyte 2Message length (between one and four bytes)byte 3… if needed to encode message lengthbyte 4… if needed to encode message lengthbyte 5… if needed to encode message length 控制指令 Message Type Value Description CONNECT 1 Client request to connect to Server CONNACK 2 Connect Acknowledgment PUBLISH 3 Publish message PUBACK 4 Publish Acknowledgment PUBREC 5 Publish Received (assured delivery part 1) PUBREL 6 Publish Release (assured delivery part 2) PUBCOMP 7 Publish Complete (assured delivery part 3) SUBSCRIBE 8 Client Subscribe request SUBACK 9 Subscribe Acknowledgment UNSUBSCRIBE 10 Client Unsubscribe request UNSUBACK 11 Unsubscribe Acknowledgment PINGREQ 12 PING Request PINGRESP 13 PING Response DISCONNECT 14 Client is Disconnecting Qos mqtt的状态机wo]]></content>
       <tags>
-        <tag>mqtt</tag>
         <tag>iot</tag>
+        <tag>mqtt</tag>
       </tags>
   </entry>
   <entry>

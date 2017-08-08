@@ -740,9 +740,9 @@
     </summary>
     
     
-      <category term="mqtt" scheme="https://blog.yumaojun.net/tags/mqtt/"/>
-    
       <category term="iot" scheme="https://blog.yumaojun.net/tags/iot/"/>
+    
+      <category term="mqtt" scheme="https://blog.yumaojun.net/tags/mqtt/"/>
     
   </entry>
   
