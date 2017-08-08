@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog.yumaojun.net/"/>
-  <updated>2017-08-08T03:11:04.000Z</updated>
+  <updated>2017-08-08T03:15:28.000Z</updated>
   <id>https://blog.yumaojun.net/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="https://blog.yumaojun.net/2017/08/07/grpc-auth/"/>
     <id>https://blog.yumaojun.net/2017/08/07/grpc-auth/</id>
     <published>2017-08-06T23:16:35.000Z</published>
-    <updated>2017-08-08T03:11:04.000Z</updated>
+    <updated>2017-08-08T03:15:28.000Z</updated>
     
     <content type="html"><![CDATA[<p>gRPC的服务端需要与认证平台对接, 之前使用http时通过中间件的形式进行实现, 因此这篇文章主要验证gRPC中能否以中间件的形式实现gRPC的认证。<br><a id="more"></a></p>
 <h2 id="认证方式"><a href="#认证方式" class="headerlink" title="认证方式"></a>认证方式</h2><p>gRPC 默认提供了两种认证方式：</p>
@@ -80,10 +80,14 @@
     
     </summary>
     
+      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
     
-      <category term="gRPC" scheme="https://blog.yumaojun.net/tags/gRPC/"/>
+      <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
+    
     
       <category term="APIGateway" scheme="https://blog.yumaojun.net/tags/APIGateway/"/>
+    
+      <category term="gRPC" scheme="https://blog.yumaojun.net/tags/gRPC/"/>
     
   </entry>
   
@@ -92,7 +96,7 @@
     <link href="https://blog.yumaojun.net/2017/08/06/http-graceful/"/>
     <id>https://blog.yumaojun.net/2017/08/06/http-graceful/</id>
     <published>2017-08-06T06:36:42.000Z</published>
-    <updated>2017-08-06T11:23:02.000Z</updated>
+    <updated>2017-08-08T03:15:45.000Z</updated>
     
     <content type="html"><![CDATA[<p>RESTful API Gateway是一个高稳定性的组件, 因此需要有像Nginx Reload那样平滑升级的能力, 幸好Go在1.8对net/http进行了更新,添加了该功能。<br><a id="more"></a></p>
 <h2 id="官方说明"><a href="#官方说明" class="headerlink" title="官方说明"></a>官方说明</h2><p>我们看下server.go中关于Colse方法的描述:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// Close将会立即关闭所有活跃的监听器以及所有连接,比如新连接,活跃连接, 空闲连接</span></div><div class="line"><span class="comment">// 如果想优雅关闭服务, 请使用Shutdown</span></div><div class="line"><span class="comment">// 注意close并不尝试关闭或者等待hijacked连接，如WebSockets</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(srv *Server)</span> <span class="title">Close</span><span class="params">()</span> <span class="title">error</span></span> &#123;</div><div class="line">        srv.mu.Lock()</div><div class="line">        <span class="keyword">defer</span> srv.mu.Unlock()</div><div class="line">        srv.closeDoneChanLocked()</div><div class="line">        err := srv.closeListenersLocked()</div><div class="line">        <span class="keyword">for</span> c := <span class="keyword">range</span> srv.activeConn &#123;</div><div class="line">                c.rwc.Close()</div><div class="line">                <span class="built_in">delete</span>(srv.activeConn, c)</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> err</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
@@ -114,6 +118,10 @@
     
     </summary>
     
+      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
+    
+      <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
+    
     
       <category term="HTTP" scheme="https://blog.yumaojun.net/tags/HTTP/"/>
     
@@ -124,7 +132,7 @@
     <link href="https://blog.yumaojun.net/2017/08/02/api-gateway-service-discovery-and-lb/"/>
     <id>https://blog.yumaojun.net/2017/08/02/api-gateway-service-discovery-and-lb/</id>
     <published>2017-08-02T01:48:56.000Z</published>
-    <updated>2017-08-06T11:37:43.000Z</updated>
+    <updated>2017-08-08T03:15:37.000Z</updated>
     
     <content type="html"><![CDATA[<p>API网关需要实现服务的自动发现和负载均衡, 由于后面的服务基本都采用gRPC实现, 因此需要验证gRPC如何实现这2个功能。<br><a id="more"></a></p>
 <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>构建高可用、高性能的通信服务，通常采用服务注册与发现、负载均衡和容错处理等机制实现。gRPC在设计时已有考虑, 官方也提供了一些基本实现, 但是如何围绕官方设计实现服务发现和负载均衡却并不容易, 我会围绕以下几点进行展开:</p>
@@ -209,10 +217,14 @@
     
     </summary>
     
+      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
     
-      <category term="gRPC" scheme="https://blog.yumaojun.net/tags/gRPC/"/>
+      <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
+    
     
       <category term="APIGateway" scheme="https://blog.yumaojun.net/tags/APIGateway/"/>
+    
+      <category term="gRPC" scheme="https://blog.yumaojun.net/tags/gRPC/"/>
     
   </entry>
   
@@ -221,7 +233,7 @@
     <link href="https://blog.yumaojun.net/2017/08/01/api-gateway/"/>
     <id>https://blog.yumaojun.net/2017/08/01/api-gateway/</id>
     <published>2017-08-01T02:01:45.000Z</published>
-    <updated>2017-08-02T01:44:27.000Z</updated>
+    <updated>2017-08-08T03:17:46.000Z</updated>
     
     <content type="html"><![CDATA[<p>微服务架构中那些单体微服务关注与自身领域, 而APIGateway关注服务全貌, 所以他是一个统筹者, 很多全局都需要的功能需要在APIGateway处进行实现, 这篇文章是设计一个API Gateway的概述, 讲述API网关的需求、价值、以及设计要求。<br><a id="more"></a></p>
 <h2 id="SOA设计方法"><a href="#SOA设计方法" class="headerlink" title="SOA设计方法"></a>SOA设计方法</h2><p>SOA是一种架构的设计方法, 全称是Service-Oriented Architecture(面向服务的架构)，它将应用程序的不同功能单元拆解成独立的服务, 多个服务直接通过良好的接口和契约联系起来,采用网络进行通信。</p>
@@ -291,6 +303,10 @@
     
     </summary>
     
+      <category term="微服务" scheme="https://blog.yumaojun.net/categories/%E5%BE%AE%E6%9C%8D%E5%8A%A1/"/>
+    
+      <category term="APIGateway" scheme="https://blog.yumaojun.net/categories/%E5%BE%AE%E6%9C%8D%E5%8A%A1/APIGateway/"/>
+    
     
       <category term="APIGateway" scheme="https://blog.yumaojun.net/tags/APIGateway/"/>
     
@@ -301,7 +317,7 @@
     <link href="https://blog.yumaojun.net/2017/07/17/iot-architecture/"/>
     <id>https://blog.yumaojun.net/2017/07/17/iot-architecture/</id>
     <published>2017-07-17T08:58:05.000Z</published>
-    <updated>2017-07-31T01:51:35.000Z</updated>
+    <updated>2017-08-08T03:15:59.000Z</updated>
     
     <content type="html"><![CDATA[<p>最近开发了一次IOT组件, 在此期间也参考了下其他IOT平台的设计架构, 有所感想, 因此将其记录下来, 和大家分享, 欢迎交流。<br><a id="more"></a></p>
 <h2 id="IOT是什么"><a href="#IOT是什么" class="headerlink" title="IOT是什么"></a>IOT是什么</h2><p>IoT是Internet of Things的缩写, 它是互联网从人向物的延伸, 核心和基础仍然是互联网技术，是互联网技术基础上的延伸和扩展。 它将各种信息传感设备，如射频识别装置、红外感应器、全球定位系统、激光扫描器等种种装置, 按约定的协议, 将任何物品与互联网相连接, 达到物品之间进行信息交换和通讯的目的，以实现智能化识别、定位、追踪、监控和管理等。<br>IOT也将加速AI的觉醒, 它将万物互联, 再加上成熟的大数据处理, 深度学习的应用 会让万物都带有灵性, 这是多么宏大的一个时代, 2016被称为AI的元年, 随着IOT的加速, 我们将是这样一个时代的见证者,见证AI觉醒的第一代人。<br>下面是一张物联网在工业引用的一张图<br><img src="http://www.mr-wu.cn/wp-content/uploads/2015/12/The-internet-of-things.jpg" alt="应用场景"><br>这样看来未来很美好, 但是现实很残酷, 如何实现落地一套可靠的IOT方案任然是个难题, 在参考了一些国外的方案过后, 结合自己的实践, 给出了一种我认为的可落到的IOT方案架构。</p>
@@ -617,132 +633,12 @@
     
     </summary>
     
+      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
     
-      <category term="iot" scheme="https://blog.yumaojun.net/tags/iot/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>物联网之MQTT</title>
-    <link href="https://blog.yumaojun.net/2017/07/05/mqtt-introduce/"/>
-    <id>https://blog.yumaojun.net/2017/07/05/mqtt-introduce/</id>
-    <published>2017-07-05T04:46:42.000Z</published>
-    <updated>2017-07-31T01:25:20.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>物联网物接入协议MQTT<br><a id="more"></a></p>
-<p>相对来说，IoT的技术挑战，主要在安全隐患、连接管理、海量数据管理，用关键字来说就是海量、通用、可扩展、简单。<br>物接入云端，有很多挑战, 数据的安全尤为重要 </p>
-<h2 id="协议比较"><a href="#协议比较" class="headerlink" title="协议比较"></a>协议比较</h2><p><a href="http://www.365yg.com/group/6408407122584879362/" target="_blank" rel="external">协议比较</a></p>
-<h2 id="MQTT简介"><a href="#MQTT简介" class="headerlink" title="MQTT简介"></a>MQTT简介</h2><p>MQTT是一个客户端服务端架构的发布/订阅模式的消息传输协议。它的设计思想是轻巧、开放、简单、规范，易于实现。这些特点使得它对很多场景来说都是很好的选择，特别是对于受限的环境如机器与机器的通信(M2M)以及物联网环境(IoT)。<br>总体来说MQTT有如下特性:</p>
-<ul>
-<li>轻量级的 machine-to-machine 通信协议。</li>
-<li>publish/subscribe模式。</li>
-<li>基于TCP/IP。</li>
-<li>支持QoS。</li>
-<li>适合于低带宽、不可靠连接、嵌入式设备、CPU内存资源紧张。</li>
-<li>是一种比较不错的Android消息推送方案。</li>
-<li>FacebookMessenger采用了MQTT。</li>
-<li>MQTT有可能成为物联网的重要协议</li>
-</ul>
-<p><a href="http://dataguild.org/?p=6817" target="_blank" rel="external">mqtt协议简介</a></p>
-<p><a href="http://www.cnblogs.com/caca/p/mqtt.html" target="_blank" rel="external">协议简介</a></p>
-<h2 id="报文格式"><a href="#报文格式" class="headerlink" title="报文格式"></a>报文格式</h2><table class="tg"><tr><th class="tg-baqh">bit</th><th class="tg-yw4l">7</th><th class="tg-yw4l">6</th><th class="tg-yw4l">5</th><th class="tg-yw4l">4</th><th class="tg-yw4l">3</th><th class="tg-yw4l">2</th><th class="tg-yw4l">1</th><th class="tg-yw4l">0</th></tr><tr><td class="tg-q1yk">byte 1</td><td class="tg-6k2t" colspan="4">Message type</td><td class="tg-6k2t">DUP</td><td class="tg-6k2t" colspan="2">QoS level</td><td class="tg-6k2t">RETAIN</td></tr><tr><td class="tg-jogk">byte 2</td><td class="tg-yw4l" colspan="8">Message length (between one and four bytes)</td></tr><tr><td class="tg-r78f">byte 3</td><td class="tg-j0tj" colspan="8">… if needed to encode message length</td></tr><tr><td class="tg-574v">byte 4</td><td class="tg-baqh" colspan="8">… if needed to encode message length</td></tr><tr><td class="tg-r78f">byte 5</td><td class="tg-j0tj" colspan="8">… if needed to encode message length</td></tr></table>
-
-<h2 id="控制指令"><a href="#控制指令" class="headerlink" title="控制指令"></a>控制指令</h2><table>
-<thead>
-<tr>
-<th>Message Type</th>
-<th style="text-align:center">Value</th>
-<th style="text-align:center">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>CONNECT</td>
-<td style="text-align:center">1</td>
-<td style="text-align:center">Client request to connect to Server</td>
-</tr>
-<tr>
-<td>CONNACK</td>
-<td style="text-align:center">2</td>
-<td style="text-align:center">Connect Acknowledgment</td>
-</tr>
-<tr>
-<td>PUBLISH</td>
-<td style="text-align:center">3</td>
-<td style="text-align:center">Publish message</td>
-</tr>
-<tr>
-<td>PUBACK</td>
-<td style="text-align:center">4</td>
-<td style="text-align:center">Publish Acknowledgment</td>
-</tr>
-<tr>
-<td>PUBREC</td>
-<td style="text-align:center">5</td>
-<td style="text-align:center">Publish Received (assured delivery part 1)</td>
-</tr>
-<tr>
-<td>PUBREL</td>
-<td style="text-align:center">6</td>
-<td style="text-align:center">Publish Release (assured delivery part 2)</td>
-</tr>
-<tr>
-<td>PUBCOMP</td>
-<td style="text-align:center">7</td>
-<td style="text-align:center">Publish Complete (assured delivery part 3)</td>
-</tr>
-<tr>
-<td>SUBSCRIBE</td>
-<td style="text-align:center">8</td>
-<td style="text-align:center">Client Subscribe request</td>
-</tr>
-<tr>
-<td>SUBACK</td>
-<td style="text-align:center">9</td>
-<td style="text-align:center">Subscribe Acknowledgment</td>
-</tr>
-<tr>
-<td>UNSUBSCRIBE</td>
-<td style="text-align:center">10</td>
-<td style="text-align:center">Client Unsubscribe request</td>
-</tr>
-<tr>
-<td>UNSUBACK</td>
-<td style="text-align:center">11</td>
-<td style="text-align:center">Unsubscribe Acknowledgment</td>
-</tr>
-<tr>
-<td>PINGREQ</td>
-<td style="text-align:center">12</td>
-<td style="text-align:center">PING Request</td>
-</tr>
-<tr>
-<td>PINGRESP</td>
-<td style="text-align:center">13</td>
-<td style="text-align:center">PING Response</td>
-</tr>
-<tr>
-<td>DISCONNECT</td>
-<td style="text-align:center">14</td>
-<td style="text-align:center">Client is Disconnecting</td>
-</tr>
-</tbody>
-</table>
-<h2 id="Qos"><a href="#Qos" class="headerlink" title="Qos"></a>Qos</h2><p><img src="https://image.slidesharecdn.com/mqttiotprotocolscomparison-140219090749-phpapp01/95/mqtt-iot-protocols-comparison-8-638.jpg?cb=1392817944" alt=""></p>
-<h2 id="mqtt的状态机"><a href="#mqtt的状态机" class="headerlink" title="mqtt的状态机"></a>mqtt的状态机</h2><p><img src="http://www.sharetechnote.com/html/IoT/image/IoT_MQTT_ProtocolOverview_01.png" alt=""><br>wo </p>
-<p><img src="https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.iotsdk.v0.9.0/msc_mqtt.png" alt=""></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;物联网物接入协议MQTT&lt;br&gt;
-    
-    </summary>
+      <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
     
     
       <category term="iot" scheme="https://blog.yumaojun.net/tags/iot/"/>
-    
-      <category term="mqtt" scheme="https://blog.yumaojun.net/tags/mqtt/"/>
     
   </entry>
   
@@ -751,10 +647,10 @@
     <link href="https://blog.yumaojun.net/2017/07/04/mqtt-reconnect/"/>
     <id>https://blog.yumaojun.net/2017/07/04/mqtt-reconnect/</id>
     <published>2017-07-04T07:21:58.000Z</published>
-    <updated>2017-07-06T05:34:58.000Z</updated>
+    <updated>2017-08-08T03:16:16.000Z</updated>
     
     <content type="html"><![CDATA[<p>最近使用Python写一个后台服务处理mqtt里面的事件时遇到了一个麻烦: mqtt连接重置时(重启mqtt服务后), 之前pub消息的线程不能正常工作了, 经过多次踩坑, 终于解决. 引发问题的原因是我使用姿势不对造成的, 一旦你使用姿势不对 会造成一些奇怪的问题,并且很难解决。 因此请正确使用mqtt。<br><a id="more"></a></p>
-<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><p>关于MQTT协议的介绍请参考之前博客: <a href="/2017/07/05/mqtt-introduce/" title="物联网之MQTT">物联网之MQTT</a>, 只有在了解MQTT协议过后, 我们才能以正确的姿势使用她, 以下是我觉得需要注意的地方:</p>
+<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><p>关于MQTT协议的介绍请参考之前博客: <a href="/2017/07/02/mqtt-introduce/" title="物联网之MQTT">物联网之MQTT</a>, 只有在了解MQTT协议过后, 我们才能以正确的姿势使用她, 以下是我觉得需要注意的地方:</p>
 <ul>
 <li>按需使用MQTT的Qos, 当Qos=2时可靠性最高, 但是会损失性能。</li>
 <li>尽量使用<code>client_id</code>来标示客户端, 但是注意 如果2个客户端使用同一个<code>client_id</code>, 会出现client争抢连接的状态, 所以全局持有一个client是不错的选择。</li>
@@ -892,6 +788,138 @@
     
     </summary>
     
+      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
+    
+      <category term="Python" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Python/"/>
+    
+    
+      <category term="mqtt" scheme="https://blog.yumaojun.net/tags/mqtt/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>物联网之MQTT</title>
+    <link href="https://blog.yumaojun.net/2017/07/02/mqtt-introduce/"/>
+    <id>https://blog.yumaojun.net/2017/07/02/mqtt-introduce/</id>
+    <published>2017-07-02T04:46:42.000Z</published>
+    <updated>2017-08-08T03:16:07.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>物联网物接入协议MQTT<br><a id="more"></a></p>
+<p>相对来说，IoT的技术挑战，主要在安全隐患、连接管理、海量数据管理，用关键字来说就是海量、通用、可扩展、简单。<br>物接入云端，有很多挑战, 数据的安全尤为重要 </p>
+<h2 id="协议比较"><a href="#协议比较" class="headerlink" title="协议比较"></a>协议比较</h2><p><a href="http://www.365yg.com/group/6408407122584879362/" target="_blank" rel="external">协议比较</a></p>
+<h2 id="MQTT简介"><a href="#MQTT简介" class="headerlink" title="MQTT简介"></a>MQTT简介</h2><p>MQTT是一个客户端服务端架构的发布/订阅模式的消息传输协议。它的设计思想是轻巧、开放、简单、规范，易于实现。这些特点使得它对很多场景来说都是很好的选择，特别是对于受限的环境如机器与机器的通信(M2M)以及物联网环境(IoT)。<br>总体来说MQTT有如下特性:</p>
+<ul>
+<li>轻量级的 machine-to-machine 通信协议。</li>
+<li>publish/subscribe模式。</li>
+<li>基于TCP/IP。</li>
+<li>支持QoS。</li>
+<li>适合于低带宽、不可靠连接、嵌入式设备、CPU内存资源紧张。</li>
+<li>是一种比较不错的Android消息推送方案。</li>
+<li>FacebookMessenger采用了MQTT。</li>
+<li>MQTT有可能成为物联网的重要协议</li>
+</ul>
+<p><a href="http://dataguild.org/?p=6817" target="_blank" rel="external">mqtt协议简介</a></p>
+<p><a href="http://www.cnblogs.com/caca/p/mqtt.html" target="_blank" rel="external">协议简介</a></p>
+<h2 id="报文格式"><a href="#报文格式" class="headerlink" title="报文格式"></a>报文格式</h2><table class="tg"><tr><th class="tg-baqh">bit</th><th class="tg-yw4l">7</th><th class="tg-yw4l">6</th><th class="tg-yw4l">5</th><th class="tg-yw4l">4</th><th class="tg-yw4l">3</th><th class="tg-yw4l">2</th><th class="tg-yw4l">1</th><th class="tg-yw4l">0</th></tr><tr><td class="tg-q1yk">byte 1</td><td class="tg-6k2t" colspan="4">Message type</td><td class="tg-6k2t">DUP</td><td class="tg-6k2t" colspan="2">QoS level</td><td class="tg-6k2t">RETAIN</td></tr><tr><td class="tg-jogk">byte 2</td><td class="tg-yw4l" colspan="8">Message length (between one and four bytes)</td></tr><tr><td class="tg-r78f">byte 3</td><td class="tg-j0tj" colspan="8">… if needed to encode message length</td></tr><tr><td class="tg-574v">byte 4</td><td class="tg-baqh" colspan="8">… if needed to encode message length</td></tr><tr><td class="tg-r78f">byte 5</td><td class="tg-j0tj" colspan="8">… if needed to encode message length</td></tr></table>
+
+<h2 id="控制指令"><a href="#控制指令" class="headerlink" title="控制指令"></a>控制指令</h2><table>
+<thead>
+<tr>
+<th>Message Type</th>
+<th style="text-align:center">Value</th>
+<th style="text-align:center">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CONNECT</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">Client request to connect to Server</td>
+</tr>
+<tr>
+<td>CONNACK</td>
+<td style="text-align:center">2</td>
+<td style="text-align:center">Connect Acknowledgment</td>
+</tr>
+<tr>
+<td>PUBLISH</td>
+<td style="text-align:center">3</td>
+<td style="text-align:center">Publish message</td>
+</tr>
+<tr>
+<td>PUBACK</td>
+<td style="text-align:center">4</td>
+<td style="text-align:center">Publish Acknowledgment</td>
+</tr>
+<tr>
+<td>PUBREC</td>
+<td style="text-align:center">5</td>
+<td style="text-align:center">Publish Received (assured delivery part 1)</td>
+</tr>
+<tr>
+<td>PUBREL</td>
+<td style="text-align:center">6</td>
+<td style="text-align:center">Publish Release (assured delivery part 2)</td>
+</tr>
+<tr>
+<td>PUBCOMP</td>
+<td style="text-align:center">7</td>
+<td style="text-align:center">Publish Complete (assured delivery part 3)</td>
+</tr>
+<tr>
+<td>SUBSCRIBE</td>
+<td style="text-align:center">8</td>
+<td style="text-align:center">Client Subscribe request</td>
+</tr>
+<tr>
+<td>SUBACK</td>
+<td style="text-align:center">9</td>
+<td style="text-align:center">Subscribe Acknowledgment</td>
+</tr>
+<tr>
+<td>UNSUBSCRIBE</td>
+<td style="text-align:center">10</td>
+<td style="text-align:center">Client Unsubscribe request</td>
+</tr>
+<tr>
+<td>UNSUBACK</td>
+<td style="text-align:center">11</td>
+<td style="text-align:center">Unsubscribe Acknowledgment</td>
+</tr>
+<tr>
+<td>PINGREQ</td>
+<td style="text-align:center">12</td>
+<td style="text-align:center">PING Request</td>
+</tr>
+<tr>
+<td>PINGRESP</td>
+<td style="text-align:center">13</td>
+<td style="text-align:center">PING Response</td>
+</tr>
+<tr>
+<td>DISCONNECT</td>
+<td style="text-align:center">14</td>
+<td style="text-align:center">Client is Disconnecting</td>
+</tr>
+</tbody>
+</table>
+<h2 id="Qos"><a href="#Qos" class="headerlink" title="Qos"></a>Qos</h2><p><img src="https://image.slidesharecdn.com/mqttiotprotocolscomparison-140219090749-phpapp01/95/mqtt-iot-protocols-comparison-8-638.jpg?cb=1392817944" alt=""></p>
+<h2 id="mqtt的状态机"><a href="#mqtt的状态机" class="headerlink" title="mqtt的状态机"></a>mqtt的状态机</h2><p><img src="http://www.sharetechnote.com/html/IoT/image/IoT_MQTT_ProtocolOverview_01.png" alt=""><br>wo </p>
+<p><img src="https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.iotsdk.v0.9.0/msc_mqtt.png" alt=""></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;物联网物接入协议MQTT&lt;br&gt;
+    
+    </summary>
+    
+      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
+    
+      <category term="Python" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Python/"/>
+    
+    
+      <category term="iot" scheme="https://blog.yumaojun.net/tags/iot/"/>
     
       <category term="mqtt" scheme="https://blog.yumaojun.net/tags/mqtt/"/>
     
