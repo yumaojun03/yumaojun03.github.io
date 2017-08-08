@@ -1,0 +1,988 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="gRPC,APIGateway," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="紫川秀的博客" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="gRPC的服务端需要与认证平台对接, 之前使用http时通过中间件的形式进行实现, 因此这篇文章主要验证gRPC中能否以中间件的形式实现gRPC的认证。">
+<meta name="keywords" content="gRPC,APIGateway">
+<meta property="og:type" content="article">
+<meta property="og:title" content="gRPC基于拦截器模式的认证">
+<meta property="og:url" content="https://blog.yumaojun.net/2017/08/07/grpc-auth/index.html">
+<meta property="og:site_name" content="紫川秀的博客">
+<meta property="og:description" content="gRPC的服务端需要与认证平台对接, 之前使用http时通过中间件的形式进行实现, 因此这篇文章主要验证gRPC中能否以中间件的形式实现gRPC的认证。">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/auth-flow.png">
+<meta property="og:updated_time" content="2017-08-08T03:11:04.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="gRPC基于拦截器模式的认证">
+<meta name="twitter:description" content="gRPC的服务端需要与认证平台对接, 之前使用http时通过中间件的形式进行实现, 因此这篇文章主要验证gRPC中能否以中间件的形式实现gRPC的认证。">
+<meta name="twitter:image" content="http://oiw1gzfww.bkt.clouddn.com/auth-flow.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 'undefined',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: "",
+      labels: ""
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://blog.yumaojun.net/2017/08/07/grpc-auth/"/>
+
+
+
+
+
+  <title>gRPC基于拦截器模式的认证 | 紫川秀的博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">紫川秀的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">比你优秀的人不可怕,可怕的是比你优秀的人比你更努力。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/08/07/grpc-auth/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="紫川秀">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://oiw1gzfww.bkt.clouddn.com/me.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="紫川秀的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">gRPC基于拦截器模式的认证</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-07T07:16:35+08:00">
+                2017-08-07
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2017-08-08T11:11:04+08:00">
+                2017-08-08
+              </time>
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/08/07/grpc-auth/" class="leancloud_visitors" data-flag-title="gRPC基于拦截器模式的认证">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>gRPC的服务端需要与认证平台对接, 之前使用http时通过中间件的形式进行实现, 因此这篇文章主要验证gRPC中能否以中间件的形式实现gRPC的认证。<br><a id="more"></a></p>
+<h2 id="认证方式"><a href="#认证方式" class="headerlink" title="认证方式"></a>认证方式</h2><p>gRPC 默认提供了两种认证方式：</p>
+<ul>
+<li>基于SSL/TLS认证方式</li>
+<li>远程调用认证方式<br>为了保证API Gateway与后端gRPC服务通信的安全同时保证token安全, 以上2种方式同时使用。</li>
+</ul>
+<h2 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h2><p>我需要验证的流程大致如下(与Openstack的认证流程一样):<br><img src="http://oiw1gzfww.bkt.clouddn.com/auth-flow.png" alt=""><br>完整的代理示例: <a href="https://github.com/yumaojun03/golang/tree/master/grpc-auth" target="_blank" rel="external">grpc中间件认证</a></p>
+<p>在进行coding前, 我们需要为服务端生成TLS需要的证书:</p>
+<ul>
+<li><p>自建CA</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 生成CA自己的私钥</span></div><div class="line">$(<span class="built_in">umask</span> 077; openssl genrsa -out private/cakey.pem 2048)</div><div class="line"><span class="comment"># 自签10年</span></div><div class="line"><span class="variable">$openssl</span> req -new -x509 -key private/cakey.pem -out cacert.pem</div><div class="line">Country Name (2 letter code) [AU]:CN</div><div class="line">State or Province Name (full name) [Some-State]:SiChuan</div><div class="line">Locality Name (eg, city) []:ChengDu</div><div class="line">Organization Name (eg, company) [Internet Widgits Pty Ltd]:defineIOT Ltd</div><div class="line">Organizational Unit Name (eg, section) []:Tec</div><div class="line">Common Name (e.g. server FQDN or YOUR name) []:ca</div><div class="line">Email Address []:yumaojun03@gmail.com</div><div class="line"><span class="comment"># 初始化自建CA的一部分文件</span></div><div class="line"><span class="variable">$mkdir</span> certs newcerts crl</div><div class="line"><span class="variable">$touch</span> index.txt</div><div class="line"><span class="variable">$touch</span> serial</div><div class="line"><span class="variable">$echo</span> 01 &gt; serial</div></pre></td></tr></table></figure>
+</li>
+<li><p>签发服务端证书</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 生成server自己的私钥</span></div><div class="line"><span class="variable">$openssl</span> genrsa -out server1.key 2048</div><div class="line"><span class="comment"># 生成证书签证请求</span></div><div class="line"><span class="variable">$openssl</span> req -new -key server1.key -out server1.csr</div><div class="line">Country Name (2 letter code) [AU]:CN</div><div class="line">State or Province Name (full name) [Some-State]:Chengdu</div><div class="line">Locality Name (eg, city) []:Chengdu</div><div class="line">Organization Name (eg, company) [Internet Widgits Pty Ltd]:defineIOT Ltd</div><div class="line">Organizational Unit Name (eg, section) []:Tec</div><div class="line">Common Name (e.g. server FQDN or YOUR name) []:server1</div><div class="line">Email Address []:yumaojun03@gmail.com</div><div class="line"></div><div class="line">Please enter the following <span class="string">'extra'</span> attributes</div><div class="line">to be sent with your certificate request</div><div class="line">A challenge password []:</div><div class="line">An optional company name []:</div><div class="line"><span class="comment"># 因为我CA就在本服务器上,直接签发证书</span></div><div class="line"><span class="variable">$openssl</span> ca -in GoWorkDir/src/golang/grpc-auth/keys/server1.csr -out server1.pem -days 3650</div><div class="line">Using configuration from /System/Library/OpenSSL/openssl.cnf</div><div class="line">Check that the request matches the signature</div><div class="line">Signature ok</div><div class="line">The stateOrProvinceName field needed to be the same <span class="keyword">in</span> the</div><div class="line">CA certificate (SiChuan) and the request (Chengdu)</div><div class="line"><span class="comment"># 将签好的证书交给server</span></div><div class="line"><span class="variable">$mv</span> server1.pem GoWorkDir/src/golang/grpc-auth/keys</div><div class="line"><span class="comment"># server端的证书准备完成</span></div><div class="line"><span class="variable">$ll</span> GoWorkDir/src/golang/grpc-auth/keys</div><div class="line">total 40</div><div class="line">-rw-r--r--  1 maojun  staff   1.6K  8  8 09:15 cacert.pem</div><div class="line">-rw-r--r--  1 maojun  staff   1.0K  8  8 09:27 server1.csr</div><div class="line">-rw-r--r--  1 maojun  staff   1.6K  8  7 21:21 server1.key</div><div class="line">-rw-r--r--  1 maojun  staff   4.5K  8  8 09:28 server1.pem</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h3><p>生成契约文件<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$protoc</span> --go_out=plugins=grpc:. hello.proto</div></pre></td></tr></table></figure></p>
+<p>目录结构如下:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$tree</span> .</div><div class="line">.</div><div class="line">├── client</div><div class="line">│   └── main.go</div><div class="line">├── keys</div><div class="line">│   ├── cacert.pem</div><div class="line">│   ├── server1.csr</div><div class="line">│   ├── server1.key</div><div class="line">│   └── server1.pem</div><div class="line">├── proto</div><div class="line">│   ├── hello.pb.go</div><div class="line">│   └── hello.proto</div><div class="line">└── server</div><div class="line">    └── main.go</div></pre></td></tr></table></figure></p>
+<h3 id="tls"><a href="#tls" class="headerlink" title="tls"></a>tls</h3><p>先看credentials.go中关于通过TLS创建客户端和服务端相关函数<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// NewClientTLSFromFile 传入客户端建立TLS连接时需要的证书, 这里主要指CA的证书</span></div><div class="line"><span class="comment">// serverNameOverride 仅仅由于测试, 通常传入""</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewClientTLSFromFile</span><span class="params">(certFile, serverNameOverride <span class="keyword">string</span>)</span> <span class="params">(TransportCredentials, error)</span></span> &#123;</div><div class="line">        b, err := ioutil.ReadFile(certFile)</div><div class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">                <span class="keyword">return</span> <span class="literal">nil</span>, err</div><div class="line">        &#125;</div><div class="line">        cp := x509.NewCertPool()</div><div class="line">        <span class="keyword">if</span> !cp.AppendCertsFromPEM(b) &#123;</div><div class="line">                <span class="keyword">return</span> <span class="literal">nil</span>, fmt.Errorf(<span class="string">"credentials: failed to append certificates"</span>)</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> NewTLS(&amp;tls.Config&#123;ServerName: serverNameOverride, RootCAs: cp&#125;), <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// NewServerTLSFromFile 传入服务端建立TLS连接时需要的证书, 这里主要指服务端的证书和私钥</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewServerTLSFromFile</span><span class="params">(certFile, keyFile <span class="keyword">string</span>)</span> <span class="params">(TransportCredentials, error)</span></span> &#123;</div><div class="line">        cert, err := tls.LoadX509KeyPair(certFile, keyFile)</div><div class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">                <span class="keyword">return</span> <span class="literal">nil</span>, err</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> NewTLS(&amp;tls.Config&#123;Certificates: []tls.Certificate&#123;cert&#125;&#125;), <span class="literal">nil</span></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>因此我们自建一个CA, 然后生成server端的证书就可以使用这组函数来完成TLS的建立了</p>
+<h4 id="服务端TLS启动"><a href="#服务端TLS启动" class="headerlink" title="服务端TLS启动"></a>服务端TLS启动</h4><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"net"</span></div><div class="line"></div><div class="line">	pb <span class="string">"golang/grpc-auth/proto"</span></div><div class="line"></div><div class="line">	<span class="string">"golang.org/x/net/context"</span></div><div class="line">	<span class="string">"google.golang.org/grpc"</span></div><div class="line">	<span class="string">"google.golang.org/grpc/credentials"</span> <span class="comment">// 引入grpc认证包</span></div><div class="line">	<span class="string">"google.golang.org/grpc/grpclog"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="keyword">const</span> (</div><div class="line">	<span class="comment">// Address gRPC服务地址</span></div><div class="line">	Address = <span class="string">"127.0.0.1:50052"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="comment">// 定义helloService并实现约定的接口</span></div><div class="line"><span class="keyword">type</span> helloService <span class="keyword">struct</span>&#123;&#125;</div><div class="line"></div><div class="line"><span class="comment">// HelloService ...</span></div><div class="line"><span class="keyword">var</span> HelloService = helloService&#123;&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(h helloService)</span> <span class="title">SayHello</span><span class="params">(ctx context.Context, in *pb.HelloRequest)</span> <span class="params">(*pb.HelloResponse, error)</span></span> &#123;</div><div class="line">	resp := <span class="built_in">new</span>(pb.HelloResponse)</div><div class="line">	resp.Message = <span class="string">"Hello "</span> + in.Name + <span class="string">"."</span></div><div class="line"></div><div class="line">	<span class="keyword">return</span> resp, <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	listen, err := net.Listen(<span class="string">"tcp"</span>, Address)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		grpclog.Fatalf(<span class="string">"failed to listen: %v"</span>, err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="comment">// TLS认证</span></div><div class="line">	creds, err := credentials.NewServerTLSFromFile(<span class="string">"../keys/server1.pem"</span>, <span class="string">"../keys/server1.key"</span>)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		grpclog.Fatalf(<span class="string">"Failed to generate credentials %v"</span>, err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="comment">// 实例化grpc Server, 并开启TLS认证</span></div><div class="line">	s := grpc.NewServer(grpc.Creds(creds))</div><div class="line"></div><div class="line">	<span class="comment">// 注册HelloService</span></div><div class="line">	pb.RegisterHelloServer(s, HelloService)</div><div class="line"></div><div class="line">	grpclog.Println(<span class="string">"Listen on "</span> + Address + <span class="string">" with TLS"</span>)</div><div class="line"></div><div class="line">	s.Serve(listen)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="客户端带证书调用"><a href="#客户端带证书调用" class="headerlink" title="客户端带证书调用"></a>客户端带证书调用</h4><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	pb <span class="string">"golang/grpc-auth/proto"</span></div><div class="line"></div><div class="line">	<span class="string">"golang.org/x/net/context"</span></div><div class="line">	<span class="string">"google.golang.org/grpc"</span></div><div class="line">	<span class="string">"google.golang.org/grpc/credentials"</span> <span class="comment">// 引入grpc认证包</span></div><div class="line">	<span class="string">"google.golang.org/grpc/grpclog"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="keyword">const</span> (</div><div class="line">	<span class="comment">// Address gRPC服务地址</span></div><div class="line">	Address = <span class="string">"127.0.0.1:50052"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	<span class="comment">// TLS连接</span></div><div class="line">	creds, err := credentials.NewClientTLSFromFile(<span class="string">"../keys/cacert.pem"</span>, <span class="string">"server1"</span>)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		grpclog.Fatalf(<span class="string">"Failed to create TLS credentials %v"</span>, err)</div><div class="line">	&#125;</div><div class="line">	conn, err := grpc.Dial(Address, grpc.WithTransportCredentials(creds))</div><div class="line"></div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		grpclog.Fatalln(err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">defer</span> conn.Close()</div><div class="line"></div><div class="line">	<span class="comment">// 初始化客户端</span></div><div class="line">	c := pb.NewHelloClient(conn)</div><div class="line"></div><div class="line">	<span class="comment">// 调用方法</span></div><div class="line">	reqBody := <span class="built_in">new</span>(pb.HelloRequest)</div><div class="line">	reqBody.Name = <span class="string">"gRPC"</span></div><div class="line">	r, err := c.SayHello(context.Background(), reqBody)</div><div class="line"></div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		grpclog.Fatalln(err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	grpclog.Println(r.Message)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="认证拦截器"><a href="#认证拦截器" class="headerlink" title="认证拦截器"></a>认证拦截器</h3><p>认证包含2部分:</p>
+<ul>
+<li>服务端认证token</li>
+<li>客户端携带token</li>
+</ul>
+<h4 id="服务端认证token"><a href="#服务端认证token" class="headerlink" title="服务端认证token"></a>服务端认证token</h4><p>拦截器部分的源码在interceptor.go中, 我仅关注普通rpc, 对于流式rpc的拦截器不做说明, 以下是相关函数:</p>
+<ul>
+<li>客户端拦截器</li>
+<li>服务端拦截器<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// UnaryClientInterceptor拦截在客户端执行的非流式RPC. inovker就是真正的RPC的handler,</span></div><div class="line"><span class="comment">// 拦截器的责任就是完成自己的逻辑后调用该handler, 让请求继续RPC的工作 </span></div><div class="line"><span class="keyword">type</span> UnaryClientInterceptor <span class="function"><span class="keyword">func</span><span class="params">(ctx context.Context, method <span class="keyword">string</span>, req, reply <span class="keyword">interface</span>&#123;&#125;, cc *ClientConn, invoker UnaryInvoker, opts ...CallOption)</span> <span class="title">error</span></span></div><div class="line"></div><div class="line">// <span class="title">UnaryServerInterceptor</span> 提供了一个在服务器上执行<span class="title">unary</span> <span class="title">RPC</span>的钩子, </div><div class="line">// <span class="title">info</span> 包含拦截器可以操作的<span class="title">RPC</span>的所有信息。</div><div class="line">// <span class="title">handler</span> 是服务方法实现的一个包装器, 而拦截器的责任就是调用该<span class="title">handler</span>完成<span class="title">RPC</span>, 让请求继续<span class="title">RPC</span>的工作</div><div class="line"><span class="title">type</span> <span class="title">UnaryServerInterceptor</span> <span class="title">func</span><span class="params">(ctx context.Context, req <span class="keyword">interface</span>&#123;&#125;, info *UnaryServerInfo, handler UnaryHandler)</span> <span class="params">(resp <span class="keyword">interface</span>&#123;&#125;, err error)</span></div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>因此我们想要在服务端实现请求的认证功能, 仅需要实现一个自己的UnaryServerInterceptor函数, 并且在server启动时作为参数传递给它即可</p>
+<p>总体需要3步:</p>
+<ul>
+<li>自定义auth函数,实现认证逻辑</li>
+<li>定义一个使用自定义认证(auth)的拦截器</li>
+<li>server启动时随参数传入</li>
+</ul>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"net"</span></div><div class="line"></div><div class="line">	pb <span class="string">"golang/grpc-auth/proto"</span></div><div class="line"></div><div class="line">	<span class="string">"golang.org/x/net/context"</span></div><div class="line">	<span class="string">"google.golang.org/grpc"</span></div><div class="line">	<span class="string">"google.golang.org/grpc/codes"</span>       <span class="comment">// grpc 响应状态码</span></div><div class="line">	<span class="string">"google.golang.org/grpc/credentials"</span> <span class="comment">// grpc认证包</span></div><div class="line">	<span class="string">"google.golang.org/grpc/grpclog"</span></div><div class="line">	<span class="string">"google.golang.org/grpc/metadata"</span> <span class="comment">// grpc metadata包</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="keyword">const</span> (</div><div class="line">	<span class="comment">// Address gRPC服务地址</span></div><div class="line">	Address = <span class="string">"127.0.0.1:50052"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="comment">// 定义helloService并实现约定的接口</span></div><div class="line"><span class="keyword">type</span> helloService <span class="keyword">struct</span>&#123;&#125;</div><div class="line"></div><div class="line"><span class="comment">// HelloService ...</span></div><div class="line"><span class="keyword">var</span> HelloService = helloService&#123;&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(h helloService)</span> <span class="title">SayHello</span><span class="params">(ctx context.Context, in *pb.HelloRequest)</span> <span class="params">(*pb.HelloResponse, error)</span></span> &#123;</div><div class="line">	resp := <span class="built_in">new</span>(pb.HelloResponse)</div><div class="line">	resp.Message = <span class="string">"Hello "</span> + in.Name + <span class="string">"."</span></div><div class="line"></div><div class="line">	<span class="keyword">return</span> resp, <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// auth 验证Token</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">auth</span><span class="params">(ctx context.Context)</span> <span class="title">error</span></span> &#123;</div><div class="line">	md, ok := metadata.FromContext(ctx)</div><div class="line">	<span class="keyword">if</span> !ok &#123;</div><div class="line">		<span class="keyword">return</span> grpc.Errorf(codes.Unauthenticated, <span class="string">"无Token认证信息"</span>)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">var</span> (</div><div class="line">		appid  <span class="keyword">string</span></div><div class="line">		appkey <span class="keyword">string</span></div><div class="line">	)</div><div class="line"></div><div class="line">	<span class="keyword">if</span> val, ok := md[<span class="string">"appid"</span>]; ok &#123;</div><div class="line">		appid = val[<span class="number">0</span>]</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">if</span> val, ok := md[<span class="string">"appkey"</span>]; ok &#123;</div><div class="line">		appkey = val[<span class="number">0</span>]</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	grpclog.Printf(<span class="string">"appid: %s, appkey: %s\n"</span>, appid, appkey)</div><div class="line"></div><div class="line">	<span class="keyword">if</span> appid != <span class="string">"101010"</span> || appkey != <span class="string">"i am key"</span> &#123;</div><div class="line">		<span class="keyword">return</span> grpc.Errorf(codes.Unauthenticated, <span class="string">"Token认证信息无效: appid=%s, appkey=%s"</span>, appid, appkey)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">return</span> <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	listen, err := net.Listen(<span class="string">"tcp"</span>, Address)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		grpclog.Fatalf(<span class="string">"Failed to listen: %v"</span>, err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">var</span> opts []grpc.ServerOption</div><div class="line"></div><div class="line">	<span class="comment">// TLS认证</span></div><div class="line">	creds, err := credentials.NewServerTLSFromFile(<span class="string">"../keys/server1.pem"</span>, <span class="string">"../keys/server1.key"</span>)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		grpclog.Fatalf(<span class="string">"Failed to generate credentials %v"</span>, err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	opts = <span class="built_in">append</span>(opts, grpc.Creds(creds))</div><div class="line"></div><div class="line">	<span class="comment">// 注册interceptor</span></div><div class="line">	<span class="keyword">var</span> interceptor grpc.UnaryServerInterceptor</div><div class="line">	interceptor = <span class="function"><span class="keyword">func</span><span class="params">(ctx context.Context, req <span class="keyword">interface</span>&#123;&#125;, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler)</span> <span class="params">(resp <span class="keyword">interface</span>&#123;&#125;, err error)</span></span> &#123;</div><div class="line">		err = auth(ctx)</div><div class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">			<span class="keyword">return</span></div><div class="line">		&#125;</div><div class="line">		<span class="comment">// 继续处理请求</span></div><div class="line">		<span class="keyword">return</span> handler(ctx, req)</div><div class="line">	&#125;</div><div class="line">	opts = <span class="built_in">append</span>(opts, grpc.UnaryInterceptor(interceptor))</div><div class="line"></div><div class="line">	<span class="comment">// 实例化grpc Server</span></div><div class="line">	s := grpc.NewServer(opts...)</div><div class="line"></div><div class="line">	<span class="comment">// 注册HelloService</span></div><div class="line">	pb.RegisterHelloServer(s, HelloService)</div><div class="line"></div><div class="line">	grpclog.Println(<span class="string">"Listen on "</span> + Address + <span class="string">" with TLS + Token + Interceptor"</span>)</div><div class="line"></div><div class="line">	s.Serve(listen)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="客户端携带token"><a href="#客户端携带token" class="headerlink" title="客户端携带token"></a>客户端携带token</h4><p>而至于客户端如何在每次调用时都传递自己的token信息, 有比客户端拦截器更方便的方式, 因为credentials中有提供这样的接口<br>这部分代码在credentials.go中<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// PerRPCCredentials 为认证定义了一个通用接口, 每次RPC调用都需要提供安全信息(比如oauth2的token)</span></div><div class="line"><span class="keyword">type</span> PerRPCCredentials <span class="keyword">interface</span> &#123;</div><div class="line">        <span class="comment">// GetRequestMetadata 获取当前请求的元数据, 如果需要可以刷新tokens.</span></div><div class="line">        <span class="comment">// 该方法在请求被传输之前调用, 而数据需要放在header里面或者其他context中.</span></div><div class="line">        <span class="comment">// uri代表请求条目的URI</span></div><div class="line">        <span class="comment">// 在底层实现的支持下, ctx可以用于超时和取消</span></div><div class="line">        <span class="comment">// <span class="doctag">TODO:</span> 定义限定键的集合，而不是将其保留为任意字符串。</span></div><div class="line">        GetRequestMetadata(ctx context.Context, uri ...<span class="keyword">string</span>) (<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>, error)</div><div class="line">        <span class="comment">// RequireTransportSecurity 表明认证过程是否需要安全传输(是否开启TLS)</span></div><div class="line">        RequireTransportSecurity() <span class="keyword">bool</span></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>因此可以看出我们仅需要实现GetRequestMetadata和RequireTransportSecurity即可, 通过GetRequestMetadata方法将需要的token传递给客户端即可。</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	pb <span class="string">"golang/grpc-auth/proto"</span></div><div class="line"></div><div class="line">	<span class="string">"golang.org/x/net/context"</span></div><div class="line">	<span class="string">"google.golang.org/grpc"</span></div><div class="line">	<span class="string">"google.golang.org/grpc/credentials"</span> <span class="comment">// 引入grpc认证包</span></div><div class="line">	<span class="string">"google.golang.org/grpc/grpclog"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="keyword">const</span> (</div><div class="line">	<span class="comment">// Address gRPC服务地址</span></div><div class="line">	Address = <span class="string">"127.0.0.1:50052"</span></div><div class="line"></div><div class="line">	<span class="comment">// OpenTLS 是否开启TLS认证</span></div><div class="line">	OpenTLS = <span class="literal">true</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="comment">// customCredential 自定义认证</span></div><div class="line"><span class="keyword">type</span> customCredential <span class="keyword">struct</span>&#123;&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c customCredential)</span> <span class="title">GetRequestMetadata</span><span class="params">(ctx context.Context, uri ...<span class="keyword">string</span>)</span> <span class="params">(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>, error)</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>&#123;</div><div class="line">		<span class="string">"appid"</span>:  <span class="string">"101010"</span>,</div><div class="line">		<span class="string">"appkey"</span>: <span class="string">"i am key"</span>,</div><div class="line">	&#125;, <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c customCredential)</span> <span class="title">RequireTransportSecurity</span><span class="params">()</span> <span class="title">bool</span></span> &#123;</div><div class="line">	<span class="keyword">if</span> OpenTLS &#123;</div><div class="line">		<span class="keyword">return</span> <span class="literal">true</span></div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> <span class="literal">false</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	<span class="keyword">var</span> err error</div><div class="line">	<span class="keyword">var</span> opts []grpc.DialOption</div><div class="line"></div><div class="line">	<span class="keyword">if</span> OpenTLS &#123;</div><div class="line">		<span class="comment">// TLS连接</span></div><div class="line">		creds, err := credentials.NewClientTLSFromFile(<span class="string">"../keys/cacert.pem"</span>, <span class="string">"server1"</span>)</div><div class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">			grpclog.Fatalf(<span class="string">"Failed to create TLS credentials %v"</span>, err)</div><div class="line">		&#125;</div><div class="line">		opts = <span class="built_in">append</span>(opts, grpc.WithTransportCredentials(creds))</div><div class="line">	&#125; <span class="keyword">else</span> &#123;</div><div class="line">		opts = <span class="built_in">append</span>(opts, grpc.WithInsecure())</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="comment">// 指定自定义认证</span></div><div class="line">	opts = <span class="built_in">append</span>(opts, grpc.WithPerRPCCredentials(<span class="built_in">new</span>(customCredential)))</div><div class="line"></div><div class="line">	conn, err := grpc.Dial(Address, opts...)</div><div class="line"></div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		grpclog.Fatalln(err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">defer</span> conn.Close()</div><div class="line"></div><div class="line">	<span class="comment">// 初始化客户端</span></div><div class="line">	c := pb.NewHelloClient(conn)</div><div class="line"></div><div class="line">	<span class="comment">// 调用方法</span></div><div class="line">	reqBody := <span class="built_in">new</span>(pb.HelloRequest)</div><div class="line">	reqBody.Name = <span class="string">"gRPC"</span></div><div class="line">	r, err := c.SayHello(context.Background(), reqBody)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		grpclog.Fatalln(err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	grpclog.Println(r.Message)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>针对以上功能做测试</p>
+<h3 id="正常测试"><a href="#正常测试" class="headerlink" title="正常测试"></a>正常测试</h3><p>带证书和合法token的请求<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$go</span> run main.go</div><div class="line">2017/08/08 10:36:10 Listen on 127.0.0.1:50052 with TLS + Token + Interceptor</div><div class="line">2017/08/08 10:36:13 appid: 101010, appkey: i am key</div></pre></td></tr></table></figure></p>
+<p>请求成功<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$go</span> run main.go</div><div class="line">2017/08/08 10:36:13 Hello gRPC.</div></pre></td></tr></table></figure></p>
+<h3 id="异常测试"><a href="#异常测试" class="headerlink" title="异常测试"></a>异常测试</h3><p>不带证书的请求<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$go</span> run main.go</div><div class="line">2017/08/08 11:05:36 Listen on 127.0.0.1:50052 with TLS + Token + Interceptor</div><div class="line">2017/08/08 11:05:38 grpc: Server.Serve failed to complete security handshake from <span class="string">"127.0.0.1:56310"</span>: tls: first record does not look like a TLS handshake</div></pre></td></tr></table></figure></p>
+<p>请求失败<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$go</span> run main.go</div><div class="line">2017/08/08 11:05:38 transport: http2Client.notifyError got notified that the client transport was broken unexpected EOF.</div><div class="line">2017/08/08 11:05:38 rpc error: code = Internal desc = transport is closing</div><div class="line"><span class="built_in">exit</span> status 1</div></pre></td></tr></table></figure></p>
+<p>带证书但token不合法<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$go</span> run main.go</div><div class="line">2017/08/08 11:08:36 rpc error: code = Unauthenticated desc = Token认证信息无效: appid=101010, appkey=i am key1</div><div class="line"><span class="built_in">exit</span> status 1</div></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="http://oiw1gzfww.bkt.clouddn.com/alipay.jpg" alt="紫川秀 Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/gRPC/" rel="tag"># gRPC</a>
+          
+            <a href="/tags/APIGateway/" rel="tag"># APIGateway</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/08/06/http-graceful/" rel="next" title="Golang HTTP服务优雅停止">
+                <i class="fa fa-chevron-left"></i> Golang HTTP服务优雅停止
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://oiw1gzfww.bkt.clouddn.com/me.png"
+               alt="紫川秀" />
+          <p class="site-author-name" itemprop="name">紫川秀</p>
+           
+              <p class="site-description motion-element" itemprop="description">喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">38</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">17</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">29</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/yumaojun03" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://douban.com/people/155892492" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/zi-chuan-xiu-86" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              友情链接
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.liaoxuefeng.com/" title="廖雪峰官网" target="_blank">廖雪峰官网</a>
+                </li>
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://xiaorui.cc/" title="峰云,就她了" target="_blank">峰云,就她了</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#认证方式"><span class="nav-number">1.</span> <span class="nav-text">认证方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#代码示例"><span class="nav-number">2.</span> <span class="nav-text">代码示例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#目录结构"><span class="nav-number">2.1.</span> <span class="nav-text">目录结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tls"><span class="nav-number">2.2.</span> <span class="nav-text">tls</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#服务端TLS启动"><span class="nav-number">2.2.1.</span> <span class="nav-text">服务端TLS启动</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#客户端带证书调用"><span class="nav-number">2.2.2.</span> <span class="nav-text">客户端带证书调用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#认证拦截器"><span class="nav-number">2.3.</span> <span class="nav-text">认证拦截器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#服务端认证token"><span class="nav-number">2.3.1.</span> <span class="nav-text">服务端认证token</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#客户端携带token"><span class="nav-number">2.3.2.</span> <span class="nav-text">客户端携带token</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#测试"><span class="nav-number">3.</span> <span class="nav-text">测试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#正常测试"><span class="nav-number">3.1.</span> <span class="nav-text">正常测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#异常测试"><span class="nav-number">3.2.</span> <span class="nav-text">异常测试</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">紫川秀</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("51RM6PwqfSuyOFX9MxLeq5yY-gzGzoHsz", "dNQYvnf4KlnN364JVGClL7bp");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
