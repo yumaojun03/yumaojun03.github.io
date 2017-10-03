@@ -102,9 +102,21 @@
     <link href="https://blog.yumaojun.net/2017/10/03/golang-json/"/>
     <id>https://blog.yumaojun.net/2017/10/03/golang-json/</id>
     <published>2017-10-03T00:44:19.000Z</published>
-    <updated>2017-10-03T01:42:54.000Z</updated>
+    <updated>2017-10-03T11:54:42.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>目前我们看到很多的开放平台，基本上都是采用了JSON作为他们的数据交互的格式。既然JSON在Web开发中如此重要，那么Go语言对JSON支持的怎么样呢？Go语言的标准库已经非常好的支持了JSON，可以很容易的对JSON数据进行编、解码的工作。如果有更灵活的需求也有不错的第三方库提供支持。这篇文章将全面解读Golang中JSON的使用。<br><a id="more"></a></p>
+<h2 id="JSON简介"><a href="#JSON简介" class="headerlink" title="JSON简介"></a>JSON简介</h2><p>JSON（Javascript Object Notation）是一种轻量级的数据交换语言，以文字为基础，具有自我描述性且易于让人阅读。尽管JSON是Javascript <a href="http://www.ecma-international.org/publications/files/ecma-st/ECMA-262.pdf" target="_blank" rel="external">Standard ECMA-262 3rd Edition – December 1999</a>的一个子集，但JSON是独立于语言的文本格式，并且采用了类似于C语言家族的一些习惯, 这些特性使JSON成为理想的数据交换语言。</p>
+<p>JSON与XML最大的不同在于XML是一个完整的标记语言，而JSON不是。JSON由于比XML更小、更快，更易解析,以及浏览器的内建快速解析支持,使得其更适用于网络数据传输领域。</p>
+<p>JSON建构于两种结构：</p>
+<p>“名称/值”对的集合（A collection of name/value pairs）。不同的语言中，它被理解为对象（object），纪录（record），结构（struct），字典（dictionary），哈希表（hash table），有键列表（keyed list），或者关联数组 （associative array）。<br>值的有序列表（An ordered list of values）。在大部分语言中，它被理解为数组（array）。<br>这些都是常见的数据结构。事实上大部分现代计算机语言都以某种形式支持它们。这使得一种数据格式在同样基于这些结构的编程语言之间交换成为可能。</p>
+<h2 id="解析JSON"><a href="#解析JSON" class="headerlink" title="解析JSON"></a>解析JSON</h2><h2 id="生成JSON"><a href="#生成JSON" class="headerlink" title="生成JSON"></a>生成JSON</h2><h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="http://json.org/json-zh.html" target="_blank" rel="external">JSON官方介绍</a></li>
+</ul>
+]]></content>
     
     <summary type="html">
+    
+      &lt;p&gt;目前我们看到很多的开放平台，基本上都是采用了JSON作为他们的数据交互的格式。既然JSON在Web开发中如此重要，那么Go语言对JSON支持的怎么样呢？Go语言的标准库已经非常好的支持了JSON，可以很容易的对JSON数据进行编、解码的工作。如果有更灵活的需求也有不错的第三方库提供支持。这篇文章将全面解读Golang中JSON的使用。&lt;br&gt;
     
     </summary>
     
@@ -1023,9 +1035,9 @@
       <category term="Python" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Python/"/>
     
     
-      <category term="iot" scheme="https://blog.yumaojun.net/tags/iot/"/>
-    
       <category term="mqtt" scheme="https://blog.yumaojun.net/tags/mqtt/"/>
+    
+      <category term="iot" scheme="https://blog.yumaojun.net/tags/iot/"/>
     
   </entry>
   
