@@ -92,7 +92,7 @@
 <meta property="og:image" content="http://json.org/object.gif">
 <meta property="og:image" content="http://json.org/array.gif">
 <meta property="og:image" content="http://json.org/value.gif">
-<meta property="og:updated_time" content="2017-10-04T09:42:46.000Z">
+<meta property="og:updated_time" content="2017-10-05T05:43:20.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go语言JSON详解">
 <meta name="twitter:description" content="目前我们看到很多的开放平台，基本上都是采用了JSON作为他们的数据交互的格式。既然JSON在Web开发中如此重要，那么Go语言对JSON支持的怎么样呢？Go语言的标准库已经非常好的支持了JSON，可以很容易的对JSON数据进行编、解码的工作。如果有更灵活的需求也有不错的第三方库提供支持。这篇文章将全面解读Golang中JSON的使用。">
@@ -314,8 +314,8 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2017-10-04T17:42:46+08:00">
-                2017-10-04
+              <time title="更新于" itemprop="dateModified" datetime="2017-10-05T13:43:20+08:00">
+                2017-10-05
               </time>
             
           </span>
@@ -411,8 +411,45 @@
 <li>数组(array): 值的有序列表<br><img src="http://json.org/value.gif" alt=""></li>
 </ul>
 <p>这些都是常见的数据结构。事实上大部分现代计算机语言都以某种形式支持它们。这使得一种数据格式在同样基于这些结构的编程语言之间交换成为可能。</p>
-<h2 id="JSON与Go数据结构映射"><a href="#JSON与Go数据结构映射" class="headerlink" title="JSON与Go数据结构映射"></a>JSON与Go数据结构映射</h2><p>Golang的标准库<code>encoding/json</code>已经提供了很好的封装，可以让我们很方便地进行<code>JSON</code>数据的转换.</p>
+<h2 id="JSON与Go数据结构映射"><a href="#JSON与Go数据结构映射" class="headerlink" title="JSON与Go数据结构映射"></a>JSON与Go数据结构映射</h2><p>Golang的标准库<code>encoding/json</code>实现的JSON标准(RFC 4627)的编码和解码, 可以让我们很方便地进行<code>JSON</code>数据的转换. </p>
+<p>具体详情可以参考 Marshal and Unmarshal函数的注释, 下面是一个基本的数据关系映射总结:<br>|Golang Type  |JSON Type  |Description                                            |<br>| ———-  | :—–:   | :—————————————————: |<br>|bool         | booleans   |true or false|<br>|int, float   |    numbers      |对于golang所有的数值类型|<br>|string       |    strings      |字符串会转换成<code>UTF-8</code>进行输出，无法转换的会打印对应的<code>unicode</code>值。而且为了防止浏览器把json输出当做html， “&lt;”、”&gt;” 以及 “&amp;” 会被转义为 “\u003c”、”\u003e” 和 “\u0026”|<br>|array,slice  |    arrays     |Publish Acknowledgment|<br>|struct       |    objects      |只有导出的字段(以大写字母开头)才会在输出中|<br>|nil          | null      |空 |</p>
 <p>注意事项:<br>Go语言中一些特殊的类型，比如Channel、complex、function是不能被解析成JSON的.</p>
+<h2 id="标准库解读"><a href="#标准库解读" class="headerlink" title="标准库解读"></a>标准库解读</h2><p>在使用标准库进行json操作之前, 先简单了解下标准库提供了那些对JSON的操作, 以下解读主要来源于GoDoc</p>
+<h3 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h3><ul>
+<li>Compact: 用于JSON字符串的拼接, 拼接时会校验后面的字符串是否是合法json, 如果不是会报错, 但对字符串中的特殊字符(html不安全字符,比如上面提到的”&lt;” “&gt;”等)不进行转义</li>
+<li><p>HTMLEscape: 和Compact相对, 拼接JSON字符串时会进行特殊字符转义, 转义成web安全的字符.</p>
+</li>
+<li><p>Valid: 校验数据是否是合法的JSON编码数据, 往往用于数据格式校验.</p>
+</li>
+<li><p>Marshal: 用于编码JSON.</p>
+</li>
+<li>Indent: 用于JSON的格式化输出, 最常见的用法时 定义JSON的缩进, 比如2个空格的缩进.</li>
+<li><p>MarshalIndent: 编码JSON后, 带格式化的输出.</p>
+</li>
+<li><p>Unmarshal: 用于解码JSON.</p>
+</li>
+</ul>
+<h3 id="接口"><a href="#接口" class="headerlink" title="接口"></a>接口</h3><ul>
+<li>Unmarshaler: 实现了UnMarshalJSON方法的对象, 该类型通过实现该方法 来将自己一个合法json转变为一个类型</li>
+<li>Marshaler: 实现了UnMarshalJSON方法的类型, 该类型通过实现该方法 来将自己序列化成一个合法的json</li>
+</ul>
+<h3 id="结构体"><a href="#结构体" class="headerlink" title="结构体"></a>结构体</h3><ul>
+<li>Decoder</li>
+<li>Encoder</li>
+<li>Number</li>
+<li>RawMessage</li>
+<li>Token</li>
+</ul>
+<h3 id="异常"><a href="#异常" class="headerlink" title="异常"></a>异常</h3><ul>
+<li>InvalidUTF8Error</li>
+<li>InvalidUnmarshalError</li>
+<li>MarshalerError</li>
+<li>SyntaxError</li>
+<li>UnmarshalFieldError</li>
+<li>UnmarshalTypeError</li>
+<li>UnsupportedTypeError</li>
+<li>UnsupportedValueError</li>
+</ul>
 <h2 id="解析JSON"><a href="#解析JSON" class="headerlink" title="解析JSON"></a>解析JSON</h2><h3 id="解析已知JSON"><a href="#解析已知JSON" class="headerlink" title="解析已知JSON"></a>解析已知JSON</h3><h3 id="解析未知JSON"><a href="#解析未知JSON" class="headerlink" title="解析未知JSON"></a>解析未知JSON</h3><h3 id="自定义解析"><a href="#自定义解析" class="headerlink" title="自定义解析"></a>自定义解析</h3><h2 id="生成JSON"><a href="#生成JSON" class="headerlink" title="生成JSON"></a>生成JSON</h2><h3 id="通过struct生成JSON"><a href="#通过struct生成JSON" class="headerlink" title="通过struct生成JSON"></a>通过struct生成JSON</h3><h3 id="自定义生成"><a href="#自定义生成" class="headerlink" title="自定义生成"></a>自定义生成</h3><h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
 <li><a href="http://json.org/json-zh.html" target="_blank" rel="external">JSON官方介绍</a></li>
 <li><a href="https://tools.ietf.org/html/rfc4627" target="_blank" rel="external">JSON RFC4672</a></li>
@@ -669,7 +706,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#JSON简介"><span class="nav-number">1.</span> <span class="nav-text">JSON简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JSON与Go数据结构映射"><span class="nav-number">2.</span> <span class="nav-text">JSON与Go数据结构映射</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解析JSON"><span class="nav-number">3.</span> <span class="nav-text">解析JSON</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#解析已知JSON"><span class="nav-number">3.1.</span> <span class="nav-text">解析已知JSON</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解析未知JSON"><span class="nav-number">3.2.</span> <span class="nav-text">解析未知JSON</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自定义解析"><span class="nav-number">3.3.</span> <span class="nav-text">自定义解析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#生成JSON"><span class="nav-number">4.</span> <span class="nav-text">生成JSON</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#通过struct生成JSON"><span class="nav-number">4.1.</span> <span class="nav-text">通过struct生成JSON</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自定义生成"><span class="nav-number">4.2.</span> <span class="nav-text">自定义生成</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#JSON简介"><span class="nav-number">1.</span> <span class="nav-text">JSON简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JSON与Go数据结构映射"><span class="nav-number">2.</span> <span class="nav-text">JSON与Go数据结构映射</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#标准库解读"><span class="nav-number">3.</span> <span class="nav-text">标准库解读</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#函数"><span class="nav-number">3.1.</span> <span class="nav-text">函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#接口"><span class="nav-number">3.2.</span> <span class="nav-text">接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#结构体"><span class="nav-number">3.3.</span> <span class="nav-text">结构体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#异常"><span class="nav-number">3.4.</span> <span class="nav-text">异常</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解析JSON"><span class="nav-number">4.</span> <span class="nav-text">解析JSON</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#解析已知JSON"><span class="nav-number">4.1.</span> <span class="nav-text">解析已知JSON</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解析未知JSON"><span class="nav-number">4.2.</span> <span class="nav-text">解析未知JSON</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自定义解析"><span class="nav-number">4.3.</span> <span class="nav-text">自定义解析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#生成JSON"><span class="nav-number">5.</span> <span class="nav-text">生成JSON</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#通过struct生成JSON"><span class="nav-number">5.1.</span> <span class="nav-text">通过struct生成JSON</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自定义生成"><span class="nav-number">5.2.</span> <span class="nav-text">自定义生成</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
             
 
           </div>

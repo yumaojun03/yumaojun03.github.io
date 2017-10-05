@@ -15,7 +15,7 @@
   <entry>
     <title><![CDATA[Go语言JSON详解]]></title>
     <url>%2F2017%2F10%2F03%2Fgolang-json%2F</url>
-    <content type="text"><![CDATA[目前我们看到很多的开放平台，基本上都是采用了JSON作为他们的数据交互的格式。既然JSON在Web开发中如此重要，那么Go语言对JSON支持的怎么样呢？Go语言的标准库已经非常好的支持了JSON，可以很容易的对JSON数据进行编、解码的工作。如果有更灵活的需求也有不错的第三方库提供支持。这篇文章将全面解读Golang中JSON的使用。 JSON简介JSON（Javascript Object Notation）是一种轻量级的数据交换语言，以文字为基础，具有自我描述性且易于让人阅读。尽管JSON是Javascript Standard ECMA-262 3rd Edition – December 1999的一个子集，但JSON是独立于语言的文本格式，并且采用了类似于C语言家族的一些习惯, 这些特性使JSON成为理想的数据交换语言。 JSON与XML最大的不同在于XML是一个完整的标记语言，而JSON不是。JSON由于比XML更小、更快，更易解析,以及浏览器的内建快速解析支持,使得其更适用于网络数据传输领域。 在讲解JSON的数据结构之前, 我们先来一段简单的样例JSON数据:12345678910111213141516171819202122[ &#123; "precision": "zip", "Latitude": 37.7668, "Longitude": -122.3959, "Address": "", "City": "SAN FRANCISCO", "State": "CA", "Zip": "94107", "Country": "US" &#125;, &#123; "precision": "zip", "Latitude": 37.371991, "Longitude": -122.026020, "Address": "", "City": "SUNNYVALE", "State": "CA", "Zip": "94085", "Country": "US" &#125;] JSON建构于两种结构: 键值对的集合(A collection of name/value pairs): 在不同的语言中, 他们被理解为: object(Javascript), struct(Golang), Dictinary(Python), 以及哈希表(hash table), 有键列表(keyed list), 或者关联数组(associative array). 值的有序列表(An ordered list of values): 在大部分语言中，它被理解为数组(array). 其中值可以包含如下类型, 并且这些结构可以嵌套: 字符串(string): 由双引号包围的任意数量Unicode字符的集合，使用反斜线转义, 一个字符(character)即一个单独的字符串(character string) 数值(number): 同时包含整数和浮点数 布尔值(booleans): 布尔值包含: true和false 空(null): 空 对象(object): 键值对的集合 数组(array): 值的有序列表 这些都是常见的数据结构。事实上大部分现代计算机语言都以某种形式支持它们。这使得一种数据格式在同样基于这些结构的编程语言之间交换成为可能。 JSON与Go数据结构映射Golang的标准库encoding/json已经提供了很好的封装，可以让我们很方便地进行JSON数据的转换. 注意事项:Go语言中一些特殊的类型，比如Channel、complex、function是不能被解析成JSON的. 解析JSON解析已知JSON解析未知JSON自定义解析生成JSON通过struct生成JSON自定义生成参考 JSON官方介绍 JSON RFC4672 Go Blog: JSON and Go]]></content>
+    <content type="text"><![CDATA[目前我们看到很多的开放平台，基本上都是采用了JSON作为他们的数据交互的格式。既然JSON在Web开发中如此重要，那么Go语言对JSON支持的怎么样呢？Go语言的标准库已经非常好的支持了JSON，可以很容易的对JSON数据进行编、解码的工作。如果有更灵活的需求也有不错的第三方库提供支持。这篇文章将全面解读Golang中JSON的使用。 JSON简介JSON（Javascript Object Notation）是一种轻量级的数据交换语言，以文字为基础，具有自我描述性且易于让人阅读。尽管JSON是Javascript Standard ECMA-262 3rd Edition – December 1999的一个子集，但JSON是独立于语言的文本格式，并且采用了类似于C语言家族的一些习惯, 这些特性使JSON成为理想的数据交换语言。 JSON与XML最大的不同在于XML是一个完整的标记语言，而JSON不是。JSON由于比XML更小、更快，更易解析,以及浏览器的内建快速解析支持,使得其更适用于网络数据传输领域。 在讲解JSON的数据结构之前, 我们先来一段简单的样例JSON数据:12345678910111213141516171819202122[ &#123; "precision": "zip", "Latitude": 37.7668, "Longitude": -122.3959, "Address": "", "City": "SAN FRANCISCO", "State": "CA", "Zip": "94107", "Country": "US" &#125;, &#123; "precision": "zip", "Latitude": 37.371991, "Longitude": -122.026020, "Address": "", "City": "SUNNYVALE", "State": "CA", "Zip": "94085", "Country": "US" &#125;] JSON建构于两种结构: 键值对的集合(A collection of name/value pairs): 在不同的语言中, 他们被理解为: object(Javascript), struct(Golang), Dictinary(Python), 以及哈希表(hash table), 有键列表(keyed list), 或者关联数组(associative array). 值的有序列表(An ordered list of values): 在大部分语言中，它被理解为数组(array). 其中值可以包含如下类型, 并且这些结构可以嵌套: 字符串(string): 由双引号包围的任意数量Unicode字符的集合，使用反斜线转义, 一个字符(character)即一个单独的字符串(character string) 数值(number): 同时包含整数和浮点数 布尔值(booleans): 布尔值包含: true和false 空(null): 空 对象(object): 键值对的集合 数组(array): 值的有序列表 这些都是常见的数据结构。事实上大部分现代计算机语言都以某种形式支持它们。这使得一种数据格式在同样基于这些结构的编程语言之间交换成为可能。 JSON与Go数据结构映射Golang的标准库encoding/json实现的JSON标准(RFC 4627)的编码和解码, 可以让我们很方便地进行JSON数据的转换. 具体详情可以参考 Marshal and Unmarshal函数的注释, 下面是一个基本的数据关系映射总结:|Golang Type |JSON Type |Description || ———- | :—–: | :—————————————————: ||bool | booleans |true or false||int, float | numbers |对于golang所有的数值类型||string | strings |字符串会转换成UTF-8进行输出，无法转换的会打印对应的unicode值。而且为了防止浏览器把json输出当做html， “&lt;”、”&gt;” 以及 “&amp;” 会被转义为 “\u003c”、”\u003e” 和 “\u0026”||array,slice | arrays |Publish Acknowledgment||struct | objects |只有导出的字段(以大写字母开头)才会在输出中||nil | null |空 | 注意事项:Go语言中一些特殊的类型，比如Channel、complex、function是不能被解析成JSON的. 标准库解读在使用标准库进行json操作之前, 先简单了解下标准库提供了那些对JSON的操作, 以下解读主要来源于GoDoc 函数 Compact: 用于JSON字符串的拼接, 拼接时会校验后面的字符串是否是合法json, 如果不是会报错, 但对字符串中的特殊字符(html不安全字符,比如上面提到的”&lt;” “&gt;”等)不进行转义 HTMLEscape: 和Compact相对, 拼接JSON字符串时会进行特殊字符转义, 转义成web安全的字符. Valid: 校验数据是否是合法的JSON编码数据, 往往用于数据格式校验. Marshal: 用于编码JSON. Indent: 用于JSON的格式化输出, 最常见的用法时 定义JSON的缩进, 比如2个空格的缩进. MarshalIndent: 编码JSON后, 带格式化的输出. Unmarshal: 用于解码JSON. 接口 Unmarshaler: 实现了UnMarshalJSON方法的对象, 该类型通过实现该方法 来将自己一个合法json转变为一个类型 Marshaler: 实现了UnMarshalJSON方法的类型, 该类型通过实现该方法 来将自己序列化成一个合法的json 结构体 Decoder Encoder Number RawMessage Token 异常 InvalidUTF8Error InvalidUnmarshalError MarshalerError SyntaxError UnmarshalFieldError UnmarshalTypeError UnsupportedTypeError UnsupportedValueError 解析JSON解析已知JSON解析未知JSON自定义解析生成JSON通过struct生成JSON自定义生成参考 JSON官方介绍 JSON RFC4672 Go Blog: JSON and Go]]></content>
       <categories>
         <category>开发语言</category>
         <category>Golang</category>
@@ -33,8 +33,8 @@
         <category>Golang</category>
       </categories>
       <tags>
-        <tag>gRPC</tag>
         <tag>APIGateway</tag>
+        <tag>gRPC</tag>
       </tags>
   </entry>
   <entry>
@@ -58,8 +58,8 @@
         <category>Golang</category>
       </categories>
       <tags>
-        <tag>gRPC</tag>
         <tag>APIGateway</tag>
+        <tag>gRPC</tag>
       </tags>
   </entry>
   <entry>
@@ -107,8 +107,8 @@
         <category>Python</category>
       </categories>
       <tags>
-        <tag>iot</tag>
         <tag>mqtt</tag>
+        <tag>iot</tag>
       </tags>
   </entry>
   <entry>
