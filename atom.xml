@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog.yumaojun.net/"/>
-  <updated>2017-10-03T01:46:02.000Z</updated>
+  <updated>2017-11-19T06:38:57.000Z</updated>
   <id>https://blog.yumaojun.net/</id>
   
   <author>
@@ -14,6 +14,211 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>数据库分类以及NoSQL介绍</title>
+    <link href="https://blog.yumaojun.net/2017/11/05/mongodb-introduce/"/>
+    <id>https://blog.yumaojun.net/2017/11/05/mongodb-introduce/</id>
+    <published>2017-11-05T08:59:52.000Z</published>
+    <updated>2017-11-19T06:38:57.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>由于项目需要存储一些无结构的数据, 这些数据主要以文本为主, 同时还需支持一些文本分析, 咋一听似乎ES是一个不错的选择, 但是这些无结构的数据同时也需要被管理, 也就是这些数据可能经常变更, 衡量再三, 最后还是选择了Mongo, 毕竟现阶段是以数据的存储和管理为主, 分析并没有那么强的需求。整篇文章以大数据存储问题为引, 一步步引出NoSQL领域文档数据的代表MongoDB。<br><a id="more"></a></p>
+<h2 id="大数据存储问题"><a href="#大数据存储问题" class="headerlink" title="大数据存储问题"></a>大数据存储问题</h2><p>E.F.Codd在1970年首次提出了数据库系统的关系模型，从此开创了数据库关系方法和关系数据理论的研究，为数据库技术奠定了理论基础，数据库技术也开始蓬勃发展。而随着几大数据库厂商陆续发布的商业数据库管理系统几乎都支持关系数据模型，数据库技术逐渐统一到以关系型数据库为主导。关系模型有扎实的数学理论做基础, 并且经过长时间的实践, 使得其在数据存储与管理领域占据统治地位。</p>
+<p>2001年后，互联网技术迅速发展，数据量迅速膨胀并并大，人类逐步进入大数据时代。大数据给传统的数据管理方式带来了严峻的挑战，关系型数据库在容量，性能，成本等多方面都难以满足大数据管理的需求。NoSQL数据库通过折中关系型数据库严格的数据一致性管理，在可扩展性、模型灵活性、经济性和访问性等方面获得了很大的优势，可以更好地适应大数据应用的需求，成为大数据时代最重要的数据管理技术。</p>
+<p>围绕大数据的存储问题, 我们依次讨论下数据库的几大分类: RDBMS, NewSQL, NoSQL。</p>
+<h3 id="RDBMS"><a href="#RDBMS" class="headerlink" title="RDBMS"></a>RDBMS</h3><p>在现代的计算系统上每天网络上都会产生庞大的数据量。这些数据有很大一部分是由关系数据库管理系统(RDMBSs)来处理。 1970年 E.F.Codd’s提出的关系模型的论文 “A relational model of data for large shared data banks”，这使得数据建模和应用程序编程更加简单。<br>通过应用实践证明，关系模型是非常适合于客户服务器编程，远远超出预期的利益，今天它是结构化数据存储在网络和商务应用的主导技术。</p>
+<blockquote>
+<p>什么是RDBMS？</p>
+</blockquote>
+<p>RDBMS全称是<code>Relational Database Management System</code>, 及关系型数据管理系统, 他采用关系模型来存储数据,关系模型是把复杂的数据结构归结为简单的二元关系(即二维表格形式), 在关系型数据库中，对数据的操作几乎全部建立在一个或多个关系表格上，通过对这些关联的表格分类、合并、连接或选取等运算来实现数据库的管理。</p>
+<blockquote>
+<p>关系型数据的特点(ACID)</p>
+</blockquote>
+<p>关系型数据库遵循ACID规则, 也就是我们常说的事物模型(transaction), 事物这个概念和现实世界中的交易很类似, 它有如下4个特性:</p>
+<ul>
+<li>A(Atomicity)<br>原子性很容易理解，也就是说事务里的所有操作要么全部做完，要么都不做，事务成功的条件是事务里的所有操作都成功，只要有一个操作失败，整个事务就失败，需要回滚。<br>比如银行转账，从A账户转100元至B账户，分为两个步骤：1）从A账户取100元；2）存入100元至B账户。这两步要么一起完成，要么一起不完成，如果只完成第一步，第二步失败，钱会莫名其妙少了100元。</li>
+<li>C(Consistency)<br>一致性也比较容易理解，也就是说数据库要一直处于一致的状态，事务的运行不会改变数据库原本的一致性约束。<br>例如现有完整性约束a+b=10，如果一个事务改变了a，那么必须得改变b，使得事务结束后依然满足a+b=10，否则事务失败。</li>
+<li>I(Isolation)<br>所谓的独立性是指并发的事务之间不会互相影响，如果一个事务要访问的数据正在被另外一个事务修改，只要另外一个事务未提交，它所访问的数据就不受未提交事务的影响。<br>比如现有有个交易是从A账户转100元至B账户，在这个交易还未完成的情况下，如果此时B查询自己的账户，是看不到新增加的100元的。</li>
+<li>D(Durability)<br>持久性是指一旦事务提交后，它所做的修改将会永久的保存在数据库上，即使出现宕机也不会丢失。<br>比如A账户收到了100元到账, 只要到账这个事物完成, 数据就已经到数据库里面了, 即使此时宕机对A用户的资产也没有影响。</li>
+</ul>
+<blockquote>
+<p>典型的产品</p>
+</blockquote>
+<p>关系型数据库诞生40多年了，从理论产生发展到现实产品, RDBMS很多产品应该都是耳熟能详的:</p>
+<ul>
+<li>Oracle</li>
+<li>MySQL</li>
+<li>PostgreSQL</li>
+<li>SQLServer</li>
+</ul>
+<blockquote>
+<p>大数据存储时面临的问题</p>
+</blockquote>
+<p>关系型数据库严格ACID原则, 因此在扩展性上表现不是特别好, 面对大规模的数据时, 在读和写上面会出现严重瓶颈。想要提升其性能, 往往需要从业务层进行处理, 进行数据的Sharding。<br>sharding有2个维度: 水平切分和垂直切分:</p>
+<ul>
+<li>水平切分: 根据表中的数据的逻辑关系，将同一张表的数据，按照某种条件切分到不同的数据库主机上</li>
+<li>垂直切分: 按照不同的表或者schema，来切分到不同的数据库主机上</li>
+</ul>
+<p>切片(sharding)会增加整个系统的复杂性，而且切片本身也是一个很复杂的过程，与应用本身有这密切的关系，所以对于不但增大的数据而言，切片并不能从根本上解决大数据存储问题。</p>
+<h3 id="NewSQL"><a href="#NewSQL" class="headerlink" title="NewSQL"></a>NewSQL</h3><p>传统的关系型数据想要做到高扩展, 高性能, 高可靠性是很复杂的, 但是当你的确想要一种这种样的数据库时, NewSQL可能是你一种不错的选择。</p>
+<blockquote>
+<p>什么是NewSQL？</p>
+</blockquote>
+<p>这是一个中间产物, 是一种完全不同的数据库架构, NewSQL术语最早在2011年由Matthew Aslett创造, NewSQL的设计立足于传统的关系型数据库，但是同时也引进一些新技术，从而达到可扩展和高性能的目的, 而缺点是没有提供强一致性, 它们不可以被使用在强一致性环境下。<br>NewSQL具有NoSQL的海量数据存储管理能力,同时还支持传统数据库的ACID和SQL能力(单个节点上的ACID能力), 但是在现实使用中还没普及开来, 还没被大规模使用。</p>
+<blockquote>
+<p>NewSQL的特点</p>
+</blockquote>
+<p>NewSQL具体和RDBMS一样的单个节点上的ACID能力, 同时又具有NoSQL一样的很强的扩展能力(它在整个集群上遵循BASE规则, 关于BASE在后面NoSQL中再做介绍)。</p>
+<blockquote>
+<p>典型的NewSQL产品</p>
+</blockquote>
+<p>我迄今也没有使用过NewSQL产品, 以下是我所知的关于NewSQL的经典产品:</p>
+<ul>
+<li>Google spanner: Google的全球级的分布式数据库(Globally-Distributed Database)</li>
+<li>CockroachDB: 参考Goole spanner实现的开源版</li>
+</ul>
+<blockquote>
+<p>如何解决大数据存储问题？</p>
+</blockquote>
+<p>NewSQL基于NoSQL的BASE原则, 构建可以横向扩展的分布式系统来解决大数据的存储和管理问题。</p>
+<h3 id="NoSQL"><a href="#NoSQL" class="headerlink" title="NoSQL"></a>NoSQL</h3><p>今天我们可以通过第三方平台(如：Google,Facebook等), 可以很容易的访问和抓取数据。用户的个人信息，社交网络，地理位置，用户生成的数据和用户操作日志已经成倍的增加。我们如果要对这些用户数据进行挖掘，那SQL数据库已经不适合这些应用了, NoSQL数据库的发展也却能很好的处理这些大的数据。</p>
+<blockquote>
+<p>什么是NoSQL？</p>
+</blockquote>
+<p>NoSQL(NoSQL = Not Only SQL)，意即“不仅仅是SQL”，是一项全新的数据库革命性运动，早期就有人提出，发展至2009年趋势越发高涨。NoSQL的拥护者们提倡运用非关系型的数据存储，相对于铺天盖地的关系型数据库运用，这一概念无疑是一种全新的思维的注入</p>
+<blockquote>
+<p>NoSQL的特点(BASE)</p>
+</blockquote>
+<p>BASE的全称是Basically Available, Soft-state, Eventually Consistent。 由<code>Eric Brewer</code>定义。ACID强调强一致性(CAP中的C), 而BASE则强调基本可用性(CAP中的A），在BASE思想的扩展下，就出现了NoSQL。<br>BASE是NoSQL数据库通常对可用性及一致性的弱要求原则:</p>
+<ul>
+<li>Basically Availble: 基本可用</li>
+<li>Soft-state: 软状态/柔性事务。 “Soft state” 可以理解为”无连接”的, 而 “Hard state” 是”面向连接”的</li>
+<li>Eventual Consistency: 最终一致性 最终一致性， 也是是 ACID 的最终目的。</li>
+</ul>
+<p>BASE是相对ACID而言的, 下面是对比表:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">ACID</th>
+<th style="text-align:right">BASE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">A原子性(Atomicity)</td>
+<td style="text-align:right">基本可用(Basically Available)</td>
+</tr>
+<tr>
+<td style="text-align:left">一致性(Consistency)</td>
+<td style="text-align:right">软状态/柔性事务(Soft state)</td>
+</tr>
+<tr>
+<td style="text-align:left">隔离性(Isolation)</td>
+<td style="text-align:right">最终一致性 (Eventual consistency)</td>
+</tr>
+<tr>
+<td style="text-align:left">持久性 (Durable)</td>
+<td style="text-align:right">支持</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>典型的NoSQL产品</p>
+</blockquote>
+<p>NoSQL是实现方式各不相同，下面主要介绍 主流的NoSQL流派, 想要了解更具体的信息请点击<a href="http://www.nosql-database.org/" target="_blank" rel="external">关于所有NoSQL介绍的一个网站</a>:</p>
+<ul>
+<li><p>列式数据模型<br>数据模型： 看到也是表, 但是不支持链接查询, 因为数据存储以列为单位(column), 而关系数据库是以行为存储单位的<br>应用场景： 在分布式文件系统之上提供支持随机读写的分布式数据存储<br>典型产品： Hbase、 Hypertable、 Bigtable、 Cassandra<br>优点： 快速查询、 高扩展性、易于实现分布式扩展</p>
+</li>
+<li><p>文档数据模型 ：<br>数据模型： 介于键值存储kv)和关系型存储(row),每一行数据组织为一个文档, 以文档为存储单位<br>应用场景： 非强事物需求的web应用<br>典型产品： MongoDB、 ElasticSearch(弹性搜索，存储web日志)<br>优点：　数据模型无需事先定义</p>
+</li>
+<li><p>键值数据模型 ：<br>数据模型： 模型简单, 易于实现, 操作简单(get set del)<br>应用场景： 内容缓存, 用于大量并行数据访问, 高负载场景<br>应用产品：  DynamoDB, Riak, Redis<br>优点：  hash的优点， 查询迅速</p>
+</li>
+<li><p>图式数据模型 ：<br>数据模型： 图式结构<br>应用场景： 社交网络、 推荐系统、 关系图谱<br>典型产品： Neo4J<br>优点： 适用于图式技术场景</p>
+</li>
+</ul>
+<blockquote>
+<p>如何解决大数据存储问题？</p>
+</blockquote>
+<p>通过分布式解决</p>
+<h3 id="RDBMS-vs-NoSQL"><a href="#RDBMS-vs-NoSQL" class="headerlink" title="RDBMS vs NoSQL"></a>RDBMS vs NoSQL</h3><p>RDBMS的特点:</p>
+<ul>
+<li>高度组织化结构化数据 </li>
+<li>结构化查询语言</li>
+<li>数据和关系都存储在单独的表中。 </li>
+<li>数据操纵语言，数据定义语言 </li>
+<li>严格的一致性</li>
+<li>基于事务</li>
+</ul>
+<p>NoSQL的特点: </p>
+<ul>
+<li>代表着不仅仅是SQL</li>
+<li>没有声明性查询语言</li>
+<li>没有预定义的模式, 架构的灵活性，支持半结构化数据</li>
+<li>键值对存储，列存储，文档存储，图形数据库</li>
+<li>最终一致性，而非ACID属性</li>
+<li>非结构化和不可预知的数据</li>
+<li>分布式计算, CAP定理 </li>
+<li>高性能，高可用性和可伸缩性, 高水平扩展能力和低成本的低端硬件集群</li>
+<li>功能相对简单, 没有统一的查询语言, 有限的查询功能</li>
+<li>最终一致是不直观的程序</li>
+</ul>
+<h2 id="数据模型"><a href="#数据模型" class="headerlink" title="数据模型"></a>数据模型</h2><p>对于数据本身而言, 我们往往将其分为结构化数据, 半结构化数据, 以及非结构化数据, 但是对于储存时数据的组织我们才称其为数据模型, 常见的数据模型有: 关系模型, 文档模型, 健值模型, 以及列式模式。</p>
+<h3 id="用户侧数据"><a href="#用户侧数据" class="headerlink" title="用户侧数据"></a>用户侧数据</h3><p>随着网络技术的发展，特别是Internet和Intranet技术的飞快发展，使得非结构化数据的数量日趋增大。这时，主要用于管理结构化数据的关系数据库的局限性暴露地越来越明显。因而，数据库技术相应地进入了“后关系数据库时代”，发展进入基于网络应用的非结构化数据库时代。<br><img src="http://www.runoob.com/wp-content/uploads/2013/10/bigdata.png" alt=""></p>
+<blockquote>
+<p>结构化数据(structured data)</p>
+</blockquote>
+<p>结构化数据, 即行数据,存储在数据库里,可以用二维表结构来逻辑表达实现的数据。<br>结构化数据, <code>先知结构, 再有数据</code>。 我们根据数据的结构预先建立好二维表, 等数据来的时候, 填入即可。因此结构化的数据往往是可建模, 标准化的数据, 结构化的数据很方便程序使用, 因为结构已知。</p>
+<p>结构化数据最大的问题, 就当数据的结构发生变化时, 我们需要调整数据的结构, 一般就意味着数据库表结构的需要变动。这使得数据在存储时有严格的要求(需要定义schema)。<br>结构化数据: 可以被提前建模的数据(定义schema)</p>
+<blockquote>
+<p>半结构化数据(semi-structured data)</p>
+</blockquote>
+<p>所谓半结构化数据，就是介于完全结构化数据(如关系型数据库、面向对象数据库中的数据)和完全无结构的数据(如声音、图像文件等)之间的数据，HTML文档就属于半结构化数据。它一般是自描述的，数据的结构和内容混在一起，没有明显的区分。<br>所以对于半结构化的数据, 数据的结构要等数据获得后才知道, 也就是<code>先有数据, 后知结构</code>。整个互联网上这类数据是很多的, 因为html就是半结构化的数据。</p>
+<p>相对于结构化的数据, 半结构化数据无需定义数据的结构(schema free), 使得其在存储上表现出强大的灵活性。<br>半结构化数据:  HTML, JSON, XML</p>
+<blockquote>
+<p>非结构化数据(unstructured data)</p>
+</blockquote>
+<p>相对于结构化数据而言，不方便用数据库二维逻辑表来表现的数据即称为非结构化数据。<br>非结构化数据库是指其字段长度可变，并且每个字段的记录又可以由可重复或不可重复的子字段构成的数据库，用它不仅可以处理结构化数据(如数字、符号等信息), 而且更适合处理非结构化数据（全文文本、图象、声音、影视、超媒体等信息)。</p>
+<p>非结构化WEB数据库主要是针对非结构化数据而产生的，与以往流行的关系数据库相比，其最大区别在于它突破了关系数据库结构定义不易改变和数据定长的限制，支持重复字段、子字段以及变长字段并实现了对变长数据和重复字段进行处理和数据项的变长存储管理，在处理连续信息（包括全文信息）和非结构化信息（包括各种多媒体信息）中有着传统关系型数据库所无法比拟的优势。<br>非结构化数据: 所有格式的办公文档、文本、图片、XML、HTML、各类报表、图像和音频/视频信息等等。</p>
+<h3 id="存储时数据"><a href="#存储时数据" class="headerlink" title="存储时数据"></a>存储时数据</h3><p>数据存储模型值数据存储时如何组织</p>
+<h4 id="关系模型"><a href="#关系模型" class="headerlink" title="关系模型"></a>关系模型</h4><p>关系模型: 新定义列, 然后通过行的方式对数据进行存储, 以二维表来表示实体与实体之间的联系，在数据建模时需要对数据对象进行拆分，再将各自的信息存到对应的表里，在需要时再将各个表连接起来。<br><img src="http://oiw1gzfww.bkt.clouddn.com/relationship_data.jpeg" alt=""></p>
+<p>在关系模型当中，多个表中的不同记录经常“交错连接”，一些数据会被多条记录共享。这样的好处就是减少了重复数据的出现，但是这样不好的地方就是一旦其中某一条链接的记录发生改变，那么与其相关的记录和表都会被锁住以防止非一致性的出现。 ACID事务在关系型数据库中是很复杂的，因为数据会扩散。即便是单一条记录，这复杂的共享数据内部关系网的存在，也使得关系型数据在多个服务器之间的传递变得复杂而缓慢，同时让读和写操作的性能变差。<br>当存储空间昂贵又稀少时，折中的权衡方案是很必要的。然而，如今存储空间的价格跟40年前相比已经大大的下降了，很多时候计算折中方案已经完全没有必要。使用更多的存储空间来换取更好的操作性能，或者是将工作负载分配到多台机器上，这才是如今应用上更好的解决方案。</p>
+<h4 id="文档模型"><a href="#文档模型" class="headerlink" title="文档模型"></a>文档模型</h4><p>文档数据: 将一个数据记录(record或者row)作为单位进行存储, 无需定义行。也可以认为一个文档就是关系数据库的一行。<br><img src="http://oiw1gzfww.bkt.clouddn.com/document_data.png" alt=""></p>
+<p>使用“文档”这个词似乎让人觉得奇怪，但是其实”文档型数据模型”真的和传统意义的文字”文档”没有什么关系。他不是书、信或者文章，这里说的”文档”其实是一个数据记录, 这个记录能够对包含的数据类型和内容进行“自我描述”。XML文档、HTML文档和JSON 文档就属于这一类, 因此我们可以认为所有半结构化的数据都属于文档数据, 而现在主要的文档数据库还是以Json作为文档为主.<br>可以看到，数据是不规则的，每一条记录包含了所有的有关该记录的信息而没有任何外部的引用, 这条记录就是“自包含”的。这就使得记录很容易完全移动到其他服务器, 因为这条记录的所有信息都包含在里面了, 不需要考虑还有信息在别的表没有一起迁移走。同时，因为在移动过程中，只有被移动的那一条记录<br>需要操作而不像关系型中每个有联系的表都需要锁住来保证一致性，这样一来ACID的保证就会变得更快速, 读写的速度也会有很大的提升。</p>
+<h4 id="健值模型"><a href="#健值模型" class="headerlink" title="健值模型"></a>健值模型</h4><p>健值模型: 它的数据按照键值对的形式进行组织,索引和存储。KV存储非常适合不涉及过多数据关系业务关系的业务数据，同时能有效减少读写磁盘的次数，比SQL数据库存储拥有更好的读写性能。<br><img src="http://oiw1gzfww.bkt.clouddn.com/key_value_data.jpeg" alt=""></p>
+<h4 id="列式模型"><a href="#列式模型" class="headerlink" title="列式模型"></a>列式模型</h4><p>列式存储: 以列相关存储架构进行数据存储。列式存储以流的方式在列中存储所有的数据，主要适合与批量数据处理和即席查询。<br><img src="http://oiw1gzfww.bkt.clouddn.com/column_data.gif" alt=""></p>
+<p>由于查询需要读取的blocks少, 所以查询快, 因为同一类型的列存储在一起, 所以数据压缩比高, Load快。 它简化数据建模的复杂性。但是插入更新慢，不太适合数据老是变化，它是按列存储的。 列式存储很适合做数据仓库，它不适合OLTP。</p>
+<h2 id="CAP定理"><a href="#CAP定理" class="headerlink" title="CAP定理"></a>CAP定理</h2><p>在计算机科学中, <code>CAP定理(CAP theorem)</code>, 又被称作<code>布鲁尔定理(Brewer&#39;s theorem)</code>, 它指出对于一个分布式计算系统来说，不可能同时满足以下三点:</p>
+<ul>
+<li>一致性(Consistency) (所有节点在同一时间具有相同的数据)</li>
+<li>可用性(Availability) (保证每个请求不管成功或者失败都有响应)</li>
+<li>分隔容忍(Partition tolerance) (系统中任意信息的丢失或失败不会影响系统的继续运作)</li>
+</ul>
+<p>CAP理论的核心是：一个分布式系统不可能同时很好的满足一致性，可用性和分区容错性这三个需求，最多只能同时较好的满足两个。<br>因此，根据CAP原理将NoSQL数据库分成了满足CA原则、满足CP原则和满足AP原则三 大类：</p>
+<ul>
+<li>CA 单点集群，满足一致性，可用性的系统，通常在可扩展性上不太强大。</li>
+<li>CP 满足一致性，分区容忍性的系统，通常性能不是特别高。</li>
+<li>AP 满足可用性，分区容忍性的系统，通常可能对一致性要求低一些。</li>
+</ul>
+<p><strong>定理</strong>: 任何分布式系统最多只能同时时满足3点(Consistency, Availability, Partition tolerance)中的2点, 同时满足3点的分布式系统是不存在的<br><strong>忠告</strong>：架构师不要将精力浪费在如何设计能满足三者的完美分布式系统，而是应该进行取舍。</p>
+<h3 id="CAP与数据库"><a href="#CAP与数据库" class="headerlink" title="CAP与数据库"></a>CAP与数据库</h3><p>RDBMS满足的是ACID规则, 而ACID规则满足的就是CAP里面的<code>CA</code>, 因此扩展性不强.<br>NewSQL/NoSQL满足的是BASE规则, 而BASE规则就是降低一致性或者可用性来提升系统性能, 就是CAP里面的<code>CP</code>/<code>AP</code></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>在理解了上面所有的概念过后, 就能看懂这张CAP的图了:<br><img src="http://oiw1gzfww.bkt.clouddn.com/cap_thorem.jpg" alt=""></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://www.mongodb.com/zh/mongodb-architecture" target="_blank" rel="external">MongoDB Architecture官方中文介绍</a><br><a href="https://www.zhihu.com/question/25535889" target="_blank" rel="external">elasticsearch(lucene)可以代替NoSQL(mongodb)吗？</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;由于项目需要存储一些无结构的数据, 这些数据主要以文本为主, 同时还需支持一些文本分析, 咋一听似乎ES是一个不错的选择, 但是这些无结构的数据同时也需要被管理, 也就是这些数据可能经常变更, 衡量再三, 最后还是选择了Mongo, 毕竟现阶段是以数据的存储和管理为主, 分析并没有那么强的需求。整篇文章以大数据存储问题为引, 一步步引出NoSQL领域文档数据的代表MongoDB。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="数据库" scheme="https://blog.yumaojun.net/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
+    
+      <category term="文档数据库" scheme="https://blog.yumaojun.net/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/%E6%96%87%E6%A1%A3%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
+    
+    
+      <category term="mongodb" scheme="https://blog.yumaojun.net/tags/mongodb/"/>
+    
+  </entry>
   
   <entry>
     <title>对比RESTful与SOAP，深入理解RESTful</title>
@@ -1830,9 +2035,9 @@
       <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
     
     
-      <category term="openstack" scheme="https://blog.yumaojun.net/tags/openstack/"/>
-    
       <category term="cobra" scheme="https://blog.yumaojun.net/tags/cobra/"/>
+    
+      <category term="openstack" scheme="https://blog.yumaojun.net/tags/openstack/"/>
     
   </entry>
   
@@ -2096,62 +2301,6 @@
     
     
       <category term="influxdb" scheme="https://blog.yumaojun.net/tags/influxdb/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>跳板机系列(四)-Golang中SSH服务端的实现</title>
-    <link href="https://blog.yumaojun.net/2017/02/23/go-ssh-server/"/>
-    <id>https://blog.yumaojun.net/2017/02/23/go-ssh-server/</id>
-    <published>2017-02-23T15:21:45.000Z</published>
-    <updated>2017-02-25T06:34:59.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>上篇博客介绍了如何亲手实现一个SSH的客户端, 这篇博客将介绍如何使用golang的SSH包构建一个自己的SSH Server, 这样我们基本就能比较全面的了解的SSH的实现。为我们编写一个SSH Proxy奠定基石。<br><a id="more"></a></p>
-<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><hr>
-<p><img src="http://oiw1gzfww.bkt.clouddn.com/ssh_potocol_arch.png" alt=""><br>以上是SSH协议一个基本架构图, 关于SSH协议的简介可以参考<a href="/2017/02/16/ssh-protocol/" title="跳板机系列(二)-ssh协议原理简介">跳板机系列(二)-ssh协议原理简介</a>, 只有在了解了SSH协议相关的基础上,才能理解SSH包里面的参数。<br>对照着SSH协议, 将上面的架构图做简要解读:</p>
-<ul>
-<li>TCP: 建立传输层链接, 然后进行SSH协议处理</li>
-<li>Handshake: 建立SSH协议里面的传输层[SSH-TRANS,该层主要提供加密传输</li>
-<li>Authentication: SSH协议里面的用户认证层[SSH-USERAUTH], 提供用户认证</li>
-<li>Channel和Request: 这些都是SSH协议里面的链接层[SSH-CONNECT], 该层主要是将多个加密隧道分成逻辑通道, 可以复用通道,通道有比较多的类型：session、x11、forwarded-tcpip、direct-tcpip, 通道里面的Requests是用于接收创建ssh channle的请求的, 而ssh channle就是里面的connection, 数据的交互基于connection交互。</li>
-</ul>
-<h2 id="Server配置"><a href="#Server配置" class="headerlink" title="Server配置"></a>Server配置</h2><hr>
-<p>首先, 我们需要创建一个SSH Server的配置, 这里主要是配置认证, 作为一个SSH Server默认是应该支持2认证: 密钥认证和密码认证, 为了方便我仅实现密码认证。<br>实现密码认证的核心是实现Server Config对象里面的PasswordCallback的函数, 该函数的核心是返回一个ssh.Permissions对象, 该对象保持了User认证通过的信息。<br>这里为了方便, 并没有将认证系统和PAM对接, 而是直接简单的实现了一个用户名密码比较。这也是很核心的一个点, 基于此 我们在设计跳板机的时候, 可以实现Server端的统一认证, 在这里插入统一认证的代码。</p>
-<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">config := &amp;ssh.ServerConfig&#123;</div><div class="line">	PasswordCallback: <span class="function"><span class="keyword">func</span><span class="params">(c ssh.ConnMetadata, pass []<span class="keyword">byte</span>)</span> <span class="params">(*ssh.Permissions, error)</span></span> &#123;</div><div class="line">		<span class="keyword">if</span> c.User() == <span class="string">"root"</span> &amp;&amp; <span class="keyword">string</span>(pass) == <span class="string">"admin"</span> &#123;</div><div class="line">			<span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">nil</span></div><div class="line">		&#125;</div><div class="line">		<span class="keyword">return</span> <span class="literal">nil</span>, fmt.Errorf(<span class="string">"password rejected for %q"</span>, c.User())</div><div class="line">	&#125;,</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>其次, 我们需要配置SSH Server的私钥, 需要保证私钥的安全, 因为他用于进行秘钥交换算法的关键(DH)<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">privateBytes, err := ioutil.ReadFile(<span class="string">"id_rsa"</span>)</div><div class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">	log.Fatal(<span class="string">"Failed to load private key (./id_rsa)"</span>)</div><div class="line">&#125;</div><div class="line"></div><div class="line">private, err := ssh.ParsePrivateKey(privateBytes)</div><div class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">	log.Fatal(<span class="string">"Failed to parse private key"</span>)</div><div class="line">&#125;</div><div class="line"></div><div class="line">config.AddHostKey(private)</div></pre></td></tr></table></figure></p>
-<h2 id="建立SSH通道-SSH链接层"><a href="#建立SSH通道-SSH链接层" class="headerlink" title="建立SSH通道(SSH链接层)"></a>建立SSH通道(SSH链接层)</h2><hr>
-<p>SSH Server配置完成后, 首先得建立TCP链接<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">listener, err := net.Listen(<span class="string">"tcp"</span>, <span class="string">"0.0.0.0:2200"</span>)</div><div class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">	log.Fatalf(<span class="string">"Failed to listen on 2200 (%s)"</span>, err)</div><div class="line">&#125;</div><div class="line"></div><div class="line">log.Print(<span class="string">"Listening on 2200..."</span>)</div><div class="line"><span class="keyword">for</span> &#123;</div><div class="line">	conn, err := listener.Accept()</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		log.Printf(<span class="string">"Failed to accept incoming connection (%s)"</span>, err)</div><div class="line">		<span class="keyword">continue</span></div><div class="line">	&#125;</div></pre></td></tr></table></figure></p>
-<p>然后我们通过ssh.NewServerConn来升级TCP链接为SSH链接, ssh提供的这个函数根据之前的配置完成: 1. 传输层[SSH-TRANS] 2. 认证层[SSH-USERAUTH] 3. 返回链接层的通道: incomingChannels, 接下来我们需要在Goroutine里面处理这些用户的通道。<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">	sshConn, chans, reqs, err := ssh.NewServerConn(conn, config)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		log.Printf(<span class="string">"Failed to handshake (%s)"</span>, err)</div><div class="line">		<span class="keyword">continue</span></div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="comment">// Discard all global out-of-band Requests</span></div><div class="line">	<span class="keyword">go</span> ssh.DiscardRequests(reqs)</div><div class="line">	<span class="comment">// Accept all channels</span></div><div class="line">	<span class="keyword">go</span> handleChannels(chans)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>这样我们就已经完成了SSH Server的连接的监听</p>
-<p>为了不阻塞通道的处理, 我们将每一个通道的处理都放到Goroutine里面进行<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">handleChannels</span><span class="params">(chans &lt;-<span class="keyword">chan</span> ssh.NewChannel)</span></span> &#123;</div><div class="line">	<span class="keyword">for</span> newChannel := <span class="keyword">range</span> chans &#123;</div><div class="line">		<span class="keyword">go</span> handleChannel(newChannel)</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>在处理ssh channel里面的数据之前,  我们需要知道channel的类型, 因为不同类型的channel里面是不同类型的数据, 处理逻辑也不一样<br>具体见<a href="https://tools.ietf.org/html/rfc4250" target="_blank" rel="external">rfc4250</a>的4.9.1, 里面有比较详解的解释, 我们先不实现其他的,仅实现处理session类型channel。<br>上面提到了通道有4种类型, 每种类型都有不同的用途,这里我们仅实现session类型通道的处理。<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">handleChannel</span><span class="params">(newChannel ssh.NewChannel)</span></span> &#123;</div><div class="line">	<span class="keyword">if</span> t := newChannel.ChannelType(); t != <span class="string">"session"</span> &#123;</div><div class="line">		newChannel.Reject(ssh.UnknownChannelType, <span class="string">"unknown channel type"</span>)</div><div class="line">		<span class="keyword">return</span></div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<h2 id="建立SSH-Channel-回话交互"><a href="#建立SSH-Channel-回话交互" class="headerlink" title="建立SSH Channel(回话交互)"></a>建立SSH Channel(回话交互)</h2><hr>
-<p>通道提供一个Accept方法, 该方法返回2个queue, 1个用于数据交换(架构图里面的connection), 1个用于控制指令的交互,比如创建connection queue(架构图里面的requests)<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">connection, requests, err := newChannel.Accept()</div><div class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">	log.Printf(<span class="string">"Could not accept channel (%s)"</span>, err)</div><div class="line">	<span class="keyword">return</span></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<h3 id="数据交互"><a href="#数据交互" class="headerlink" title="数据交互"></a>数据交互</h3><p>我们将运行bash程序,然后bash与 ssh channel对接, 从而实现和bash的远程交互, 从这里可以看出, 其实这里可以扩展性很高, 我们如果运行其他服务比如git,那么git也可通过ssh链接来交互。 git也正是通过这种方式支持ssh的。<br>这里准备了一个colse函数用于关闭ssh channel和退出bash程序<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">bash := exec.Command(<span class="string">"bash"</span>)</div><div class="line"></div><div class="line"><span class="comment">// Prepare teardown function</span></div><div class="line"><span class="built_in">close</span> := <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">	_, err := bash.Process.Wait()</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		log.Printf(<span class="string">"Failed to exit bash (%s)"</span>, err)</div><div class="line">	&#125;</div><div class="line">       connection.Close()</div><div class="line">	log.Printf(<span class="string">"Session closed"</span>)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>如果我们直接将bash的输入和输出流行terminal这将失败, 因为bash没有运行在tty中, 因此这里需要一个模拟tty(pty)来运行bash。<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">bashf, err := pty.Start(bash)</div><div class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">	log.Printf(<span class="string">"Could not start pty (%s)"</span>, err)</div><div class="line">	<span class="built_in">close</span>()</div><div class="line">	<span class="keyword">return</span></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>接下来我们需要将 bash的管道和connection的管道对接起来, 这里为了保证colse函数(connection资源释放)只被调用一次使用的sync.Once。<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> once sync.Once</div><div class="line"><span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">	io.Copy(connection, bashf)</div><div class="line">	once.Do(<span class="built_in">close</span>)</div><div class="line">&#125;()</div><div class="line"><span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">	io.Copy(bashf, connection)</div><div class="line">	once.Do(<span class="built_in">close</span>)</div><div class="line">&#125;()</div></pre></td></tr></table></figure></p>
-<h3 id="指令交互"><a href="#指令交互" class="headerlink" title="指令交互"></a>指令交互</h3><p>这里主要有以下几类请求:</p>
-<ul>
-<li>shell/exec/subsystem: <a href="https://tools.ietf.org/html/rfc4254#section-6.5" target="_blank" rel="external">channel request type for shell</a>, 这几类主要是用于区分connection链接的程序, shell值后面启动的一个程序或者shell, exec指后面启动的是用户的默认shell, 而subsystem是在后面启动一个子程序来执行connection里面的命令 </li>
-<li>pty-req: 准备一个pty等待输入</li>
-<li>window-change: 监听tty窗口改变事件。及时更新tty size。<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">		<span class="keyword">for</span> req := <span class="keyword">range</span> requests &#123;</div><div class="line">			<span class="keyword">switch</span> req.Type &#123;</div><div class="line">			<span class="keyword">case</span> <span class="string">"shell"</span>:</div><div class="line">				<span class="comment">// We only accept the default shell</span></div><div class="line">				<span class="comment">// (i.e. no command in the Payload)</span></div><div class="line">				<span class="keyword">if</span> <span class="built_in">len</span>(req.Payload) == <span class="number">0</span> &#123;</div><div class="line">					req.Reply(<span class="literal">true</span>, <span class="literal">nil</span>)</div><div class="line">				&#125;</div><div class="line">			<span class="keyword">case</span> <span class="string">"pty-req"</span>:</div><div class="line">				termLen := req.Payload[<span class="number">3</span>]</div><div class="line">				w, h := parseDims(req.Payload[termLen+<span class="number">4</span>:])</div><div class="line">				SetWinsize(bashf.Fd(), w, h)</div><div class="line">				req.Reply(<span class="literal">true</span>, <span class="literal">nil</span>)</div><div class="line">			<span class="keyword">case</span> <span class="string">"window-change"</span>:</div><div class="line">				w, h := parseDims(req.Payload)</div><div class="line">				SetWinsize(bashf.Fd(), w, h)</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">	&#125;()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-</ul>
-<h2 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h2><p>以下是完整代码<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div><div class="line">175</div><div class="line">176</div><div class="line">177</div><div class="line">178</div><div class="line">179</div><div class="line">180</div><div class="line">181</div><div class="line">182</div><div class="line">183</div><div class="line">184</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"encoding/binary"</span></div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"io"</span></div><div class="line">	<span class="string">"io/ioutil"</span></div><div class="line">	<span class="string">"log"</span></div><div class="line">	<span class="string">"net"</span></div><div class="line">	<span class="string">"os/exec"</span></div><div class="line">	<span class="string">"sync"</span></div><div class="line">	<span class="string">"syscall"</span></div><div class="line">	<span class="string">"unsafe"</span></div><div class="line"></div><div class="line">	<span class="string">"github.com/kr/pty"</span></div><div class="line">	<span class="string">"golang.org/x/crypto/ssh"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line"></div><div class="line">	<span class="comment">// In the latest version of crypto/ssh (after Go 1.3), the SSH server type has been removed</span></div><div class="line">	<span class="comment">// in favour of an SSH connection type. A ssh.ServerConn is created by passing an existing</span></div><div class="line">	<span class="comment">// net.Conn and a ssh.ServerConfig to ssh.NewServerConn, in effect, upgrading the net.Conn</span></div><div class="line">	<span class="comment">// into an ssh.ServerConn</span></div><div class="line"></div><div class="line">	config := &amp;ssh.ServerConfig&#123;</div><div class="line">		<span class="comment">//Define a function to run when a client attempts a password login</span></div><div class="line">		PasswordCallback: <span class="function"><span class="keyword">func</span><span class="params">(c ssh.ConnMetadata, pass []<span class="keyword">byte</span>)</span> <span class="params">(*ssh.Permissions, error)</span></span> &#123;</div><div class="line">			<span class="comment">// Should use constant-time compare (or better, salt+hash) in a production setting.</span></div><div class="line">			<span class="keyword">if</span> c.User() == <span class="string">"foo"</span> &amp;&amp; <span class="keyword">string</span>(pass) == <span class="string">"bar"</span> &#123;</div><div class="line">				<span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">nil</span></div><div class="line">			&#125;</div><div class="line">			<span class="keyword">return</span> <span class="literal">nil</span>, fmt.Errorf(<span class="string">"password rejected for %q"</span>, c.User())</div><div class="line">		&#125;,</div><div class="line">		<span class="comment">// You may also explicitly allow anonymous client authentication, though anon bash</span></div><div class="line">		<span class="comment">// sessions may not be a wise idea</span></div><div class="line">		<span class="comment">// NoClientAuth: true,</span></div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="comment">// You can generate a keypair with 'ssh-keygen -t rsa'</span></div><div class="line">	privateBytes, err := ioutil.ReadFile(<span class="string">"id_rsa"</span>)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		log.Fatal(<span class="string">"Failed to load private key (./id_rsa)"</span>)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	private, err := ssh.ParsePrivateKey(privateBytes)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		log.Fatal(<span class="string">"Failed to parse private key"</span>)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	config.AddHostKey(private)</div><div class="line"></div><div class="line">	<span class="comment">// Once a ServerConfig has been configured, connections can be accepted.</span></div><div class="line">	listener, err := net.Listen(<span class="string">"tcp"</span>, <span class="string">"0.0.0.0:2200"</span>)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		log.Fatalf(<span class="string">"Failed to listen on 2200 (%s)"</span>, err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="comment">// Accept all connections</span></div><div class="line">	log.Print(<span class="string">"Listening on 2200..."</span>)</div><div class="line">	<span class="keyword">for</span> &#123;</div><div class="line">		tcpConn, err := listener.Accept()</div><div class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">			log.Printf(<span class="string">"Failed to accept incoming connection (%s)"</span>, err)</div><div class="line">			<span class="keyword">continue</span></div><div class="line">		&#125;</div><div class="line">		<span class="comment">// Before use, a handshake must be performed on the incoming net.Conn.</span></div><div class="line">		sshConn, chans, reqs, err := ssh.NewServerConn(tcpConn, config)</div><div class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">			log.Printf(<span class="string">"Failed to handshake (%s)"</span>, err)</div><div class="line">			<span class="keyword">continue</span></div><div class="line">		&#125;</div><div class="line"></div><div class="line">		log.Printf(<span class="string">"New SSH connection from %s (%s)"</span>, sshConn.RemoteAddr(), sshConn.ClientVersion())</div><div class="line">		<span class="comment">// Discard all global out-of-band Requests</span></div><div class="line">		<span class="keyword">go</span> ssh.DiscardRequests(reqs)</div><div class="line">		<span class="comment">// Accept all channels</span></div><div class="line">		<span class="keyword">go</span> handleChannels(chans)</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">handleChannels</span><span class="params">(chans &lt;-<span class="keyword">chan</span> ssh.NewChannel)</span></span> &#123;</div><div class="line">	<span class="comment">// Service the incoming Channel channel in go routine</span></div><div class="line">	<span class="keyword">for</span> newChannel := <span class="keyword">range</span> chans &#123;</div><div class="line">		<span class="keyword">go</span> handleChannel(newChannel)</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">handleChannel</span><span class="params">(newChannel ssh.NewChannel)</span></span> &#123;</div><div class="line">	<span class="comment">// Since we're handling a shell, we expect a</span></div><div class="line">	<span class="comment">// channel type of "session". The also describes</span></div><div class="line">	<span class="comment">// "x11", "direct-tcpip" and "forwarded-tcpip"</span></div><div class="line">	<span class="comment">// channel types.</span></div><div class="line">	<span class="keyword">if</span> t := newChannel.ChannelType(); t != <span class="string">"session"</span> &#123;</div><div class="line">		newChannel.Reject(ssh.UnknownChannelType, fmt.Sprintf(<span class="string">"unknown channel type: %s"</span>, t))</div><div class="line">		<span class="keyword">return</span></div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="comment">// At this point, we have the opportunity to reject the client's</span></div><div class="line">	<span class="comment">// request for another logical connection</span></div><div class="line">	connection, requests, err := newChannel.Accept()</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		log.Printf(<span class="string">"Could not accept channel (%s)"</span>, err)</div><div class="line">		<span class="keyword">return</span></div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="comment">// Fire up bash for this session</span></div><div class="line">	bash := exec.Command(<span class="string">"bash"</span>)</div><div class="line"></div><div class="line">	<span class="comment">// Prepare teardown function</span></div><div class="line">	<span class="built_in">close</span> := <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">		connection.Close()</div><div class="line">		_, err := bash.Process.Wait()</div><div class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">			log.Printf(<span class="string">"Failed to exit bash (%s)"</span>, err)</div><div class="line">		&#125;</div><div class="line">		log.Printf(<span class="string">"Session closed"</span>)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="comment">// Allocate a terminal for this channel</span></div><div class="line">	log.Print(<span class="string">"Creating pty..."</span>)</div><div class="line">	bashf, err := pty.Start(bash)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		log.Printf(<span class="string">"Could not start pty (%s)"</span>, err)</div><div class="line">		<span class="built_in">close</span>()</div><div class="line">		<span class="keyword">return</span></div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="comment">//pipe session to bash and visa-versa</span></div><div class="line">	<span class="keyword">var</span> once sync.Once</div><div class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">		io.Copy(connection, bashf)</div><div class="line">		once.Do(<span class="built_in">close</span>)</div><div class="line">	&#125;()</div><div class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">		io.Copy(bashf, connection)</div><div class="line">		once.Do(<span class="built_in">close</span>)</div><div class="line">	&#125;()</div><div class="line"></div><div class="line">	<span class="comment">// Sessions have out-of-band requests such as "shell", "pty-req" and "env"</span></div><div class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</div><div class="line">		<span class="keyword">for</span> req := <span class="keyword">range</span> requests &#123;</div><div class="line">			<span class="keyword">switch</span> req.Type &#123;</div><div class="line">			<span class="keyword">case</span> <span class="string">"shell"</span>:</div><div class="line">				<span class="comment">// We only accept the default shell</span></div><div class="line">				<span class="comment">// (i.e. no command in the Payload)</span></div><div class="line">				<span class="keyword">if</span> <span class="built_in">len</span>(req.Payload) == <span class="number">0</span> &#123;</div><div class="line">					req.Reply(<span class="literal">true</span>, <span class="literal">nil</span>)</div><div class="line">				&#125;</div><div class="line">			<span class="keyword">case</span> <span class="string">"pty-req"</span>:</div><div class="line">				termLen := req.Payload[<span class="number">3</span>]</div><div class="line">				w, h := parseDims(req.Payload[termLen+<span class="number">4</span>:])</div><div class="line">				SetWinsize(bashf.Fd(), w, h)</div><div class="line">				<span class="comment">// Responding true (OK) here will let the client</span></div><div class="line">				<span class="comment">// know we have a pty ready for input</span></div><div class="line">				req.Reply(<span class="literal">true</span>, <span class="literal">nil</span>)</div><div class="line">			<span class="keyword">case</span> <span class="string">"window-change"</span>:</div><div class="line">				w, h := parseDims(req.Payload)</div><div class="line">				SetWinsize(bashf.Fd(), w, h)</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">	&#125;()</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// parseDims extracts terminal dimensions (width x height) from the provided buffer.</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">parseDims</span><span class="params">(b []<span class="keyword">byte</span>)</span> <span class="params">(<span class="keyword">uint32</span>, <span class="keyword">uint32</span>)</span></span> &#123;</div><div class="line">	w := binary.BigEndian.Uint32(b)</div><div class="line">	h := binary.BigEndian.Uint32(b[<span class="number">4</span>:])</div><div class="line">	<span class="keyword">return</span> w, h</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// Winsize stores the Height and Width of a terminal.</span></div><div class="line"><span class="keyword">type</span> Winsize <span class="keyword">struct</span> &#123;</div><div class="line">	Height <span class="keyword">uint16</span></div><div class="line">	Width  <span class="keyword">uint16</span></div><div class="line">	x      <span class="keyword">uint16</span> <span class="comment">// unused</span></div><div class="line">	y      <span class="keyword">uint16</span> <span class="comment">// unused</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// SetWinsize sets the size of the given pty.</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">SetWinsize</span><span class="params">(fd <span class="keyword">uintptr</span>, w, h <span class="keyword">uint32</span>)</span></span> &#123;</div><div class="line">	ws := &amp;Winsize&#123;Width: <span class="keyword">uint16</span>(w), Height: <span class="keyword">uint16</span>(h)&#125;</div><div class="line">	syscall.Syscall(syscall.SYS_IOCTL, fd, <span class="keyword">uintptr</span>(syscall.TIOCSWINSZ), <span class="keyword">uintptr</span>(unsafe.Pointer(ws)))</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;上篇博客介绍了如何亲手实现一个SSH的客户端, 这篇博客将介绍如何使用golang的SSH包构建一个自己的SSH Server, 这样我们基本就能比较全面的了解的SSH的实现。为我们编写一个SSH Proxy奠定基石。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
-    
-      <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
-    
-    
-      <category term="ssh-jumphost" scheme="https://blog.yumaojun.net/tags/ssh-jumphost/"/>
     
   </entry>
   

@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="mongodb," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="紫川秀的博客" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="由于项目需要存储一些无结构的数据, 这些数据主要以文本为主, 同时还需支持一些文本分析, 咋一听似乎ES是一个不错的选择, 但是这些无结构的数据同时也需要被管理, 也就是这些数据可能经常变更, 衡量再三, 最后还是选择了Mongo, 毕竟现阶段是以数据的存储和管理为主, 分析并没有那么强的需求。整篇文章以大数据存储问题为引, 一步步引出NoSQL领域文档数据的代表MongoDB。">
+<meta name="keywords" content="mongodb">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数据库分类以及NoSQL介绍">
+<meta property="og:url" content="https://blog.yumaojun.net/2017/11/05/mongodb-introduce/index.html">
+<meta property="og:site_name" content="紫川秀的博客">
+<meta property="og:description" content="由于项目需要存储一些无结构的数据, 这些数据主要以文本为主, 同时还需支持一些文本分析, 咋一听似乎ES是一个不错的选择, 但是这些无结构的数据同时也需要被管理, 也就是这些数据可能经常变更, 衡量再三, 最后还是选择了Mongo, 毕竟现阶段是以数据的存储和管理为主, 分析并没有那么强的需求。整篇文章以大数据存储问题为引, 一步步引出NoSQL领域文档数据的代表MongoDB。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://www.runoob.com/wp-content/uploads/2013/10/bigdata.png">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/relationship_data.jpeg">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/document_data.png">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/key_value_data.jpeg">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/column_data.gif">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/cap_thorem.jpg">
+<meta property="og:updated_time" content="2017-11-19T06:38:57.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="数据库分类以及NoSQL介绍">
+<meta name="twitter:description" content="由于项目需要存储一些无结构的数据, 这些数据主要以文本为主, 同时还需支持一些文本分析, 咋一听似乎ES是一个不错的选择, 但是这些无结构的数据同时也需要被管理, 也就是这些数据可能经常变更, 衡量再三, 最后还是选择了Mongo, 毕竟现阶段是以数据的存储和管理为主, 分析并没有那么强的需求。整篇文章以大数据存储问题为引, 一步步引出NoSQL领域文档数据的代表MongoDB。">
+<meta name="twitter:image" content="http://www.runoob.com/wp-content/uploads/2013/10/bigdata.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://blog.yumaojun.net/2017/11/05/mongodb-introduce/"/>
+
+
+
+
+
+  <title>数据库分类以及NoSQL介绍 | 紫川秀的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">紫川秀的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">比你优秀的人不可怕,可怕的是比你优秀的人比你更努力。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/11/05/mongodb-introduce/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="紫川秀">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://oiw1gzfww.bkt.clouddn.com/me.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="紫川秀的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">数据库分类以及NoSQL介绍</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-05T16:59:52+08:00">
+                2017-11-05
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2017-11-19T14:38:57+08:00">
+                2017-11-19
+              </time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/数据库/" itemprop="url" rel="index">
+                    <span itemprop="name">数据库</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/数据库/文档数据库/" itemprop="url" rel="index">
+                    <span itemprop="name">文档数据库</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/11/05/mongodb-introduce/" class="leancloud_visitors" data-flag-title="数据库分类以及NoSQL介绍">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>由于项目需要存储一些无结构的数据, 这些数据主要以文本为主, 同时还需支持一些文本分析, 咋一听似乎ES是一个不错的选择, 但是这些无结构的数据同时也需要被管理, 也就是这些数据可能经常变更, 衡量再三, 最后还是选择了Mongo, 毕竟现阶段是以数据的存储和管理为主, 分析并没有那么强的需求。整篇文章以大数据存储问题为引, 一步步引出NoSQL领域文档数据的代表MongoDB。<br><a id="more"></a></p>
+<h2 id="大数据存储问题"><a href="#大数据存储问题" class="headerlink" title="大数据存储问题"></a>大数据存储问题</h2><p>E.F.Codd在1970年首次提出了数据库系统的关系模型，从此开创了数据库关系方法和关系数据理论的研究，为数据库技术奠定了理论基础，数据库技术也开始蓬勃发展。而随着几大数据库厂商陆续发布的商业数据库管理系统几乎都支持关系数据模型，数据库技术逐渐统一到以关系型数据库为主导。关系模型有扎实的数学理论做基础, 并且经过长时间的实践, 使得其在数据存储与管理领域占据统治地位。</p>
+<p>2001年后，互联网技术迅速发展，数据量迅速膨胀并并大，人类逐步进入大数据时代。大数据给传统的数据管理方式带来了严峻的挑战，关系型数据库在容量，性能，成本等多方面都难以满足大数据管理的需求。NoSQL数据库通过折中关系型数据库严格的数据一致性管理，在可扩展性、模型灵活性、经济性和访问性等方面获得了很大的优势，可以更好地适应大数据应用的需求，成为大数据时代最重要的数据管理技术。</p>
+<p>围绕大数据的存储问题, 我们依次讨论下数据库的几大分类: RDBMS, NewSQL, NoSQL。</p>
+<h3 id="RDBMS"><a href="#RDBMS" class="headerlink" title="RDBMS"></a>RDBMS</h3><p>在现代的计算系统上每天网络上都会产生庞大的数据量。这些数据有很大一部分是由关系数据库管理系统(RDMBSs)来处理。 1970年 E.F.Codd’s提出的关系模型的论文 “A relational model of data for large shared data banks”，这使得数据建模和应用程序编程更加简单。<br>通过应用实践证明，关系模型是非常适合于客户服务器编程，远远超出预期的利益，今天它是结构化数据存储在网络和商务应用的主导技术。</p>
+<blockquote>
+<p>什么是RDBMS？</p>
+</blockquote>
+<p>RDBMS全称是<code>Relational Database Management System</code>, 及关系型数据管理系统, 他采用关系模型来存储数据,关系模型是把复杂的数据结构归结为简单的二元关系(即二维表格形式), 在关系型数据库中，对数据的操作几乎全部建立在一个或多个关系表格上，通过对这些关联的表格分类、合并、连接或选取等运算来实现数据库的管理。</p>
+<blockquote>
+<p>关系型数据的特点(ACID)</p>
+</blockquote>
+<p>关系型数据库遵循ACID规则, 也就是我们常说的事物模型(transaction), 事物这个概念和现实世界中的交易很类似, 它有如下4个特性:</p>
+<ul>
+<li>A(Atomicity)<br>原子性很容易理解，也就是说事务里的所有操作要么全部做完，要么都不做，事务成功的条件是事务里的所有操作都成功，只要有一个操作失败，整个事务就失败，需要回滚。<br>比如银行转账，从A账户转100元至B账户，分为两个步骤：1）从A账户取100元；2）存入100元至B账户。这两步要么一起完成，要么一起不完成，如果只完成第一步，第二步失败，钱会莫名其妙少了100元。</li>
+<li>C(Consistency)<br>一致性也比较容易理解，也就是说数据库要一直处于一致的状态，事务的运行不会改变数据库原本的一致性约束。<br>例如现有完整性约束a+b=10，如果一个事务改变了a，那么必须得改变b，使得事务结束后依然满足a+b=10，否则事务失败。</li>
+<li>I(Isolation)<br>所谓的独立性是指并发的事务之间不会互相影响，如果一个事务要访问的数据正在被另外一个事务修改，只要另外一个事务未提交，它所访问的数据就不受未提交事务的影响。<br>比如现有有个交易是从A账户转100元至B账户，在这个交易还未完成的情况下，如果此时B查询自己的账户，是看不到新增加的100元的。</li>
+<li>D(Durability)<br>持久性是指一旦事务提交后，它所做的修改将会永久的保存在数据库上，即使出现宕机也不会丢失。<br>比如A账户收到了100元到账, 只要到账这个事物完成, 数据就已经到数据库里面了, 即使此时宕机对A用户的资产也没有影响。</li>
+</ul>
+<blockquote>
+<p>典型的产品</p>
+</blockquote>
+<p>关系型数据库诞生40多年了，从理论产生发展到现实产品, RDBMS很多产品应该都是耳熟能详的:</p>
+<ul>
+<li>Oracle</li>
+<li>MySQL</li>
+<li>PostgreSQL</li>
+<li>SQLServer</li>
+</ul>
+<blockquote>
+<p>大数据存储时面临的问题</p>
+</blockquote>
+<p>关系型数据库严格ACID原则, 因此在扩展性上表现不是特别好, 面对大规模的数据时, 在读和写上面会出现严重瓶颈。想要提升其性能, 往往需要从业务层进行处理, 进行数据的Sharding。<br>sharding有2个维度: 水平切分和垂直切分:</p>
+<ul>
+<li>水平切分: 根据表中的数据的逻辑关系，将同一张表的数据，按照某种条件切分到不同的数据库主机上</li>
+<li>垂直切分: 按照不同的表或者schema，来切分到不同的数据库主机上</li>
+</ul>
+<p>切片(sharding)会增加整个系统的复杂性，而且切片本身也是一个很复杂的过程，与应用本身有这密切的关系，所以对于不但增大的数据而言，切片并不能从根本上解决大数据存储问题。</p>
+<h3 id="NewSQL"><a href="#NewSQL" class="headerlink" title="NewSQL"></a>NewSQL</h3><p>传统的关系型数据想要做到高扩展, 高性能, 高可靠性是很复杂的, 但是当你的确想要一种这种样的数据库时, NewSQL可能是你一种不错的选择。</p>
+<blockquote>
+<p>什么是NewSQL？</p>
+</blockquote>
+<p>这是一个中间产物, 是一种完全不同的数据库架构, NewSQL术语最早在2011年由Matthew Aslett创造, NewSQL的设计立足于传统的关系型数据库，但是同时也引进一些新技术，从而达到可扩展和高性能的目的, 而缺点是没有提供强一致性, 它们不可以被使用在强一致性环境下。<br>NewSQL具有NoSQL的海量数据存储管理能力,同时还支持传统数据库的ACID和SQL能力(单个节点上的ACID能力), 但是在现实使用中还没普及开来, 还没被大规模使用。</p>
+<blockquote>
+<p>NewSQL的特点</p>
+</blockquote>
+<p>NewSQL具体和RDBMS一样的单个节点上的ACID能力, 同时又具有NoSQL一样的很强的扩展能力(它在整个集群上遵循BASE规则, 关于BASE在后面NoSQL中再做介绍)。</p>
+<blockquote>
+<p>典型的NewSQL产品</p>
+</blockquote>
+<p>我迄今也没有使用过NewSQL产品, 以下是我所知的关于NewSQL的经典产品:</p>
+<ul>
+<li>Google spanner: Google的全球级的分布式数据库(Globally-Distributed Database)</li>
+<li>CockroachDB: 参考Goole spanner实现的开源版</li>
+</ul>
+<blockquote>
+<p>如何解决大数据存储问题？</p>
+</blockquote>
+<p>NewSQL基于NoSQL的BASE原则, 构建可以横向扩展的分布式系统来解决大数据的存储和管理问题。</p>
+<h3 id="NoSQL"><a href="#NoSQL" class="headerlink" title="NoSQL"></a>NoSQL</h3><p>今天我们可以通过第三方平台(如：Google,Facebook等), 可以很容易的访问和抓取数据。用户的个人信息，社交网络，地理位置，用户生成的数据和用户操作日志已经成倍的增加。我们如果要对这些用户数据进行挖掘，那SQL数据库已经不适合这些应用了, NoSQL数据库的发展也却能很好的处理这些大的数据。</p>
+<blockquote>
+<p>什么是NoSQL？</p>
+</blockquote>
+<p>NoSQL(NoSQL = Not Only SQL)，意即“不仅仅是SQL”，是一项全新的数据库革命性运动，早期就有人提出，发展至2009年趋势越发高涨。NoSQL的拥护者们提倡运用非关系型的数据存储，相对于铺天盖地的关系型数据库运用，这一概念无疑是一种全新的思维的注入</p>
+<blockquote>
+<p>NoSQL的特点(BASE)</p>
+</blockquote>
+<p>BASE的全称是Basically Available, Soft-state, Eventually Consistent。 由<code>Eric Brewer</code>定义。ACID强调强一致性(CAP中的C), 而BASE则强调基本可用性(CAP中的A），在BASE思想的扩展下，就出现了NoSQL。<br>BASE是NoSQL数据库通常对可用性及一致性的弱要求原则:</p>
+<ul>
+<li>Basically Availble: 基本可用</li>
+<li>Soft-state: 软状态/柔性事务。 “Soft state” 可以理解为”无连接”的, 而 “Hard state” 是”面向连接”的</li>
+<li>Eventual Consistency: 最终一致性 最终一致性， 也是是 ACID 的最终目的。</li>
+</ul>
+<p>BASE是相对ACID而言的, 下面是对比表:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">ACID</th>
+<th style="text-align:right">BASE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">A原子性(Atomicity)</td>
+<td style="text-align:right">基本可用(Basically Available)</td>
+</tr>
+<tr>
+<td style="text-align:left">一致性(Consistency)</td>
+<td style="text-align:right">软状态/柔性事务(Soft state)</td>
+</tr>
+<tr>
+<td style="text-align:left">隔离性(Isolation)</td>
+<td style="text-align:right">最终一致性 (Eventual consistency)</td>
+</tr>
+<tr>
+<td style="text-align:left">持久性 (Durable)</td>
+<td style="text-align:right">支持</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>典型的NoSQL产品</p>
+</blockquote>
+<p>NoSQL是实现方式各不相同，下面主要介绍 主流的NoSQL流派, 想要了解更具体的信息请点击<a href="http://www.nosql-database.org/" target="_blank" rel="external">关于所有NoSQL介绍的一个网站</a>:</p>
+<ul>
+<li><p>列式数据模型<br>数据模型： 看到也是表, 但是不支持链接查询, 因为数据存储以列为单位(column), 而关系数据库是以行为存储单位的<br>应用场景： 在分布式文件系统之上提供支持随机读写的分布式数据存储<br>典型产品： Hbase、 Hypertable、 Bigtable、 Cassandra<br>优点： 快速查询、 高扩展性、易于实现分布式扩展</p>
+</li>
+<li><p>文档数据模型 ：<br>数据模型： 介于键值存储kv)和关系型存储(row),每一行数据组织为一个文档, 以文档为存储单位<br>应用场景： 非强事物需求的web应用<br>典型产品： MongoDB、 ElasticSearch(弹性搜索，存储web日志)<br>优点：　数据模型无需事先定义</p>
+</li>
+<li><p>键值数据模型 ：<br>数据模型： 模型简单, 易于实现, 操作简单(get set del)<br>应用场景： 内容缓存, 用于大量并行数据访问, 高负载场景<br>应用产品：  DynamoDB, Riak, Redis<br>优点：  hash的优点， 查询迅速</p>
+</li>
+<li><p>图式数据模型 ：<br>数据模型： 图式结构<br>应用场景： 社交网络、 推荐系统、 关系图谱<br>典型产品： Neo4J<br>优点： 适用于图式技术场景</p>
+</li>
+</ul>
+<blockquote>
+<p>如何解决大数据存储问题？</p>
+</blockquote>
+<p>通过分布式解决</p>
+<h3 id="RDBMS-vs-NoSQL"><a href="#RDBMS-vs-NoSQL" class="headerlink" title="RDBMS vs NoSQL"></a>RDBMS vs NoSQL</h3><p>RDBMS的特点:</p>
+<ul>
+<li>高度组织化结构化数据 </li>
+<li>结构化查询语言</li>
+<li>数据和关系都存储在单独的表中。 </li>
+<li>数据操纵语言，数据定义语言 </li>
+<li>严格的一致性</li>
+<li>基于事务</li>
+</ul>
+<p>NoSQL的特点: </p>
+<ul>
+<li>代表着不仅仅是SQL</li>
+<li>没有声明性查询语言</li>
+<li>没有预定义的模式, 架构的灵活性，支持半结构化数据</li>
+<li>键值对存储，列存储，文档存储，图形数据库</li>
+<li>最终一致性，而非ACID属性</li>
+<li>非结构化和不可预知的数据</li>
+<li>分布式计算, CAP定理 </li>
+<li>高性能，高可用性和可伸缩性, 高水平扩展能力和低成本的低端硬件集群</li>
+<li>功能相对简单, 没有统一的查询语言, 有限的查询功能</li>
+<li>最终一致是不直观的程序</li>
+</ul>
+<h2 id="数据模型"><a href="#数据模型" class="headerlink" title="数据模型"></a>数据模型</h2><p>对于数据本身而言, 我们往往将其分为结构化数据, 半结构化数据, 以及非结构化数据, 但是对于储存时数据的组织我们才称其为数据模型, 常见的数据模型有: 关系模型, 文档模型, 健值模型, 以及列式模式。</p>
+<h3 id="用户侧数据"><a href="#用户侧数据" class="headerlink" title="用户侧数据"></a>用户侧数据</h3><p>随着网络技术的发展，特别是Internet和Intranet技术的飞快发展，使得非结构化数据的数量日趋增大。这时，主要用于管理结构化数据的关系数据库的局限性暴露地越来越明显。因而，数据库技术相应地进入了“后关系数据库时代”，发展进入基于网络应用的非结构化数据库时代。<br><img src="http://www.runoob.com/wp-content/uploads/2013/10/bigdata.png" alt=""></p>
+<blockquote>
+<p>结构化数据(structured data)</p>
+</blockquote>
+<p>结构化数据, 即行数据,存储在数据库里,可以用二维表结构来逻辑表达实现的数据。<br>结构化数据, <code>先知结构, 再有数据</code>。 我们根据数据的结构预先建立好二维表, 等数据来的时候, 填入即可。因此结构化的数据往往是可建模, 标准化的数据, 结构化的数据很方便程序使用, 因为结构已知。</p>
+<p>结构化数据最大的问题, 就当数据的结构发生变化时, 我们需要调整数据的结构, 一般就意味着数据库表结构的需要变动。这使得数据在存储时有严格的要求(需要定义schema)。<br>结构化数据: 可以被提前建模的数据(定义schema)</p>
+<blockquote>
+<p>半结构化数据(semi-structured data)</p>
+</blockquote>
+<p>所谓半结构化数据，就是介于完全结构化数据(如关系型数据库、面向对象数据库中的数据)和完全无结构的数据(如声音、图像文件等)之间的数据，HTML文档就属于半结构化数据。它一般是自描述的，数据的结构和内容混在一起，没有明显的区分。<br>所以对于半结构化的数据, 数据的结构要等数据获得后才知道, 也就是<code>先有数据, 后知结构</code>。整个互联网上这类数据是很多的, 因为html就是半结构化的数据。</p>
+<p>相对于结构化的数据, 半结构化数据无需定义数据的结构(schema free), 使得其在存储上表现出强大的灵活性。<br>半结构化数据:  HTML, JSON, XML</p>
+<blockquote>
+<p>非结构化数据(unstructured data)</p>
+</blockquote>
+<p>相对于结构化数据而言，不方便用数据库二维逻辑表来表现的数据即称为非结构化数据。<br>非结构化数据库是指其字段长度可变，并且每个字段的记录又可以由可重复或不可重复的子字段构成的数据库，用它不仅可以处理结构化数据(如数字、符号等信息), 而且更适合处理非结构化数据（全文文本、图象、声音、影视、超媒体等信息)。</p>
+<p>非结构化WEB数据库主要是针对非结构化数据而产生的，与以往流行的关系数据库相比，其最大区别在于它突破了关系数据库结构定义不易改变和数据定长的限制，支持重复字段、子字段以及变长字段并实现了对变长数据和重复字段进行处理和数据项的变长存储管理，在处理连续信息（包括全文信息）和非结构化信息（包括各种多媒体信息）中有着传统关系型数据库所无法比拟的优势。<br>非结构化数据: 所有格式的办公文档、文本、图片、XML、HTML、各类报表、图像和音频/视频信息等等。</p>
+<h3 id="存储时数据"><a href="#存储时数据" class="headerlink" title="存储时数据"></a>存储时数据</h3><p>数据存储模型值数据存储时如何组织</p>
+<h4 id="关系模型"><a href="#关系模型" class="headerlink" title="关系模型"></a>关系模型</h4><p>关系模型: 新定义列, 然后通过行的方式对数据进行存储, 以二维表来表示实体与实体之间的联系，在数据建模时需要对数据对象进行拆分，再将各自的信息存到对应的表里，在需要时再将各个表连接起来。<br><img src="http://oiw1gzfww.bkt.clouddn.com/relationship_data.jpeg" alt=""></p>
+<p>在关系模型当中，多个表中的不同记录经常“交错连接”，一些数据会被多条记录共享。这样的好处就是减少了重复数据的出现，但是这样不好的地方就是一旦其中某一条链接的记录发生改变，那么与其相关的记录和表都会被锁住以防止非一致性的出现。 ACID事务在关系型数据库中是很复杂的，因为数据会扩散。即便是单一条记录，这复杂的共享数据内部关系网的存在，也使得关系型数据在多个服务器之间的传递变得复杂而缓慢，同时让读和写操作的性能变差。<br>当存储空间昂贵又稀少时，折中的权衡方案是很必要的。然而，如今存储空间的价格跟40年前相比已经大大的下降了，很多时候计算折中方案已经完全没有必要。使用更多的存储空间来换取更好的操作性能，或者是将工作负载分配到多台机器上，这才是如今应用上更好的解决方案。</p>
+<h4 id="文档模型"><a href="#文档模型" class="headerlink" title="文档模型"></a>文档模型</h4><p>文档数据: 将一个数据记录(record或者row)作为单位进行存储, 无需定义行。也可以认为一个文档就是关系数据库的一行。<br><img src="http://oiw1gzfww.bkt.clouddn.com/document_data.png" alt=""></p>
+<p>使用“文档”这个词似乎让人觉得奇怪，但是其实”文档型数据模型”真的和传统意义的文字”文档”没有什么关系。他不是书、信或者文章，这里说的”文档”其实是一个数据记录, 这个记录能够对包含的数据类型和内容进行“自我描述”。XML文档、HTML文档和JSON 文档就属于这一类, 因此我们可以认为所有半结构化的数据都属于文档数据, 而现在主要的文档数据库还是以Json作为文档为主.<br>可以看到，数据是不规则的，每一条记录包含了所有的有关该记录的信息而没有任何外部的引用, 这条记录就是“自包含”的。这就使得记录很容易完全移动到其他服务器, 因为这条记录的所有信息都包含在里面了, 不需要考虑还有信息在别的表没有一起迁移走。同时，因为在移动过程中，只有被移动的那一条记录<br>需要操作而不像关系型中每个有联系的表都需要锁住来保证一致性，这样一来ACID的保证就会变得更快速, 读写的速度也会有很大的提升。</p>
+<h4 id="健值模型"><a href="#健值模型" class="headerlink" title="健值模型"></a>健值模型</h4><p>健值模型: 它的数据按照键值对的形式进行组织,索引和存储。KV存储非常适合不涉及过多数据关系业务关系的业务数据，同时能有效减少读写磁盘的次数，比SQL数据库存储拥有更好的读写性能。<br><img src="http://oiw1gzfww.bkt.clouddn.com/key_value_data.jpeg" alt=""></p>
+<h4 id="列式模型"><a href="#列式模型" class="headerlink" title="列式模型"></a>列式模型</h4><p>列式存储: 以列相关存储架构进行数据存储。列式存储以流的方式在列中存储所有的数据，主要适合与批量数据处理和即席查询。<br><img src="http://oiw1gzfww.bkt.clouddn.com/column_data.gif" alt=""></p>
+<p>由于查询需要读取的blocks少, 所以查询快, 因为同一类型的列存储在一起, 所以数据压缩比高, Load快。 它简化数据建模的复杂性。但是插入更新慢，不太适合数据老是变化，它是按列存储的。 列式存储很适合做数据仓库，它不适合OLTP。</p>
+<h2 id="CAP定理"><a href="#CAP定理" class="headerlink" title="CAP定理"></a>CAP定理</h2><p>在计算机科学中, <code>CAP定理(CAP theorem)</code>, 又被称作<code>布鲁尔定理(Brewer&#39;s theorem)</code>, 它指出对于一个分布式计算系统来说，不可能同时满足以下三点:</p>
+<ul>
+<li>一致性(Consistency) (所有节点在同一时间具有相同的数据)</li>
+<li>可用性(Availability) (保证每个请求不管成功或者失败都有响应)</li>
+<li>分隔容忍(Partition tolerance) (系统中任意信息的丢失或失败不会影响系统的继续运作)</li>
+</ul>
+<p>CAP理论的核心是：一个分布式系统不可能同时很好的满足一致性，可用性和分区容错性这三个需求，最多只能同时较好的满足两个。<br>因此，根据CAP原理将NoSQL数据库分成了满足CA原则、满足CP原则和满足AP原则三 大类：</p>
+<ul>
+<li>CA 单点集群，满足一致性，可用性的系统，通常在可扩展性上不太强大。</li>
+<li>CP 满足一致性，分区容忍性的系统，通常性能不是特别高。</li>
+<li>AP 满足可用性，分区容忍性的系统，通常可能对一致性要求低一些。</li>
+</ul>
+<p><strong>定理</strong>: 任何分布式系统最多只能同时时满足3点(Consistency, Availability, Partition tolerance)中的2点, 同时满足3点的分布式系统是不存在的<br><strong>忠告</strong>：架构师不要将精力浪费在如何设计能满足三者的完美分布式系统，而是应该进行取舍。</p>
+<h3 id="CAP与数据库"><a href="#CAP与数据库" class="headerlink" title="CAP与数据库"></a>CAP与数据库</h3><p>RDBMS满足的是ACID规则, 而ACID规则满足的就是CAP里面的<code>CA</code>, 因此扩展性不强.<br>NewSQL/NoSQL满足的是BASE规则, 而BASE规则就是降低一致性或者可用性来提升系统性能, 就是CAP里面的<code>CP</code>/<code>AP</code></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>在理解了上面所有的概念过后, 就能看懂这张CAP的图了:<br><img src="http://oiw1gzfww.bkt.clouddn.com/cap_thorem.jpg" alt=""></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://www.mongodb.com/zh/mongodb-architecture" target="_blank" rel="external">MongoDB Architecture官方中文介绍</a><br><a href="https://www.zhihu.com/question/25535889" target="_blank" rel="external">elasticsearch(lucene)可以代替NoSQL(mongodb)吗？</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="http://oiw1gzfww.bkt.clouddn.com/alipay.jpg" alt="紫川秀 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/mongodb/" rel="tag"># mongodb</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/03/restful-vs-soap/" rel="next" title="对比RESTful与SOAP，深入理解RESTful">
+                <i class="fa fa-chevron-left"></i> 对比RESTful与SOAP，深入理解RESTful
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  
+    <div class="comments" id="comments">
+      <div id="vcomments"></div>
+    </div>
+  
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://oiw1gzfww.bkt.clouddn.com/me.png"
+                alt="紫川秀" />
+            
+              <p class="site-author-name" itemprop="name">紫川秀</p>
+              <p class="site-description motion-element" itemprop="description">喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">41</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">31</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/yumaojun03" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://douban.com/people/155892492" target="_blank" title="豆瓣">
+                    
+                      <i class="fa fa-fw fa-globe"></i>豆瓣</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://www.zhihu.com/people/zi-chuan-xiu-86" target="_blank" title="知乎">
+                    
+                      <i class="fa fa-fw fa-globe"></i>知乎</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-globe"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.liaoxuefeng.com/" title="廖雪峰官网" target="_blank">廖雪峰官网</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://xiaorui.cc/" title="峰云,就她了" target="_blank">峰云,就她了</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#大数据存储问题"><span class="nav-number">1.</span> <span class="nav-text">大数据存储问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RDBMS"><span class="nav-number">1.1.</span> <span class="nav-text">RDBMS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NewSQL"><span class="nav-number">1.2.</span> <span class="nav-text">NewSQL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NoSQL"><span class="nav-number">1.3.</span> <span class="nav-text">NoSQL</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RDBMS-vs-NoSQL"><span class="nav-number">1.4.</span> <span class="nav-text">RDBMS vs NoSQL</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据模型"><span class="nav-number">2.</span> <span class="nav-text">数据模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#用户侧数据"><span class="nav-number">2.1.</span> <span class="nav-text">用户侧数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#存储时数据"><span class="nav-number">2.2.</span> <span class="nav-text">存储时数据</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#关系模型"><span class="nav-number">2.2.1.</span> <span class="nav-text">关系模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#文档模型"><span class="nav-number">2.2.2.</span> <span class="nav-text">文档模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#健值模型"><span class="nav-number">2.2.3.</span> <span class="nav-text">健值模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#列式模型"><span class="nav-number">2.2.4.</span> <span class="nav-text">列式模型</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CAP定理"><span class="nav-number">3.</span> <span class="nav-text">CAP定理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CAP与数据库"><span class="nav-number">3.1.</span> <span class="nav-text">CAP与数据库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">3.2.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2016 &mdash; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">紫川秀</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine@1.1.4/dist/Valine.min.js"></script>
+  <script type="text/javascript">
+    new Valine({
+        av: AV,
+        el: '#vcomments' ,
+        verify: false,
+        notify: true,
+        app_id: '51RM6PwqfSuyOFX9MxLeq5yY-gzGzoHsz',
+        app_key: 'dNQYvnf4KlnN364JVGClL7bp',
+        placeholder: 'Comment input placeholder'
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("51RM6PwqfSuyOFX9MxLeq5yY-gzGzoHsz", "dNQYvnf4KlnN364JVGClL7bp");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
