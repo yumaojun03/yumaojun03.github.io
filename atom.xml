@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog.yumaojun.net/"/>
-  <updated>2017-11-19T06:38:57.000Z</updated>
+  <updated>2017-11-19T15:32:32.000Z</updated>
   <id>https://blog.yumaojun.net/</id>
   
   <author>
@@ -14,6 +14,54 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Golang程序版本管理</title>
+    <link href="https://blog.yumaojun.net/2017/11/19/golang-cli-version/"/>
+    <id>https://blog.yumaojun.net/2017/11/19/golang-cli-version/</id>
+    <published>2017-11-19T06:45:15.000Z</published>
+    <updated>2017-11-19T15:32:32.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>项目在完成后往往都需要版本化, 而Golang项目往往交付的是编译过后的二进制包, 如何通过二进制包知道项目的版本, 就像docker的version命令一样楠?<br><a id="more"></a></p>
+<h2 id="为什么需要版本管理"><a href="#为什么需要版本管理" class="headerlink" title="为什么需要版本管理"></a>为什么需要版本管理</h2><p>版本管理主要用于对运行程序的版本追踪,从而可以管理线上服务的运行版本,避免各个版本的服务程序混淆.这里通常的做法为在程序中埋入版本标志,同时该版本号会对应到git上的tag或release版本.从而对线上服务更改有一个更全面的信息说明。</p>
+<p>比如docker的版本信息:<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"> maojun@maojun-mbp $ docker version</div><div class="line">Client:</div><div class="line"> Version:      17.09.0-ce</div><div class="line"> API version:  1.32</div><div class="line"> Go version:   go1.8.3</div><div class="line"> Git commit:   afdb6d4</div><div class="line"> Built:        Tue Sep 26 22:40:09 2017</div><div class="line"> OS/Arch:      darwin/amd64</div><div class="line">...</div></pre></td></tr></table></figure></p>
+<h2 id="GUN风格版本命名方式和规则"><a href="#GUN风格版本命名方式和规则" class="headerlink" title="GUN风格版本命名方式和规则"></a>GUN风格版本命名方式和规则</h2><p>这里将介绍基于GNU风格的一种版本命名方式, 这也是当今主流的版本命名方式, 很多开源项目的版本命名都遵循此风格。<br>GUN风格版本命名风格:<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Major_Version_Number.Minor_Version_Number[.Revision_Number[.Build_Number]] </div><div class="line">主版本号.子版本号[.修正版本号[.编译版本号]]</div><div class="line">示例 : 1.2.1, 2.0, 5.0.0.build-13124</div></pre></td></tr></table></figure></p>
+<ul>
+<li>Major: 具有相同名称但不同主版本号的程序集不可互换。例如，这适用于对产品的大量重写，这些重写使得无法实现向后兼容性。</li>
+<li>Minor: 如果两个程序集的名称和主版本号相同，而次版本号不同，这指示显著增强，但照顾到了向后兼容性。例如，这适用于产品的修正版或完全向后兼容的新版本。</li>
+<li>Revision: 名称、主版本号和次版本号都相同但修订号不同的程序集应是完全可互换的。这适用于修复以前发布的程序集中的安全漏洞。</li>
+<li>Build: 内部版本号的不同表示对相同源所作的重新编译。这适合于更改处理器、平台或编译器的情况。</li>
+</ul>
+<p>版本号的变化一般遵循如下规则:</p>
+<ul>
+<li>项目初版本   : 版本号可以为 0.1 或 0.1.0, 也可以为 1.0 或 1.0.0.</li>
+<li>修正版本号增加: 当项目在进行了局部修改或 bug 修正时，主版本号和子版本号都不变,修正版本号加1.</li>
+<li>子版本号增加  : 当项目在原有的基础上增加了部分功能时，主版本号不变，子版本号加 1，修正版本号复位为 0，因而可以被忽略掉.</li>
+<li>主版本号增加  : 当项目在进行了重大修改或局部修正累积较多，而导致项目整体发生全局变化时.</li>
+<li>编译版本号变化 : 编译版本号一般是编译器在编译过程中自动生成的，我们只定义其格式，并不进行人为控制</li>
+</ul>
+<h2 id="如何埋入版本信息"><a href="#如何埋入版本信息" class="headerlink" title="如何埋入版本信息"></a>如何埋入版本信息</h2><p>写C/C++代码时，可以在代码中预定义一些版本宏定义，然后再编译时从外部传入数据作为版本号, golang代码不支持宏定义, 但是go build时提供了一个与之相似的功能参数:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">-ldflags <span class="string">'flag list'</span></div><div class="line">	arguments to pass on each go tool link invocation.</div></pre></td></tr></table></figure></p>
+<p>然后查看<a href="https://golang.org/cmd/link/" target="_blank" rel="external">go tool link的相关文档</a>:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">-X importpath.name=value</div><div class="line">	Set the value of the string variable <span class="keyword">in</span> importpath named name to value.</div><div class="line">	Note that before Go 1.5 this option took two separate arguments.</div><div class="line">	Now it takes one argument split on the first = sign.</div></pre></td></tr></table></figure></p>
+<p>按照文档中的说明应该是在build时，通过-ldflags设定linker的参数。 然后再通过linker的-X来修改指定路径下面的变量值<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"> </div><div class="line"><span class="keyword">import</span> ( </div><div class="line"> <span class="string">"fmt"</span></div><div class="line">)</div><div class="line"> </div><div class="line"><span class="keyword">var</span> (</div><div class="line">    VERSION</div><div class="line">)</div><div class="line"> </div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123; </div><div class="line"> fmt.Printf(<span class="string">"Version:[%s]\n"</span>, VERSION)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>编译时传入变量:<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ go build -ldflags <span class="string">"-X main.VERSION=v1.0.0-alpha1"</span> main.go</div><div class="line">$ ./main</div><div class="line">Version:[v1.0.0-alpha1]</div></pre></td></tr></table></figure></p>
+<h2 id="最终样例"><a href="#最终样例" class="headerlink" title="最终样例"></a>最终样例</h2><p>如果我们直接在项目入口文件处埋入版本信息, 对项目入口侵入太大, 因此你会看到一些好的开源项目下都有一个专门的version包, 由它来负责接收埋入的版本信息。</p>
+<p>最终示例请参考: <a href="https://github.com/yumaojun03/golang/tree/master/version-example" target="_blank" rel="external">Golang程序版本管理代码示例</a><br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"> maojun@maojun-mbp $ ./version-example -v</div><div class="line">Version   : v0.0.1-alpha.0</div><div class="line">Build Time: 2017-11-19 23:28:12</div><div class="line">Git Branch: master</div><div class="line">Git Commit: 83de09af3f96007726edd5b308ed989476b9f358</div><div class="line">Go Version: go1.9 linux/amd64</div></pre></td></tr></table></figure></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;项目在完成后往往都需要版本化, 而Golang项目往往交付的是编译过后的二进制包, 如何通过二进制包知道项目的版本, 就像docker的version命令一样楠?&lt;br&gt;
+    
+    </summary>
+    
+      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
+    
+      <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
+    
+    
+      <category term="build" scheme="https://blog.yumaojun.net/tags/build/"/>
+    
+  </entry>
   
   <entry>
     <title>数据库分类以及NoSQL介绍</title>
@@ -537,9 +585,9 @@
       <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
     
     
-      <category term="APIGateway" scheme="https://blog.yumaojun.net/tags/APIGateway/"/>
-    
       <category term="gRPC" scheme="https://blog.yumaojun.net/tags/gRPC/"/>
+    
+      <category term="APIGateway" scheme="https://blog.yumaojun.net/tags/APIGateway/"/>
     
   </entry>
   
@@ -676,9 +724,9 @@
       <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
     
     
-      <category term="APIGateway" scheme="https://blog.yumaojun.net/tags/APIGateway/"/>
-    
       <category term="gRPC" scheme="https://blog.yumaojun.net/tags/gRPC/"/>
+    
+      <category term="APIGateway" scheme="https://blog.yumaojun.net/tags/APIGateway/"/>
     
   </entry>
   
@@ -2035,9 +2083,9 @@
       <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
     
     
-      <category term="cobra" scheme="https://blog.yumaojun.net/tags/cobra/"/>
-    
       <category term="openstack" scheme="https://blog.yumaojun.net/tags/openstack/"/>
+    
+      <category term="cobra" scheme="https://blog.yumaojun.net/tags/cobra/"/>
     
   </entry>
   
@@ -2144,163 +2192,6 @@
     
     
       <category term="vendor" scheme="https://blog.yumaojun.net/tags/vendor/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>时序数据库之InfluxDB</title>
-    <link href="https://blog.yumaojun.net/2017/03/10/opentsdb-vs-influxdb/"/>
-    <id>https://blog.yumaojun.net/2017/03/10/opentsdb-vs-influxdb/</id>
-    <published>2017-03-10T11:33:53.000Z</published>
-    <updated>2017-03-13T08:45:30.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>最近公司业务重度依赖时序数据库, 公司上个版本选择了OpenTSDB, 在1-2年前，他的确很流行。 但是在做软件重构时, 业务层反馈的一些问题, OpenTSDB暂时无法解决,成为了一个痛点, 让我需要考虑其他方案, 由于之前使用过InfluxDB, 也一直在关注, 它给了我惊艳的感觉,所以记忆犹新.<br><a id="more"></a></p>
-<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>之前做运维时,重度使用过zabbix, 关系型数据库的优化,根本无法解决高IO, 后面又使用过Graphite, 这个安装像迷一样的工具, 它后端在RRD上面设计出了一个简单的时序数据库, 但是配置繁杂,容量完全靠规划。直到使用了InfluxDB, 部署简单,使用方便,高压缩, 对它印象很不错, 但是0.12过后不支持集群。</p>
-<p>之前InfluxDB切换了2次存储引擎(它的存储是插件式的), 也没去了解过它切换的原因, 直到看到InfoQ上七牛的演讲<a href="http://www.infoq.com/cn/presentations/see-the-timing-of-data-processing-from-influxdb" target="_blank" rel="external">从InfluxDB看时序数据的处</a>, 他道出了了原因: </p>
-<ol>
-<li>LevelDB不支持热备份, influxDB设计的shard会消耗大量文件描述符，将系统资源耗尽。</li>
-<li>BoltDB解决了热备, 解决了消耗大量文件描述符的问题, 但是引入了一个更致命的问题:容量达到数GB级别时,会产生大量随机写, 造成高IOPS。</li>
-<li>放弃了他们, 在他们的经验上开始自己实现一个存储引擎: TSM(Time-Structured Merge Tree), 它截取了OpenTSDB的一些设计经验,根据<code>LSM Tree</code>针对时间序列数据进行优化</li>
-</ol>
-<p>我认为像这样的针对特殊场景进行优化的数据库会是今后数据库领域发展的主流, 另一个证明就是EleasticSearch一个针对文本解索而设计的数据库, 虽然OpenTSDB也针对时序数据做了优化,但是由于存储系统依然依赖HBase, 所以力度上面感觉没InfluxDB给力。</p>
-<p>社区一路走来之艰辛,但是却激情洋溢,他们是先行者. 我对它集群的闭源并不反感, 这群激情洋溢的人需要有商业支持。</p>
-<h2 id="时序数据库热度排名"><a href="#时序数据库热度排名" class="headerlink" title="时序数据库热度排名"></a>时序数据库热度排名</h2><p>这是DB Engine的时序数据库2017的排行榜, 截图是2017-3月的，最新的可以点<a href="http://db-engines.com/en/ranking/time+series+dbms" target="_blank" rel="external">DB-Engines Ranking of Time Series DBMS</a><br><img src="http://oiw1gzfww.bkt.clouddn.com/ts-top.png" alt=""><br>上图可以看出InfluxDB最近很热, 领先优势明显<br>下面是对比InfluxDB, OpenTSDB, Graphite的变化趋势。<br><img src="http://oiw1gzfww.bkt.clouddn.com/tsdb-top.png" alt=""><br>对于一个设计精良，部署简单，使用方便，而且还高性能的时序数据库而言, 想不热都难。</p>
-<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>基于Go语言开发，社区非常活跃，项目更新速度很快，日新月异，关注度高, 1.0发布过后, 稳定性也非常高。官方是这样介绍InfluxDB的：</p>
-<blockquote>
-<p>influxdb是一个从底层一步一步成长为能处理高写入,高查询的时序数据库, 它专门针对时序数据做了优化,让其更高性能, 他可以用来存储任何时序数据,  包括DevOps的监控、应用指标、物联网传感器的数据, 并实时分析</p>
-</blockquote>
-<p>这是它github上给出的<a href="https://github.com/influxdata/influxdb" target="_blank" rel="external">特性说明</a>:</p>
-<ul>
-<li>内建HTTP API, 无需自己实现</li>
-<li>数据高压缩, 支持非常灵活的查询访问</li>
-<li>支持类SQL查询, 学习成本低, 方便使用</li>
-<li>安装和管理都十分简单, 数据写入和读取的速度快</li>
-<li>为实时查询而生, 对每一个点位都建立索引, 及时查询响应速度小于100ms</li>
-</ul>
-<h2 id="业务问题"><a href="#业务问题" class="headerlink" title="业务问题"></a>业务问题</h2><p>我们需要一个时序数据库, 他需要能解决我们以下这些问题:</p>
-<ol>
-<li><p>一个测试指标多值<br>一个指标往往有多个维度来描述其变化状态,并不仅仅是值, 比如对于CPU的而言, 应该有中断，负载, 使用率等。</p>
-</li>
-<li><p>多Tag支持<br>tag是对一个指标的描述,是一个标签, 在业务上Tag对于分组过滤非常有意义, 用于标示一个指标在业务上的意义, 比如对于IOT来说, 传感器的指标往往是一个无意义的id, 因此需求给它打上name标签, 标示他的特殊意义, 打上设备ID, 标示它属于哪个设备, 打上位置标签, 标示该指标来源于哪个地方。</p>
-</li>
-<li><p>在指标的值上能做一些基本的比较运算<br>作为一个数据库,在功能层面需要解决一些基本的运算, 比如求和，求最小，求最大, 但这还不够, 需要支持条件过滤, 支持Tag的条件过滤, 支持值的条件过滤, 支持值的条件过滤是关键, 不然会产生巨大的数据复制, 比如我们需要过滤出 CPU &gt; 90的机器, 如果数据库不支持, 那么我需要将这些数据从数据库中查出来,复制给我的程序处理。 这带来了巨大的问题: 1. 数据库要吐出如此大量的数据, 负载升高, 出口流量暴增 2.程序拿到如此大量的数据, 给处理方带来了巨大的计算压力, 如果前段采用Angular或者React来写, 一个运行在pc上的小小的浏览器,根本处理不了。3. 处理效率低，数据的处理本该在数据存储的地方进行, 比如Hadoop, 完全没必要复制。</p>
-</li>
-<li><p>指标计算的中间结果需要存会指标<br>这是一个比较常见的场景, 使用RDD时更是常用,比如数据是按照30秒存储的，但是我需要 这样一个聚合维度 5m, 15m, 1h, 3h, 12h, 然后我平时只使用这些维度的数据, 不用每次临时计算。</p>
-</li>
-</ol>
-<h2 id="概念介绍"><a href="#概念介绍" class="headerlink" title="概念介绍"></a>概念介绍</h2><p>influxDB的核心概念包含: Line Protocol, Retention Policy, Series, Point, Continuous Query.</p>
-<h3 id="Line-Protocol"><a href="#Line-Protocol" class="headerlink" title="Line Protocol"></a>Line Protocol</h3><p>Line Protocol用于描述存入数据库的数据格式, 也可以说是数据协议, 相比于JSON格式，Line Protocol无需序列化，更加高效, 官方对它做了全面的介绍<a href="https://docs.influxdata.com/influxdb/v1.2/write_protocols/line_protocol_tutorial/" target="_blank" rel="external">Line Protocol</a>, 下面摘取语法部分做简要说明：<br>Line Protocol里面的一行就是InfluxDB里面的一个点位, 他将一个点分割成measurement, tag_set, field_set, timestamp4个部分, 例如:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">语法格式: measurement[,tag_key1=tag_value1...] field_key=field_value[,field_key2=field_value2] [timestamp]</div><div class="line"></div><div class="line">栗子:</div><div class="line">weather,location=us-midwest temperature=82 1465839830100400200</div><div class="line">  |    -------------------- --------------  |</div><div class="line">  |             |             |             |</div><div class="line">  |             |             |             |</div><div class="line">+-----------+--------+-+---------+-+---------+</div><div class="line">|measurement|,tag_set| |field_set| |timestamp|</div><div class="line">+-----------+--------+-+---------+-+---------+</div></pre></td></tr></table></figure></p>
-<ul>
-<li>measurement: metric name, 需要监控的指标的名称, 比如上面的weather</li>
-<li>tag_set: 使用”,”与measurement隔开, 表示一组Tag的集合, 用于保存点位的元数据, 为可选项, 会进行索引，方便查询时用于过滤条件， 格式: <tag_key>=<tag_value>,<tag_key>=<tag_value>, 比如上面的location=us-midwest</tag_value></tag_key></tag_value></tag_key></li>
-<li>field_set: 使用空格与tag_set隔开, 标示一组Field的集合, 用于保存该点位多维度的值, 支持各种类型，数据存储时不会进行索引,格式: <field_key>=<field_value>,<field_key>=<field_value>, 比如上面的temperature=82</field_value></field_key></field_value></field_key></li>
-<li>timestamp: 采集该点位的时间戳, 时间的默认精度是纳秒.</li>
-</ul>
-<p>存储策略:measurements,tag keys,field keys,tag values全局存一份。field values和timestamps每条数据存一份。</p>
-<h3 id="Retention-Policy"><a href="#Retention-Policy" class="headerlink" title="Retention Policy"></a>Retention Policy</h3><p>指数据的保存策略, 包含数据的保存时间和副本数(集群中的概念),默认保存时间是永久，副本是1个, 但是我们可以修改, 也可以创建新的保存策略</p>
-<h3 id="Series"><a href="#Series" class="headerlink" title="Series"></a>Series</h3><p>InfluxDB中元数据的数据结构体, series相当于是InfluxDB中元数据的集合，在同一个database中，retention policy、measurement、tag sets完全相同的数据同属于一个series，同一个series的数据在物理上会按照时间顺序排列存储在一起。<br>series 的key为 measurement+所有tags的序列化字符串, 他保存着该series的Retention policy, Measurement,Tag set, 比如:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">|--------------------------------------------------------------------------------------------------|</div><div class="line">|Arbitrary series number | Retention policy | Measurement    | Tag set                             |</div><div class="line">|series 1                | autogen          | census         | location = 1,scientist = langstroth |</div><div class="line">|series 2                | autogen          | census         | location = 2,scientist = langstroth |</div><div class="line">|series 3                | autogen          | census         | location = 1,scientist = perpetua   |</div><div class="line">|--------------------------------------------------------------------------------------------------|</div></pre></td></tr></table></figure></p>
-<h3 id="Point"><a href="#Point" class="headerlink" title="Point"></a>Point</h3><p>InfluxDB中单条插入语句的数据结构体, 用于保存点位的值的集合, 每一个Point通过series和timestamp进行唯一标示:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">name: census</div><div class="line">-----------------</div><div class="line">time                      butterflies     honeybees   location    scientist</div><div class="line">2015-08-18T00:00:00Z      1               30          1           perpetua</div></pre></td></tr></table></figure></p>
-<h3 id="Schema"><a href="#Schema" class="headerlink" title="Schema"></a>Schema</h3><p>用于描述数据在InfluxDB的组织形式, InfluxDB的Schema十分简单由 这些概念组成: </p>
-<ul>
-<li>databases</li>
-<li>retention policies</li>
-<li>series</li>
-<li>measurements </li>
-<li>tag keys</li>
-<li>tag values</li>
-<li>field keys<br>在操作数据库的时候，需要知道这些概念。</li>
-</ul>
-<h3 id="Continuous-Query"><a href="#Continuous-Query" class="headerlink" title="Continuous Query"></a>Continuous Query</h3><p>简称CQ, 是预先配置好的一些查询命令，SELECT语句必须包含GROUP BY time()，influxdb会定期自动执行这些命令并将查询结果写入指定的另外的measurement中。<br>利用这个特性并结合RP我们可以方便地保存不同粒度的数据，根据数据粒度的不同设置不同的保存时间，这样不仅节约了存储空间，而且加速了时间间隔较长的数据查询效率，避免查询时再进行聚合计算。</p>
-<h3 id="存储引擎"><a href="#存储引擎" class="headerlink" title="存储引擎"></a>存储引擎</h3><p>从LevelDB(LSM Tree)，到BoltD(mmap B+树)，现在是自己实现的TSM Tree的算法，类似LSM Tree，针对InfluxDB的使用做了特殊优化。</p>
-<h4 id="Shard"><a href="#Shard" class="headerlink" title="Shard"></a>Shard</h4><p>Shard这个概念并不对普通用户开放，Shard也不是存储引擎, 它在存储引擎之上的一个概念, 存储引擎负责存储shard, 因此在讲存储引擎之前先讲明shard。</p>
-<p>在InfluxDB中按照数据的时间戳所在的范围，会去创建不同的shard，每一个shard都有自己的存储引擎相关文件，这样做的目的就是为了可以通过时间来快速定位到要查询数据的相关资源，加速查询的过程，并且也让之后的批量删除数据的操作变得非常简单且高效。</p>
-<p>它和retention policy相关联。每一个存储策略下会存在许多shard，每一个shard存储一个指定时间段内的数据，并且不重复，例如7点-8点的数据落入shard0 中，8点-9点的数据则落入shard1中。每一个shard都对应一个底层的存储引擎。</p>
-<p>当检测到一个shard中的数据过期后，只需要将这个shard的资源释放，相关文件删除即可，这样的做法使得删除过期数据变得非常高效。</p>
-<h4 id="LevelDB"><a href="#LevelDB" class="headerlink" title="LevelDB"></a>LevelDB</h4><h4 id="BoltDB"><a href="#BoltDB" class="headerlink" title="BoltDB"></a>BoltDB</h4><h4 id="TSM-Tree"><a href="#TSM-Tree" class="headerlink" title="TSM Tree"></a>TSM Tree</h4><h2 id="功能使用"><a href="#功能使用" class="headerlink" title="功能使用"></a>功能使用</h2><h3 id="安装与部署"><a href="#安装与部署" class="headerlink" title="安装与部署"></a>安装与部署</h3><p>我这里主要做功能测试, 后面会有机会专门做性能测试, 因此这里使用官方提供的docker镜像部署,官方镜像最新也是1.2版本<br>配置Daocloud的镜像加速源或者阿里的加速源,然后直接拉取镜像<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker pull influxdb</div></pre></td></tr></table></figure></p>
-<p>由于influxDB开发时就设计好了, 官方也给出了环境配置变量,启动时可以通过这些环境变量对influxdb进行配置<a href="https://docs.influxdata.com/influxdb/v1.2/administration/config" target="_blank" rel="external">InfluxDB配置</a></p>
-<h3 id="函数与SQL"><a href="#函数与SQL" class="headerlink" title="函数与SQL"></a>函数与SQL</h3><p>内部提供很多函数,方便一些基本操作<a href="https://docs.influxdata.com/influxdb/v1.2/query_language/functions/" target="_blank" rel="external">InfluxQL Functions</a><br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">&gt; SELECT MEAN("water_level") FROM "h2o_feet" WHERE "location"='coyote_creek' AND time &gt;= '2015-08-18T00:06:00Z' AND time &lt;= '2015-08-18T00:54:00Z' GROUP BY time(18m)</div><div class="line"></div><div class="line">name: h2o_feet</div><div class="line">time                   mean</div><div class="line">----                   ----</div><div class="line">2015-08-18T00:00:00Z   7.946</div><div class="line">2015-08-18T00:18:00Z   7.6323333333333325</div><div class="line">2015-08-18T00:36:00Z   7.238666666666667</div><div class="line">2015-08-18T00:54:00Z   6.982</div><div class="line"></div><div class="line">&gt; SELECT MAX("water_level") FROM "h2o_feet" WHERE time &gt;= '2015-08-18T00:00:00Z' AND time &lt; '2015-08-18T00:54:00Z' GROUP BY time(12m), "location"</div><div class="line">name: h2o_feet</div><div class="line">tags: location = coyote_creek</div><div class="line">time			                max</div><div class="line">----		  	              ---</div><div class="line">2015-08-18T00:00:00Z	  8.12</div><div class="line">2015-08-18T00:12:00Z	  7.887</div><div class="line">2015-08-18T00:24:00Z	  7.635</div><div class="line">2015-08-18T00:36:00Z	  7.372</div><div class="line">2015-08-18T00:48:00Z	  7.11</div><div class="line"></div><div class="line">name: h2o_feet</div><div class="line">tags: location = santa_monica</div><div class="line">time			                max</div><div class="line">----		  	              ---</div><div class="line">2015-08-18T00:00:00Z	  2.116</div><div class="line">2015-08-18T00:12:00Z	  2.126</div><div class="line">2015-08-18T00:24:00Z	  2.051</div><div class="line">2015-08-18T00:36:00Z	  2.067</div><div class="line">2015-08-18T00:48:00Z	  1.991</div></pre></td></tr></table></figure></p>
-<h3 id="用户认证和权限"><a href="#用户认证和权限" class="headerlink" title="用户认证和权限"></a>用户认证和权限</h3><h3 id="Retention-Policy-1"><a href="#Retention-Policy-1" class="headerlink" title="Retention Policy"></a>Retention Policy</h3><h3 id="Cotinuous-Query"><a href="#Cotinuous-Query" class="headerlink" title="Cotinuous Query"></a>Cotinuous Query</h3><h3 id="常见操作-SQL"><a href="#常见操作-SQL" class="headerlink" title="常见操作(SQL)"></a>常见操作(SQL)</h3><h2 id="性能建议"><a href="#性能建议" class="headerlink" title="性能建议"></a>性能建议</h2><p>官方有很详解的说明,我这里仅截取出单节点部分:<a href="chttps://docs.influxdata.com/influxdb/v1.2/guides/hardware_sizing/#general-hardware-guidelines-for-a-single-node" target="_blank" rel="external">官方推荐硬件配置</a></p>
-<table>
-<thead>
-<tr>
-<th>Load</th>
-<th style="text-align:center">Field writes per second</th>
-<th style="text-align:center">MOderate queries per second</th>
-<th style="text-align:right">Unique series</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Low</td>
-<td style="text-align:center">&lt; 5 thousand</td>
-<td style="text-align:center">&lt; 5</td>
-<td style="text-align:right">&lt; 100 thousand</td>
-</tr>
-<tr>
-<td>Moderate</td>
-<td style="text-align:center">&lt; 250 thousand</td>
-<td style="text-align:center">&lt; 25</td>
-<td style="text-align:right">&lt; 1 million</td>
-</tr>
-<tr>
-<td>High</td>
-<td style="text-align:center">&gt; 250</td>
-<td style="text-align:center">&gt; 25</td>
-<td style="text-align:right">&gt; 1 million</td>
-</tr>
-<tr>
-<td>Probobly infeasible</td>
-<td style="text-align:center">&gt; 750 thousand</td>
-<td style="text-align:center">&gt; 100</td>
-<td style="text-align:right">&gt; 10 million</td>
-</tr>
-</tbody>
-</table>
-<p>根据负载情况官方推荐的硬件需求:</p>
-<table>
-<thead>
-<tr>
-<th>Load</th>
-<th style="text-align:center">CPU</th>
-<th style="text-align:center">RAM</th>
-<th style="text-align:right">IOPS</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Low</td>
-<td style="text-align:center">2-4 cores</td>
-<td style="text-align:center">2-4 G</td>
-<td style="text-align:right">500</td>
-</tr>
-<tr>
-<td>Moderate</td>
-<td style="text-align:center">4-6 cores</td>
-<td style="text-align:center">8-32 G</td>
-<td style="text-align:right">500-1000</td>
-</tr>
-<tr>
-<td>High</td>
-<td style="text-align:center">8 cores</td>
-<td style="text-align:center">32+ G</td>
-<td style="text-align:right">1000+</td>
-</tr>
-</tbody>
-</table>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;最近公司业务重度依赖时序数据库, 公司上个版本选择了OpenTSDB, 在1-2年前，他的确很流行。 但是在做软件重构时, 业务层反馈的一些问题, OpenTSDB暂时无法解决,成为了一个痛点, 让我需要考虑其他方案, 由于之前使用过InfluxDB, 也一直在关注, 它给了我惊艳的感觉,所以记忆犹新.&lt;br&gt;
-    
-    </summary>
-    
-      <category term="数据库" scheme="https://blog.yumaojun.net/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
-    
-      <category term="时序数据库" scheme="https://blog.yumaojun.net/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/%E6%97%B6%E5%BA%8F%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
-    
-    
-      <category term="influxdb" scheme="https://blog.yumaojun.net/tags/influxdb/"/>
     
   </entry>
   

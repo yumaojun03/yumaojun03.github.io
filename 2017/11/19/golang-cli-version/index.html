@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="紫川秀, 博客" />
+  <meta name="keywords" content="build," />
 
 
 
@@ -81,17 +81,18 @@
 
 
 
-<meta name="description" content="在公司做内部分享的时候往往用ppt, 写ppt的过程中往往还有比较多的代码示例, 通常的做法就是直接截图, 其实这对使用者来说是很不友好的, 而我之前一直使用markdown写博客, 比如我这个博客, 因此就想使用MarkDown来写分享的文档, 但是MarkDown的文档并不方便内部传阅, 因此想到了一个问题: 能否用MarkDown写, 然后转换成PDF, 给同事使用？于是问了下度娘, 果然找">
+<meta name="description" content="项目在完成后往往都需要版本化, 而Golang项目往往交付的是编译过后的二进制包, 如何通过二进制包知道项目的版本, 就像docker的version命令一样楠?">
+<meta name="keywords" content="build">
 <meta property="og:type" content="article">
-<meta property="og:title" content="使用pandoc将markdown文档转换成pdf">
-<meta property="og:url" content="https://blog.yumaojun.net/2017/01/19/markdown-to-pdf/index.html">
+<meta property="og:title" content="Golang程序版本管理">
+<meta property="og:url" content="https://blog.yumaojun.net/2017/11/19/golang-cli-version/index.html">
 <meta property="og:site_name" content="紫川秀的博客">
-<meta property="og:description" content="在公司做内部分享的时候往往用ppt, 写ppt的过程中往往还有比较多的代码示例, 通常的做法就是直接截图, 其实这对使用者来说是很不友好的, 而我之前一直使用markdown写博客, 比如我这个博客, 因此就想使用MarkDown来写分享的文档, 但是MarkDown的文档并不方便内部传阅, 因此想到了一个问题: 能否用MarkDown写, 然后转换成PDF, 给同事使用？于是问了下度娘, 果然找">
+<meta property="og:description" content="项目在完成后往往都需要版本化, 而Golang项目往往交付的是编译过后的二进制包, 如何通过二进制包知道项目的版本, 就像docker的version命令一样楠?">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-01-23T05:48:52.000Z">
+<meta property="og:updated_time" content="2017-11-19T15:32:32.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="使用pandoc将markdown文档转换成pdf">
-<meta name="twitter:description" content="在公司做内部分享的时候往往用ppt, 写ppt的过程中往往还有比较多的代码示例, 通常的做法就是直接截图, 其实这对使用者来说是很不友好的, 而我之前一直使用markdown写博客, 比如我这个博客, 因此就想使用MarkDown来写分享的文档, 但是MarkDown的文档并不方便内部传阅, 因此想到了一个问题: 能否用MarkDown写, 然后转换成PDF, 给同事使用？于是问了下度娘, 果然找">
+<meta name="twitter:title" content="Golang程序版本管理">
+<meta name="twitter:description" content="项目在完成后往往都需要版本化, 而Golang项目往往交付的是编译过后的二进制包, 如何通过二进制包知道项目的版本, 就像docker的version命令一样楠?">
 
 
 
@@ -121,13 +122,13 @@
 
 
 
-  <link rel="canonical" href="https://blog.yumaojun.net/2017/01/19/markdown-to-pdf/"/>
+  <link rel="canonical" href="https://blog.yumaojun.net/2017/11/19/golang-cli-version/"/>
 
 
 
 
 
-  <title>使用pandoc将markdown文档转换成pdf | 紫川秀的博客</title>
+  <title>Golang程序版本管理 | 紫川秀的博客</title>
   
 
 
@@ -264,7 +265,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/01/19/markdown-to-pdf/">
+    <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/11/19/golang-cli-version/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="紫川秀">
@@ -281,7 +282,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">使用pandoc将markdown文档转换成pdf</h1>
+          <h1 class="post-title" itemprop="name headline">Golang程序版本管理</h1>
         
 
         <div class="post-meta">
@@ -293,8 +294,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-01-19T13:03:18+08:00">
-                2017-01-19
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-19T14:45:15+08:00">
+                2017-11-19
               </time>
             
 
@@ -309,8 +310,8 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2017-01-23T13:48:52+08:00">
-                2017-01-23
+              <time title="更新于" itemprop="dateModified" datetime="2017-11-19T23:32:32+08:00">
+                2017-11-19
               </time>
             
           </span>
@@ -328,8 +329,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/文档工具/" itemprop="url" rel="index">
-                    <span itemprop="name">文档工具</span>
+                  <a href="/categories/开发语言/" itemprop="url" rel="index">
+                    <span itemprop="name">开发语言</span>
                   </a>
                 </span>
 
@@ -339,8 +340,8 @@
                 
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/文档工具/pandoc/" itemprop="url" rel="index">
-                    <span itemprop="name">pandoc</span>
+                  <a href="/categories/开发语言/Golang/" itemprop="url" rel="index">
+                    <span itemprop="name">Golang</span>
                   </a>
                 </span>
 
@@ -356,7 +357,7 @@
 
           
           
-             <span id="/2017/01/19/markdown-to-pdf/" class="leancloud_visitors" data-flag-title="使用pandoc将markdown文档转换成pdf">
+             <span id="/2017/11/19/golang-cli-version/" class="leancloud_visitors" data-flag-title="Golang程序版本管理">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -387,15 +388,30 @@
       
 
       
-        <p>在公司做内部分享的时候往往用ppt, 写ppt的过程中往往还有比较多的代码示例, 通常的做法就是直接截图, 其实这对使用者来说是很不友好的, 而我之前一直使用markdown写博客, 比如我这个博客, 因此就想使用MarkDown来写分享的文档, 但是MarkDown的文档并不方便内部传阅, 因此想到了一个问题: 能否用MarkDown写, 然后转换成PDF, 给同事使用？于是问了下度娘, 果然找到了一个工具: <code>Pandoc</code>, 使用下来感觉不错, 在此分享一下使用方法, 也方便以后自己查阅。<br><a id="more"></a></p>
-<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>Pandoc是一个用haskell编写的开源文本转换工具，小巧迅速且支持格式广泛，堪称文本转换应用的瑞士军刀。支持很多种输入输出，有关Pandoc可以在其官网进行详细了解。下载页面可以<a href="https://github.com/jgm/pandoc" target="_blank" rel="external">点此进入</a>，在其中选择合适的版本即可（GitHub下载不多赘述), 至于详细的描述请看github上的说明。<br>我这里主要使用 <code>markdown</code>—-&gt;<code>pdf</code>。</p>
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>我这里仅介绍Mac下的安装, 需要安装<code>pandoc</code>和<code>LaTeX</code><br>其他平台官方有详尽的介绍, 具体请查看：<a href="http://pandoc.org/installing.html" target="_blank" rel="external">pandoc官方安装文档</a></p>
-<h3 id="pandoc安装"><a href="#pandoc安装" class="headerlink" title="pandoc安装"></a>pandoc安装</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ brew install pandoc</div></pre></td></tr></table></figure>
-<h3 id="LaTeX安装"><a href="#LaTeX安装" class="headerlink" title="LaTeX安装"></a>LaTeX安装</h3><p>因为我需要转换成pdf,还需要装<code>LaTeX</code>, 选一个Basic版本的安装即可, <code>LaTeX</code>的<a href="http://www.tug.org/mactex/morepackages.html" target="_blank" rel="external">下载地址</a></p>
-<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>简单的使用可以<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pandoc -h</div></pre></td></tr></table></figure></p>
-<p>详细用法可以man查看，我这里直接给干活了,我使用庞房,这里记得选一种你系统上有的字体。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">pandoc -N -s --toc --latex-engine=xelatex -V CJKmainfont=&apos;PingFang SC&apos; -V mainfont=&apos;Monaco&apos; -V geometry:margin=1in Keystone_extension.markdown  -o Keystone.pdf</div></pre></td></tr></table></figure></p>
-<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><p>主要是Pandoc默认是对markDown语法有扩展，如果遇到转换后的效果和预期效果不一样, 还得阅读Pandoc扩展的MarkDown语法, 这篇博客对次介绍不错<a href="http://www.cnblogs.com/baiyangcao/p/pandoc_markdown.html" target="_blank" rel="external">Pandoc中的markdown语法</a><br>我这里仅列举一个我遇到的坑，当然如果你想使用标准的MarkDown语法，也可<code>-f markdown_strict</code>。</p>
-<h3 id="图片位置对应不上"><a href="#图片位置对应不上" class="headerlink" title="图片位置对应不上"></a>图片位置对应不上</h3><p>在markDown中插入的图片和Markdown里的不一样, 这里需要在图片后面添加一个<code>\</code>, 这样图片才不会换行, 这个在它扩展语法中有描述。</p>
+        <p>项目在完成后往往都需要版本化, 而Golang项目往往交付的是编译过后的二进制包, 如何通过二进制包知道项目的版本, 就像docker的version命令一样楠?<br><a id="more"></a></p>
+<h2 id="为什么需要版本管理"><a href="#为什么需要版本管理" class="headerlink" title="为什么需要版本管理"></a>为什么需要版本管理</h2><p>版本管理主要用于对运行程序的版本追踪,从而可以管理线上服务的运行版本,避免各个版本的服务程序混淆.这里通常的做法为在程序中埋入版本标志,同时该版本号会对应到git上的tag或release版本.从而对线上服务更改有一个更全面的信息说明。</p>
+<p>比如docker的版本信息:<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"> maojun@maojun-mbp $ docker version</div><div class="line">Client:</div><div class="line"> Version:      17.09.0-ce</div><div class="line"> API version:  1.32</div><div class="line"> Go version:   go1.8.3</div><div class="line"> Git commit:   afdb6d4</div><div class="line"> Built:        Tue Sep 26 22:40:09 2017</div><div class="line"> OS/Arch:      darwin/amd64</div><div class="line">...</div></pre></td></tr></table></figure></p>
+<h2 id="GUN风格版本命名方式和规则"><a href="#GUN风格版本命名方式和规则" class="headerlink" title="GUN风格版本命名方式和规则"></a>GUN风格版本命名方式和规则</h2><p>这里将介绍基于GNU风格的一种版本命名方式, 这也是当今主流的版本命名方式, 很多开源项目的版本命名都遵循此风格。<br>GUN风格版本命名风格:<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Major_Version_Number.Minor_Version_Number[.Revision_Number[.Build_Number]] </div><div class="line">主版本号.子版本号[.修正版本号[.编译版本号]]</div><div class="line">示例 : 1.2.1, 2.0, 5.0.0.build-13124</div></pre></td></tr></table></figure></p>
+<ul>
+<li>Major: 具有相同名称但不同主版本号的程序集不可互换。例如，这适用于对产品的大量重写，这些重写使得无法实现向后兼容性。</li>
+<li>Minor: 如果两个程序集的名称和主版本号相同，而次版本号不同，这指示显著增强，但照顾到了向后兼容性。例如，这适用于产品的修正版或完全向后兼容的新版本。</li>
+<li>Revision: 名称、主版本号和次版本号都相同但修订号不同的程序集应是完全可互换的。这适用于修复以前发布的程序集中的安全漏洞。</li>
+<li>Build: 内部版本号的不同表示对相同源所作的重新编译。这适合于更改处理器、平台或编译器的情况。</li>
+</ul>
+<p>版本号的变化一般遵循如下规则:</p>
+<ul>
+<li>项目初版本   : 版本号可以为 0.1 或 0.1.0, 也可以为 1.0 或 1.0.0.</li>
+<li>修正版本号增加: 当项目在进行了局部修改或 bug 修正时，主版本号和子版本号都不变,修正版本号加1.</li>
+<li>子版本号增加  : 当项目在原有的基础上增加了部分功能时，主版本号不变，子版本号加 1，修正版本号复位为 0，因而可以被忽略掉.</li>
+<li>主版本号增加  : 当项目在进行了重大修改或局部修正累积较多，而导致项目整体发生全局变化时.</li>
+<li>编译版本号变化 : 编译版本号一般是编译器在编译过程中自动生成的，我们只定义其格式，并不进行人为控制</li>
+</ul>
+<h2 id="如何埋入版本信息"><a href="#如何埋入版本信息" class="headerlink" title="如何埋入版本信息"></a>如何埋入版本信息</h2><p>写C/C++代码时，可以在代码中预定义一些版本宏定义，然后再编译时从外部传入数据作为版本号, golang代码不支持宏定义, 但是go build时提供了一个与之相似的功能参数:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">-ldflags <span class="string">'flag list'</span></div><div class="line">	arguments to pass on each go tool link invocation.</div></pre></td></tr></table></figure></p>
+<p>然后查看<a href="https://golang.org/cmd/link/" target="_blank" rel="external">go tool link的相关文档</a>:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">-X importpath.name=value</div><div class="line">	Set the value of the string variable <span class="keyword">in</span> importpath named name to value.</div><div class="line">	Note that before Go 1.5 this option took two separate arguments.</div><div class="line">	Now it takes one argument split on the first = sign.</div></pre></td></tr></table></figure></p>
+<p>按照文档中的说明应该是在build时，通过-ldflags设定linker的参数。 然后再通过linker的-X来修改指定路径下面的变量值<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"> </div><div class="line"><span class="keyword">import</span> ( </div><div class="line"> <span class="string">"fmt"</span></div><div class="line">)</div><div class="line"> </div><div class="line"><span class="keyword">var</span> (</div><div class="line">    VERSION</div><div class="line">)</div><div class="line"> </div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123; </div><div class="line"> fmt.Printf(<span class="string">"Version:[%s]\n"</span>, VERSION)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>编译时传入变量:<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ go build -ldflags <span class="string">"-X main.VERSION=v1.0.0-alpha1"</span> main.go</div><div class="line">$ ./main</div><div class="line">Version:[v1.0.0-alpha1]</div></pre></td></tr></table></figure></p>
+<h2 id="最终样例"><a href="#最终样例" class="headerlink" title="最终样例"></a>最终样例</h2><p>如果我们直接在项目入口文件处埋入版本信息, 对项目入口侵入太大, 因此你会看到一些好的开源项目下都有一个专门的version包, 由它来负责接收埋入的版本信息。</p>
+<p>最终示例请参考: <a href="https://github.com/yumaojun03/golang/tree/master/version-example" target="_blank" rel="external">Golang程序版本管理代码示例</a><br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"> maojun@maojun-mbp $ ./version-example -v</div><div class="line">Version   : v0.0.1-alpha.0</div><div class="line">Build Time: 2017-11-19 23:28:12</div><div class="line">Git Branch: master</div><div class="line">Git Commit: 83de09af3f96007726edd5b308ed989476b9f358</div><div class="line">Go Version: go1.9 linux/amd64</div></pre></td></tr></table></figure></p>
 
       
     </div>
@@ -435,6 +451,12 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/build/" rel="tag"># build</a>
+          
+        </div>
+      
 
       
       
@@ -444,8 +466,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/01/17/commit-message-style/" rel="next" title="commit message编写规范">
-                <i class="fa fa-chevron-left"></i> commit message编写规范
+              <a href="/2017/11/05/mongodb-introduce/" rel="next" title="数据库分类以及NoSQL介绍">
+                <i class="fa fa-chevron-left"></i> 数据库分类以及NoSQL介绍
               </a>
             
           </div>
@@ -453,10 +475,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/01/22/gopsutils/" rel="prev" title="夸平台系统监控库-gopsutils">
-                夸平台系统监控库-gopsutils <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -641,7 +659,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装"><span class="nav-number">2.</span> <span class="nav-text">安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#pandoc安装"><span class="nav-number">2.1.</span> <span class="nav-text">pandoc安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LaTeX安装"><span class="nav-number">2.2.</span> <span class="nav-text">LaTeX安装</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用"><span class="nav-number">3.</span> <span class="nav-text">使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#注意事项"><span class="nav-number">4.</span> <span class="nav-text">注意事项</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#图片位置对应不上"><span class="nav-number">4.1.</span> <span class="nav-text">图片位置对应不上</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么需要版本管理"><span class="nav-number">1.</span> <span class="nav-text">为什么需要版本管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GUN风格版本命名方式和规则"><span class="nav-number">2.</span> <span class="nav-text">GUN风格版本命名方式和规则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何埋入版本信息"><span class="nav-number">3.</span> <span class="nav-text">如何埋入版本信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最终样例"><span class="nav-number">4.</span> <span class="nav-text">最终样例</span></a></li></ol></div>
             
 
           </div>
