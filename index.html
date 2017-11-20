@@ -311,7 +311,7 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2017-11-20T17:06:41+08:00">
+              <time title="更新于" itemprop="dateModified" datetime="2017-11-20T22:50:40+08:00">
                 2017-11-20
               </time>
             
@@ -390,7 +390,7 @@
 
       
         
-          <p>我们知道构建一个Docker镜像的时候往往需要引入一些程序依赖的东西，最常见的就是引入一个基础操作系统镜像，但这样往往会使得编译出来的镜像特别大。就拿Python来说, 之前build的镜像一般都大于600M, 如果这个项目是内部项目, 其实问题不大, 因为内网一般也会搭建镜像仓库, 内网数据也快, 但是如果是开源项目, 镜像过大就是个问题。对拉取者带宽要求较高, 而Docker hub的速度大家也都知道, 当然如果你使用镜像加速体验会好很多。但是如果能做到把镜像变小, 做到几M, 几十M那么对于你项目的使用者来说体验会好很多. 因为Go是静态编译语言, 可以做到0依赖, 因此可以构建很小的程序镜像, 但是其实还是有些小插曲, 这也就是这篇文章出现的原因.<br>
+          <p>应用容器化方便了部署，避免实际中开发环境和生产环境不一致而导致的部署困难, 而且，容器化之后还可以对应用所使用的CPU、内存等资源做限制，这些都是容器化之后的可以带来的方便。这篇文章将会将如何build Docker镜像(最小化build), 容器化你的Golang应用。<br>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2017/11/20/golang-mini-docker-image/#more" rel="contents">

@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog.yumaojun.net/"/>
-  <updated>2017-11-20T09:06:41.000Z</updated>
+  <updated>2017-11-20T14:50:40.000Z</updated>
   <id>https://blog.yumaojun.net/</id>
   
   <author>
@@ -20,9 +20,11 @@
     <link href="https://blog.yumaojun.net/2017/11/20/golang-mini-docker-image/"/>
     <id>https://blog.yumaojun.net/2017/11/20/golang-mini-docker-image/</id>
     <published>2017-11-20T01:26:22.000Z</published>
-    <updated>2017-11-20T09:06:41.000Z</updated>
+    <updated>2017-11-20T14:50:40.000Z</updated>
     
-    <content type="html"><![CDATA[<p>我们知道构建一个Docker镜像的时候往往需要引入一些程序依赖的东西，最常见的就是引入一个基础操作系统镜像，但这样往往会使得编译出来的镜像特别大。就拿Python来说, 之前build的镜像一般都大于600M, 如果这个项目是内部项目, 其实问题不大, 因为内网一般也会搭建镜像仓库, 内网数据也快, 但是如果是开源项目, 镜像过大就是个问题。对拉取者带宽要求较高, 而Docker hub的速度大家也都知道, 当然如果你使用镜像加速体验会好很多。但是如果能做到把镜像变小, 做到几M, 几十M那么对于你项目的使用者来说体验会好很多. 因为Go是静态编译语言, 可以做到0依赖, 因此可以构建很小的程序镜像, 但是其实还是有些小插曲, 这也就是这篇文章出现的原因.<br><a id="more"></a></p>
+    <content type="html"><![CDATA[<p>应用容器化方便了部署，避免实际中开发环境和生产环境不一致而导致的部署困难, 而且，容器化之后还可以对应用所使用的CPU、内存等资源做限制，这些都是容器化之后的可以带来的方便。这篇文章将会将如何build Docker镜像(最小化build), 容器化你的Golang应用。<br><a id="more"></a></p>
+<h2 id="为什么需要构建小的镜像"><a href="#为什么需要构建小的镜像" class="headerlink" title="为什么需要构建小的镜像"></a>为什么需要构建小的镜像</h2><p>我们知道构建一个Docker镜像的时候往往需要引入一些程序依赖的东西，最常见的就是引入一个基础操作系统镜像，但这样往往会使得编译出来的镜像特别大。就拿Python来说, 之前build的镜像一般都大于600M, 如果这个项目是内部项目, 其实问题不大, 因为内网一般也会搭建镜像仓库, 内网数据也快, 但是如果是开源项目, 镜像过大就是个问题。对拉取者带宽要求较高, 而Docker hub的速度大家也都知道, 当然如果你使用镜像加速体验会好很多。但是如果能做到把镜像变小, 做到几M, 几十M那么对于你项目的使用者来说体验会好很多.</p>
+<p>因为Go是静态编译语言, 可以做到0依赖, 因此可以构建很小的程序镜像, 但是其实还是有些小插曲, 这也就是这篇文章出现的原因.</p>
 <h2 id="程序样例"><a href="#程序样例" class="headerlink" title="程序样例"></a>程序样例</h2><p>这里以一个简单的hello world的WEB API程序为例:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"log"</span></div><div class="line">	<span class="string">"net/http"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="comment">// greeter hello world example</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">greeter</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> &#123;</div><div class="line">	w.Write([]<span class="keyword">byte</span>(<span class="string">"hello world!"</span>))</div><div class="line">	w.WriteHeader(http.StatusOK)</div><div class="line">	<span class="keyword">return</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	http.HandleFunc(<span class="string">"/"</span>, greeter)</div><div class="line">	addr := <span class="string">"0.0.0.0:8080"</span></div><div class="line">	log.Printf(<span class="string">"start service at: %s ... \n"</span>, addr)</div><div class="line">	err := http.ListenAndServe(addr, <span class="literal">nil</span>)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		log.Fatal(<span class="string">"ListenAndServe: "</span>, err)</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>最终会把这个程序打包成一个最小的docker镜像进行发布, 让我们看看这样一个镜像build出来过后到底有多大。</p>
 <h2 id="编译时的问题"><a href="#编译时的问题" class="headerlink" title="编译时的问题"></a>编译时的问题</h2><p>编译时的主要问题就是如果将Golang程序编译成一个真正没有依赖的二进制程序, 也许有人会问Go本身不就是静态编译吗？这里就需要聊聊Golang里面CGO了。</p>
@@ -50,7 +52,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;我们知道构建一个Docker镜像的时候往往需要引入一些程序依赖的东西，最常见的就是引入一个基础操作系统镜像，但这样往往会使得编译出来的镜像特别大。就拿Python来说, 之前build的镜像一般都大于600M, 如果这个项目是内部项目, 其实问题不大, 因为内网一般也会搭建镜像仓库, 内网数据也快, 但是如果是开源项目, 镜像过大就是个问题。对拉取者带宽要求较高, 而Docker hub的速度大家也都知道, 当然如果你使用镜像加速体验会好很多。但是如果能做到把镜像变小, 做到几M, 几十M那么对于你项目的使用者来说体验会好很多. 因为Go是静态编译语言, 可以做到0依赖, 因此可以构建很小的程序镜像, 但是其实还是有些小插曲, 这也就是这篇文章出现的原因.&lt;br&gt;
+      &lt;p&gt;应用容器化方便了部署，避免实际中开发环境和生产环境不一致而导致的部署困难, 而且，容器化之后还可以对应用所使用的CPU、内存等资源做限制，这些都是容器化之后的可以带来的方便。这篇文章将会将如何build Docker镜像(最小化build), 容器化你的Golang应用。&lt;br&gt;
     
     </summary>
     
@@ -633,9 +635,9 @@
       <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
     
     
-      <category term="gRPC" scheme="https://blog.yumaojun.net/tags/gRPC/"/>
-    
       <category term="APIGateway" scheme="https://blog.yumaojun.net/tags/APIGateway/"/>
+    
+      <category term="gRPC" scheme="https://blog.yumaojun.net/tags/gRPC/"/>
     
   </entry>
   
@@ -772,9 +774,9 @@
       <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
     
     
-      <category term="gRPC" scheme="https://blog.yumaojun.net/tags/gRPC/"/>
-    
       <category term="APIGateway" scheme="https://blog.yumaojun.net/tags/APIGateway/"/>
+    
+      <category term="gRPC" scheme="https://blog.yumaojun.net/tags/gRPC/"/>
     
   </entry>
   
