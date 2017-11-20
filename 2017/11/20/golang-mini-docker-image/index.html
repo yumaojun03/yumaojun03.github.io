@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="swagger," />
+  <meta name="keywords" content="build," />
 
 
 
@@ -81,19 +81,18 @@
 
 
 
-<meta name="keywords" content="swagger">
+<meta name="description" content="我们知道构建一个Docker镜像的时候往往需要引入一些程序依赖的东西，最常见的就是引入一个基础操作系统镜像，但这样往往会使得编译出来的镜像特别大。就拿Python来说, 之前build的镜像一般都大于600M, 如果这个项目是内部项目, 其实问题不大, 因为内网一般也会搭建镜像仓库, 内网数据也快, 但是如果是开源项目, 镜像过大就是个问题。对拉取者带宽要求较高, 而Docker hub的速度大家">
+<meta name="keywords" content="build">
 <meta property="og:type" content="article">
-<meta property="og:title" content="如何使用swagger设计出漂亮的RESTful API">
-<meta property="og:url" content="https://blog.yumaojun.net/2017/01/05/api-design-swagger/index.html">
+<meta property="og:title" content="构建Golang程序最小Docker镜像">
+<meta property="og:url" content="https://blog.yumaojun.net/2017/11/20/golang-mini-docker-image/index.html">
 <meta property="og:site_name" content="紫川秀的博客">
+<meta property="og:description" content="我们知道构建一个Docker镜像的时候往往需要引入一些程序依赖的东西，最常见的就是引入一个基础操作系统镜像，但这样往往会使得编译出来的镜像特别大。就拿Python来说, 之前build的镜像一般都大于600M, 如果这个项目是内部项目, 其实问题不大, 因为内网一般也会搭建镜像仓库, 内网数据也快, 但是如果是开源项目, 镜像过大就是个问题。对拉取者带宽要求较高, 而Docker hub的速度大家">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/swagger_example.png">
-<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/swagger_gen_server_code.png">
-<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/swagger_gen_client_code.png">
-<meta property="og:updated_time" content="2017-11-18T03:54:07.000Z">
+<meta property="og:updated_time" content="2017-11-20T09:06:41.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="如何使用swagger设计出漂亮的RESTful API">
-<meta name="twitter:image" content="http://oiw1gzfww.bkt.clouddn.com/swagger_example.png">
+<meta name="twitter:title" content="构建Golang程序最小Docker镜像">
+<meta name="twitter:description" content="我们知道构建一个Docker镜像的时候往往需要引入一些程序依赖的东西，最常见的就是引入一个基础操作系统镜像，但这样往往会使得编译出来的镜像特别大。就拿Python来说, 之前build的镜像一般都大于600M, 如果这个项目是内部项目, 其实问题不大, 因为内网一般也会搭建镜像仓库, 内网数据也快, 但是如果是开源项目, 镜像过大就是个问题。对拉取者带宽要求较高, 而Docker hub的速度大家">
 
 
 
@@ -123,13 +122,13 @@
 
 
 
-  <link rel="canonical" href="https://blog.yumaojun.net/2017/01/05/api-design-swagger/"/>
+  <link rel="canonical" href="https://blog.yumaojun.net/2017/11/20/golang-mini-docker-image/"/>
 
 
 
 
 
-  <title>如何使用swagger设计出漂亮的RESTful API | 紫川秀的博客</title>
+  <title>构建Golang程序最小Docker镜像 | 紫川秀的博客</title>
   
 
 
@@ -266,7 +265,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/01/05/api-design-swagger/">
+    <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/11/20/golang-mini-docker-image/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="紫川秀">
@@ -283,7 +282,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">如何使用swagger设计出漂亮的RESTful API</h1>
+          <h1 class="post-title" itemprop="name headline">构建Golang程序最小Docker镜像</h1>
         
 
         <div class="post-meta">
@@ -295,8 +294,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-01-05T13:19:16+08:00">
-                2017-01-05
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-20T09:26:22+08:00">
+                2017-11-20
               </time>
             
 
@@ -311,8 +310,8 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2017-11-18T11:54:07+08:00">
-                2017-11-18
+              <time title="更新于" itemprop="dateModified" datetime="2017-11-20T17:06:41+08:00">
+                2017-11-20
               </time>
             
           </span>
@@ -330,8 +329,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/程序设计/" itemprop="url" rel="index">
-                    <span itemprop="name">程序设计</span>
+                  <a href="/categories/开发语言/" itemprop="url" rel="index">
+                    <span itemprop="name">开发语言</span>
                   </a>
                 </span>
 
@@ -341,8 +340,8 @@
                 
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/程序设计/RESTful-API/" itemprop="url" rel="index">
-                    <span itemprop="name">RESTful API</span>
+                  <a href="/categories/开发语言/Golang/" itemprop="url" rel="index">
+                    <span itemprop="name">Golang</span>
                   </a>
                 </span>
 
@@ -358,7 +357,7 @@
 
           
           
-             <span id="/2017/01/05/api-design-swagger/" class="leancloud_visitors" data-flag-title="如何使用swagger设计出漂亮的RESTful API">
+             <span id="/2017/11/20/golang-mini-docker-image/" class="leancloud_visitors" data-flag-title="构建Golang程序最小Docker镜像">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -389,220 +388,30 @@
       
 
       
-        <p><img src="http://oiw1gzfww.bkt.clouddn.com/swagger_example.png" alt=""><br><a id="more"></a></p>
-<p>按照现在的趋势，前后端分离几乎已经是业界对开发和部署方式所达成的一种共识, 后台只负责数据的提供和计算，而完全不处理展现。而前端则负责拿到数据，组织数据并展现的工作。这样结构清晰，关注点分离，前后端会变得相对独立并松耦合。而前段和后端对待的契约就是API设计文档, 有了API的设计文档过后, 后端依据设计文件开发后端程序, 前段根据API设计文档模拟服务器,开发前段页面。而<code>Swagger</code>就是其中一种比较优秀的 <code>RESTful API</code>设计工具。</p>
-<h2 id="swagger-工具简介"><a href="#swagger-工具简介" class="headerlink" title="swagger 工具简介"></a>swagger 工具简介</h2><p>swagger是一个RESTful API 的设计工具，官方提供3种工具：</p>
+        <p>我们知道构建一个Docker镜像的时候往往需要引入一些程序依赖的东西，最常见的就是引入一个基础操作系统镜像，但这样往往会使得编译出来的镜像特别大。就拿Python来说, 之前build的镜像一般都大于600M, 如果这个项目是内部项目, 其实问题不大, 因为内网一般也会搭建镜像仓库, 内网数据也快, 但是如果是开源项目, 镜像过大就是个问题。对拉取者带宽要求较高, 而Docker hub的速度大家也都知道, 当然如果你使用镜像加速体验会好很多。但是如果能做到把镜像变小, 做到几M, 几十M那么对于你项目的使用者来说体验会好很多. 因为Go是静态编译语言, 可以做到0依赖, 因此可以构建很小的程序镜像, 但是其实还是有些小插曲, 这也就是这篇文章出现的原因.<br><a id="more"></a></p>
+<h2 id="程序样例"><a href="#程序样例" class="headerlink" title="程序样例"></a>程序样例</h2><p>这里以一个简单的hello world的WEB API程序为例:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"log"</span></div><div class="line">	<span class="string">"net/http"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="comment">// greeter hello world example</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">greeter</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> &#123;</div><div class="line">	w.Write([]<span class="keyword">byte</span>(<span class="string">"hello world!"</span>))</div><div class="line">	w.WriteHeader(http.StatusOK)</div><div class="line">	<span class="keyword">return</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	http.HandleFunc(<span class="string">"/"</span>, greeter)</div><div class="line">	addr := <span class="string">"0.0.0.0:8080"</span></div><div class="line">	log.Printf(<span class="string">"start service at: %s ... \n"</span>, addr)</div><div class="line">	err := http.ListenAndServe(addr, <span class="literal">nil</span>)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		log.Fatal(<span class="string">"ListenAndServe: "</span>, err)</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>最终会把这个程序打包成一个最小的docker镜像进行发布, 让我们看看这样一个镜像build出来过后到底有多大。</p>
+<h2 id="编译时的问题"><a href="#编译时的问题" class="headerlink" title="编译时的问题"></a>编译时的问题</h2><p>编译时的主要问题就是如果将Golang程序编译成一个真正没有依赖的二进制程序, 也许有人会问Go本身不就是静态编译吗？这里就需要聊聊Golang里面CGO了。</p>
 <ol>
-<li><code>swagger-editor</code> 在线编辑器，同时提供编辑-展现-客户端-服务端代码的生成</li>
-<li><code>swagger-ui</code> 展示工具，将编辑器定义好的json描述文件友好展示的工具。</li>
-<li><code>swagger-codegen</code> 生成服务端和客户端的代码。</li>
-</ol>
-<p>因为swagger-editor集成了swagger-codegen功能，因此我们仅需要使用swagger-editor和swagger-ui就够了。</p>
-<h2 id="编辑器-editor"><a href="#编辑器-editor" class="headerlink" title="编辑器(editor)"></a>编辑器(editor)</h2><p>可以使用在线编辑器，而由于网络原因, 往往不能很好的使用swagger提供的在线编辑器，然而这个在线编辑器也可以本地部署，其次有很多编辑器也有swagger的插件, 通过按照swagger插件，我们也可以配置出一个swagger的编辑器。有了编辑器后，我们需要熟悉使用swagger来设计API的一些语法。</p>
-<h3 id="部署本地编辑器"><a href="#部署本地编辑器" class="headerlink" title="部署本地编辑器"></a>部署本地编辑器</h3><p>安装docker，配置镜像加速，然后拉去镜像到本地运行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">docker pull swaggerapi/swagger-editor</div><div class="line">docker run -p 80:8080 swaggerapi/swagger-editor</div></pre></td></tr></table></figure></p>
-<h3 id="使用本地编辑器"><a href="#使用本地编辑器" class="headerlink" title="使用本地编辑器"></a>使用本地编辑器</h3><p>推荐使用<code>vscode</code>作为编辑器, 安装vscode的<code>Swagger View</code>插件 就可以打造一个 swagger的编辑器了采用yaml编写，然后使用Swagger Preview 查看预览。</p>
-<h3 id="swagger2-0语法"><a href="#swagger2-0语法" class="headerlink" title="swagger2.0语法"></a>swagger2.0语法</h3><p>详情参考<a href="http://swagger.io/specification/" target="_blank" rel="external">swagger2.0官方规范</a></p>
-<ul>
-<li><p>格式<br>采用json， 因为yaml是json的一个超集，因此也可以使用。通常情况我们通过yaml来完成编辑，最后通过编辑器导出为json文件。</p>
+<li><p>关于<code>-installsuffix cgo</code>参数<br>Go1.5版本之前，Go里面的一些库函数是用C实现的(网络方面的居多), 也就是CGO。如果你的代码中使用了这些C实现的库函数，那你就要加上<code>-installsuffix cgo</code>这个参数，让它编译的时候去CGO里面找，否则编译时会报错。但是Go1.5版本开始实现了自举，所有的标准库都是用Go代码实现，就不存在这个问题了。所以，如果你的Go版本是1.5之前的，最好加上这个参数，当然如果你的代码中没用使用C实现的库，那不加也不会报错。如果你的Go是1.5及之后的版本，就不需要再加这个参数了。</p>
 </li>
-<li><p>文件结构<br>为一个单独的文件，但是其中definitions部分可以被抽出来为一个独立文件，通过$ref进行引用，按照惯例，这个文件应该被命名为 swagger.json</p>
-</li>
-<li><p>数据类型<br>用于描述一个数据的数据类型，对象定义时使用。</p>
-</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>Common Name</th>
-<th style="text-align:center">type</th>
-<th style="text-align:center">format</th>
-<th style="text-align:right">Comments</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>integer</td>
-<td style="text-align:center">integer</td>
-<td style="text-align:center">int32</td>
-<td style="text-align:right">signed 32 bits</td>
-</tr>
-<tr>
-<td>long</td>
-<td style="text-align:center">integer</td>
-<td style="text-align:center">int64</td>
-<td style="text-align:right">signed 64 bits</td>
-</tr>
-<tr>
-<td>float</td>
-<td style="text-align:center">number</td>
-<td style="text-align:center">float</td>
-<td style="text-align:right"></td>
-</tr>
-<tr>
-<td>double</td>
-<td style="text-align:center">number</td>
-<td style="text-align:center">double</td>
-<td style="text-align:right"></td>
-</tr>
-<tr>
-<td>string</td>
-<td style="text-align:center">string</td>
-<td style="text-align:center"></td>
-<td style="text-align:right"></td>
-</tr>
-<tr>
-<td>byte</td>
-<td style="text-align:center">string</td>
-<td style="text-align:center">byte</td>
-<td style="text-align:right">base64 encoded characters</td>
-</tr>
-<tr>
-<td>binary</td>
-<td style="text-align:center">string</td>
-<td style="text-align:center">binary</td>
-<td style="text-align:right">any sequence of octets</td>
-</tr>
-<tr>
-<td>boolean</td>
-<td style="text-align:center">boolean</td>
-<td style="text-align:center"></td>
-<td style="text-align:right"></td>
-</tr>
-<tr>
-<td>date</td>
-<td style="text-align:center">string</td>
-<td style="text-align:center">date</td>
-<td style="text-align:right">As defined by full-date - RFC3339</td>
-</tr>
-<tr>
-<td>dateTime</td>
-<td style="text-align:center">string</td>
-<td style="text-align:center">date-time</td>
-<td style="text-align:right">As defined by date-time - RFC3339</td>
-</tr>
-<tr>
-<td>password</td>
-<td style="text-align:center">string</td>
-<td style="text-align:center">password</td>
-<td style="text-align:right">Used to hint UIs the input needs to be obscured.</td>
-</tr>
-</tbody>
-</table>
-<ul>
-<li>规范<br>规范也就是语法，会安装此规范来编写API设计文档。以下列出了所有需要的关键字段</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>字段名</th>
-<th style="text-align:center">类型</th>
-<th style="text-align:right">描述    </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>swagger</td>
-<td style="text-align:center">string</td>
-<td style="text-align:right">必填项。表示使用的swagger的版本，必须为2.0</td>
-</tr>
-<tr>
-<td>info</td>
-<td style="text-align:center"><a href="http://swagger.io/specification/#infoObject" target="_blank" rel="external">Info Object</a></td>
-<td style="text-align:right">必填项。提供API的一些元数据描述</td>
-</tr>
-<tr>
-<td>host</td>
-<td style="text-align:center">string</td>
-<td style="text-align:right">提供该API服务的主机名称或者IP，测试时 使用该地址进程测试。</td>
-</tr>
-<tr>
-<td>basePath</td>
-<td style="text-align:center">string</td>
-<td style="text-align:right">API的基本路径,这是相对的host。 如果不包括,API是直属host。 必须以”/“开头</td>
-</tr>
-<tr>
-<td>schemes</td>
-<td style="text-align:center">[string]</td>
-<td style="text-align:right">API的传输协议的列表。 在”http”,”https”,”ws”,”wss”其中选择</td>
-</tr>
-<tr>
-<td>consumes</td>
-<td style="text-align:center">[string]</td>
-<td style="text-align:right">一个MIME类型的api可以使用列表。 值必须是所描述的Mime类型</td>
-</tr>
-<tr>
-<td>produces</td>
-<td style="text-align:center">[string]</td>
-<td style="text-align:right">MIME类型的api可以产生的列表。   值必须是所描述的Mime类型</td>
-</tr>
-<tr>
-<td>paths</td>
-<td style="text-align:center"><a href="http://swagger.io/specification/#pathsObject" target="_blank" rel="external">路径对象</a></td>
-<td style="text-align:right">必填项。可用的路径和操作的API</td>
-</tr>
-<tr>
-<td>definitions</td>
-<td style="text-align:center"><a href="http://swagger.io/specification/#definitionsObject" target="_blank" rel="external">定义对象</a></td>
-<td style="text-align:right">一个对象数据类型定义</td>
-</tr>
-<tr>
-<td>parameters</td>
-<td style="text-align:center"><a href="http://swagger.io/specification/#parametersDefinitionsObject" target="_blank" rel="external">参数定义对象</a></td>
-<td style="text-align:right">定义请求参数的对象</td>
-</tr>
-<tr>
-<td>responses</td>
-<td style="text-align:center"><a href="http://swagger.io/specification/#responsesDefinitionsObject" target="_blank" rel="external">反应定义对象</a></td>
-<td style="text-align:right">定义请求响应对象</td>
-</tr>
-<tr>
-<td>securityDefinitions</td>
-<td style="text-align:center"><a href="http://swagger.io/specification/#securityDefinitionsObject" target="_blank" rel="external">安全定义对象</a></td>
-<td style="text-align:right">安全方案定义规范,比如认证</td>
-</tr>
-<tr>
-<td>security</td>
-<td style="text-align:center"><a href="http://swagger.io/specification/#securityRequirementObject" target="_blank" rel="external">安全需求对象</a></td>
-<td style="text-align:right">这里主要指使用哪种认证手段</td>
-</tr>
-<tr>
-<td>tags</td>
-<td style="text-align:center"><a href="http://swagger.io/specification/#tagObject" target="_blank" rel="external">标签对象</a></td>
-<td style="text-align:right">没个RESTful中资源的标签，列表中的每个标记名称必须是唯一的</td>
-</tr>
-<tr>
-<td>externalDocs</td>
-<td style="text-align:center"><a href="http://swagger.io/specification/#externalDocumentationObject" target="_blank" rel="external">外部文档对象</a></td>
-<td style="text-align:right">额外的外部文档, 指向外部url</td>
-</tr>
-</tbody>
-</table>
-<h2 id="渲染器-ui"><a href="#渲染器-ui" class="headerlink" title="渲染器(ui)"></a>渲染器(ui)</h2><p>swagger-ui的使用很简单<a href="http://swagger.io/docs/" target="_blank" rel="external">swager-ui官方文档</a></p>
-<h3 id="HTML文档渲染"><a href="#HTML文档渲染" class="headerlink" title="HTML文档渲染"></a>HTML文档渲染</h3><p>渲染器使用官方的swagger-ui，这里我们需要一个web服务器，用来渲染我们刚才编辑完成的api 设计文档。这里一般使用node 的 express为web框架来做这个简单的web服务器</p>
-<h3 id="PDF文档渲染"><a href="#PDF文档渲染" class="headerlink" title="PDF文档渲染"></a>PDF文档渲染</h3><p>将API设计文档渲染成PDF, 流程是这样: swagger.yaml —&gt; asciiDoc—&gt; pdf</p>
-<ul>
-<li><p>使用<a href="https://github.com/Swagger2Markup/swagger2markup" target="_blank" rel="external">swagger2markup</a>来生成asciiDoc格式的文档<br>下载swagger2markup工具,<a href="http://repo.springsource.org/libs-release-remote/io/github/swagger2markup/swagger2markup-cli/" target="_blank" rel="external">下载地址</a>,选择你想要的版本下载<br>使用工具生成asciiDoc, -i指定swagger.yaml的位置, -f指定输出文件名称：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java -jar swagger2markup-cli-1.1.0.jar convert -i ~/PycharmProjects/doc/api_design/swagger.yaml <span class="_">-f</span> asiidoc/swagger</div></pre></td></tr></table></figure>
-</li>
-<li><p>使用<a href="http://asciidoctor.org/docs/convert-asciidoc-to-pdf/" target="_blank" rel="external">asciidoctor</a>来将asciiDoc换换成PDF<br>这是一个ruby写的工具，我本地不打算部署ruby环境，因此在找一个docker镜像：<code>madduci/docker-asciidoctor-pdf</code><br>由于访问dockerhub的镜像速度非常慢，因此我将该工具的使用说明复制了下来，<a href="https://store.docker.com/community/images/madduci/docker-asciidoctor-pdf" target="_blank" rel="external">镜像使用说明</a></p>
-<blockquote>
-<p>Docker Image exposing asciidoctor-pdf as entrypoint and /document as mounted volume where to build the file<br>To build your own documents as PDF, simply run the container as:<br>docker run –rm -v /path/to/your/document/folder/:/document/ madduci/docker-asciidoctor-pdf /document/your_document.adoc<br>If you want to use some custom styles, just run it as<br>docker run –rm -v /path/to/your/document/folder/:/document/ madduci/docker-asciidoctor-pdf -a pdf-stylesdir=/document/resources/themes -a pdf-style=your_style -a pdf-fontsdir=/document/resources/fonts /document/your_document.adoc<br>and it will generate the pdf in the mounted volume /document</p>
-</blockquote>
-<p>这工具在生成含有中文的pdf文档时有字体问题，因此我修改了字体为微软雅黑字体，以下是修改方法：</p>
-<ol>
-<li><p>添加雅黑字体到当前的Fonts文件夹下面,这里需要标准字体和粗体, 而默认提供的字体只有这些<a href="https://github.com/asciidoctor/asciidoctor-pdf/tree/master/data/fonts" target="_blank" rel="external">默认提供的字体</a></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">➜  asiidoc ls Fonts |grep -i &apos;yahei&apos;</div><div class="line">Microsoft Yahei.ttf</div><div class="line">yahei.ttf</div><div class="line">yahei_bold.ttf</div></pre></td></tr></table></figure>
-</li>
-<li><p>修改主题配置<code>default-theme.yml</code>的<code>Noto Serif</code>字段，使用该字体:<br>配置文件下载地址<a href="https://github.com/asciidoctor/asciidoctor-pdf/tree/master/data/themes" target="_blank" rel="external">默认配置文件下载地址</a></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Noto Serif:</div><div class="line">normal: yahei.ttf</div><div class="line">bold: yahei_bold.ttf</div><div class="line">italic: yahei.ttf</div><div class="line">bold_italic: yahei_bold.tt</div></pre></td></tr></table></figure>
+<li><p>关于<code>CGO_ENABLED=0</code>参数<br>CGO_ENABLED=0表示静态编译cgo, 不会link系统上的一些动态链接库, 如果想要编译的二进制包正在无依赖, 这需要禁用CGO</p>
 </li>
 </ol>
-<p>最后把我们生成好的swagger.adoc, 主题配置文件,字体 放在一个目录下，挂载到docker里面去:</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">➜  Downloads ls asiidoc</div><div class="line">Fonts  swagger.adoc themes</div><div class="line">docker run --rm -v $(<span class="built_in">pwd</span>)/asiidoc/:/document/ madduci/docker-asciidoctor-pdf  <span class="_">-a</span> pdf-fontsdir=/document/Fonts <span class="_">-a</span> pdf-stylesdir=/document/themes /document/swagger.adoc</div></pre></td></tr></table></figure>
-<p>最后查看asiidoc下面就会有生成的pdf文件</p>
-</li>
+<p>有了上面2点, 我们一般会这样build我们的程序:<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 如果Golang&lt;1.5</span></div><div class="line">CGO_ENABLED=0 GOOS=linux go build <span class="_">-a</span> -v -installsuffix cgo -o app .</div><div class="line"><span class="comment"># 如果Golang&gt;1.5</span></div><div class="line">CGO_ENABLED=0 GOOS=linux go build <span class="_">-a</span> -v -o app .</div></pre></td></tr></table></figure></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">maojun@maojun-mbp $ du -sh app</div><div class="line">5.8M	app</div></pre></td></tr></table></figure>
+<p>这样我们就编译好了一个0依赖的二进制包, 打出来的包5.8M, 接下来我们将基于它制造docker镜像。</p>
+<h2 id="如何选择镜像的Base依赖"><a href="#如何选择镜像的Base依赖" class="headerlink" title="如何选择镜像的Base依赖"></a>如何选择镜像的Base依赖</h2><p>在选择我们打包好的二进制包的运行依赖时, 我一般会有这3种考虑:</p>
+<ul>
+<li>scratch: 它是一个特殊的镜像, 因为它是一个空镜像。但是它却是非常重要。我们知道Dockerfile文件必须以FROM开头，但如果我们的镜像真的是不依赖任何其他东西的时候，我们就可以FROM scratch。在Docker 1.5.0之后，FROM scratch已经变成一个空操作(no-op)，也就是说它不会再单独占一层了, 当然依赖这层的大小也就为0了, 因此基于此可以构建最小镜像。</li>
+<li>alpine: Alpine Linux是一个社区开发的面向安全应用的轻量级Linux发行版, 适合用来做Docker镜像、路由器、防火墙、VPNs、VoIP 盒子 以及服务器的操作系统，基于<code>uClibc</code>和<code>Busybox</code>, 大小只有3.97M。</li>
+<li>ubuntu: 这个不用多做介绍了, 如果你信不过alpine这也算一个不错的选择, ubuntu16.04的镜像大小为128M。</li>
 </ul>
-<h2 id="代码生成器-codegen"><a href="#代码生成器-codegen" class="headerlink" title="代码生成器(codegen)"></a>代码生成器(codegen)</h2><p>swagger能提供服务端和客户端的代码生成功能,这个功能在swagger-editor上已经集成<br>生成server端代码：<br><img src="http://oiw1gzfww.bkt.clouddn.com/swagger_gen_server_code.png" alt=""><br>生成客户端代码：<br><img src="http://oiw1gzfww.bkt.clouddn.com/swagger_gen_client_code.png" alt=""></p>
+<p>我们选择<code>alpine</code>作为base依赖, 因为它足够小, 而且是一个linux, 有shell环境, 以备有时需要进入容器。完整的Dockerfile如下:<br><figure class="highlight docker"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">FROM</span> alpine:latest</div><div class="line"></div><div class="line"><span class="keyword">ADD</span><span class="bash"> app /</span></div><div class="line"></div><div class="line"><span class="keyword">CMD</span><span class="bash"> [<span class="string">"/app"</span>]</span></div></pre></td></tr></table></figure></p>
+<h2 id="最终镜像大小"><a href="#最终镜像大小" class="headerlink" title="最终镜像大小"></a>最终镜像大小</h2><p>基于刚才写好的dockerfile进行build:<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"> maojun@maojun-mbp $ docker build -t app:v0.0.1 .</div><div class="line">Sending build context to Docker daemon  6.094MB</div><div class="line">Step 1/3 : FROM alpine:latest</div><div class="line"> ---&gt; 053cde6e8953</div><div class="line">Step 2/3 : ADD app /</div><div class="line"> ---&gt; 765750f573f1</div><div class="line">Step 3/3 : CMD /app</div><div class="line"> ---&gt; Running <span class="keyword">in</span> cb62cfd2ad1e</div><div class="line"> ---&gt; 188a3189d4f8</div><div class="line">Removing intermediate container cb62cfd2ad1e</div><div class="line">Successfully built 188a3189d4f8</div><div class="line">Successfully tagged app:v0.0.1</div></pre></td></tr></table></figure></p>
+<p>build出来的image大小:<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">app                              v0.0.1              188a3189d4f8        2 minutes ago       10.1MB</div></pre></td></tr></table></figure></p>
+<p>最后我们测试下build的镜像是否可以正常使用:<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"> maojun@maojun-mbp $ docker run -itd -p 8080:8080 app:v0.0.1</div><div class="line">9fe96a7868679f8be4e34905755dcd93343a70b9a0424791de2482647e69b2d8</div><div class="line"> maojun@maojun-mbp $ docker ps</div><div class="line">CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                    NAMES</div><div class="line">9fe96a786867        app:v0.0.1          <span class="string">"/app"</span>                   4 seconds ago       Up 2 seconds        0.0.0.0:8080-&gt;8080/tcp   hungry_kilby</div><div class="line"> maojun@maojun-mbp $ curl localhost:8080</div><div class="line">hello world!%</div></pre></td></tr></table></figure></p>
+<p>最终镜像大小: 10.1M, 并且带有shell, 如果你使用<code>scratch</code>构建估计只有6M多点, 但是实用性可能会有所降低。</p>
 
       
     </div>
@@ -644,7 +453,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/swagger/" rel="tag"># swagger</a>
+            <a href="/tags/build/" rel="tag"># build</a>
           
         </div>
       
@@ -657,8 +466,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/01/02/python-bestpractice/" rel="next" title="使用Python中的一些安全建议">
-                <i class="fa fa-chevron-left"></i> 使用Python中的一些安全建议
+              <a href="/2017/11/19/golang-cli-version/" rel="next" title="Golang程序版本管理">
+                <i class="fa fa-chevron-left"></i> Golang程序版本管理
               </a>
             
           </div>
@@ -666,10 +475,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/01/06/rest-api-design/" rel="prev" title="RESTful API 设计规范">
-                RESTful API 设计规范 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -854,7 +659,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#swagger-工具简介"><span class="nav-number">1.</span> <span class="nav-text">swagger 工具简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编辑器-editor"><span class="nav-number">2.</span> <span class="nav-text">编辑器(editor)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#部署本地编辑器"><span class="nav-number">2.1.</span> <span class="nav-text">部署本地编辑器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用本地编辑器"><span class="nav-number">2.2.</span> <span class="nav-text">使用本地编辑器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#swagger2-0语法"><span class="nav-number">2.3.</span> <span class="nav-text">swagger2.0语法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#渲染器-ui"><span class="nav-number">3.</span> <span class="nav-text">渲染器(ui)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#HTML文档渲染"><span class="nav-number">3.1.</span> <span class="nav-text">HTML文档渲染</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PDF文档渲染"><span class="nav-number">3.2.</span> <span class="nav-text">PDF文档渲染</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#代码生成器-codegen"><span class="nav-number">4.</span> <span class="nav-text">代码生成器(codegen)</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#程序样例"><span class="nav-number">1.</span> <span class="nav-text">程序样例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编译时的问题"><span class="nav-number">2.</span> <span class="nav-text">编译时的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何选择镜像的Base依赖"><span class="nav-number">3.</span> <span class="nav-text">如何选择镜像的Base依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最终镜像大小"><span class="nav-number">4.</span> <span class="nav-text">最终镜像大小</span></a></li></ol></div>
             
 
           </div>
