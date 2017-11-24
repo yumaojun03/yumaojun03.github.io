@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog.yumaojun.net/"/>
-  <updated>2017-11-23T15:36:31.000Z</updated>
+  <updated>2017-11-24T01:51:44.000Z</updated>
   <id>https://blog.yumaojun.net/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="https://blog.yumaojun.net/2017/11/22/golang-mongodb/"/>
     <id>https://blog.yumaojun.net/2017/11/22/golang-mongodb/</id>
     <published>2017-11-22T05:37:45.000Z</published>
-    <updated>2017-11-23T15:36:31.000Z</updated>
+    <updated>2017-11-24T01:51:44.000Z</updated>
     
     <content type="html"><![CDATA[<p>在上篇博客中介绍了NoSQL以及文档数据库, 这篇博客介绍当下最流行的文档数据库:MongoDB。<br><a id="more"></a></p>
 <h2 id="MongoDB简介"><a href="#MongoDB简介" class="headerlink" title="MongoDB简介"></a>MongoDB简介</h2><p>mongodb是一个基于分布式文件存储的数据库。由C++语言编写。旨在为WEB应用提供可扩展的高性能数据存储解决方案。它是一个介于关系数据库和非关系数据库之间的产品，是非关系数据库当中功能最丰富，最像关系数据库的。</p>
@@ -55,20 +55,18 @@
 <p>集合存在于数据库中，集合没有固定的结构(文档不需要设置相同的字段，并且相同的字段不需要相同的数据类型)，这意味着你在对集合可以插入不同格式和类型的数据，但通常情况下我们插入集合的数据都会有一定的关联性。这与关系型数据库有很大的区别，也是MongoDB非常突出的特点, 该特性被称作<code>schema free</code>。</p>
 <p>比如:<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&gt; db.students.<span class="function"><span class="title">find</span></span>()</div><div class="line">&#123; <span class="string">"_id"</span> : ObjectId(<span class="string">"5a162b109d83b8def7401002"</span>), <span class="string">"name"</span> : <span class="string">"Bob"</span>, <span class="string">"age"</span> : 22 &#125;</div><div class="line">&#123; <span class="string">"_id"</span> : ObjectId(<span class="string">"5a162b829d83b8def7401003"</span>), <span class="string">"name"</span> : <span class="string">"Bob"</span>, <span class="string">"money"</span> : 99 &#125;</div><div class="line">&#123; <span class="string">"_id"</span> : ObjectId(<span class="string">"5a162bbd9d83b8def7401004"</span>), <span class="string">"name"</span> : <span class="string">"Bob"</span>, <span class="string">"location"</span> : <span class="string">"chengdu"</span> &#125;</div></pre></td></tr></table></figure></p>
 <h2 id="mongo-shell的使用"><a href="#mongo-shell的使用" class="headerlink" title="mongo shell的使用"></a>mongo shell的使用</h2><p>正常安装完MongoDB过后会安装<code>mongodb-org-shell</code>包, 它是mongoDB的客户端工具, 我们使用它和MongoDB进行交互(就像MySQL的客户端工具一样).<br>通过help查看mongo-shell的使用方法:<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">&gt; <span class="built_in">help</span></div><div class="line">	db.help()                    <span class="built_in">help</span> on db methods</div><div class="line">	db.mycoll.help()             <span class="built_in">help</span> on collection methods</div><div class="line">	sh.help()                    sharding helpers</div><div class="line">	rs.help()                    replica <span class="built_in">set</span> helpers</div><div class="line">	<span class="built_in">help</span> admin                   administrative <span class="built_in">help</span></div><div class="line">	<span class="built_in">help</span> connect                 connecting to a db <span class="built_in">help</span></div><div class="line">	<span class="built_in">help</span> keys                    key shortcuts</div><div class="line">	<span class="built_in">help</span> misc                    misc things to know</div><div class="line">	<span class="built_in">help</span> mr                      mapreduce</div><div class="line"></div><div class="line">	show dbs                     show database names</div><div class="line">	show collections             show collections <span class="keyword">in</span> current database</div><div class="line">	show users                   show users <span class="keyword">in</span> current database</div><div class="line">	show profile                 show most recent system.profile entries with time &gt;= 1ms</div><div class="line">	show logs                    show the accessible logger names</div><div class="line">	show <span class="built_in">log</span> [name]              prints out the last segment of <span class="built_in">log</span> <span class="keyword">in</span> memory, <span class="string">'global'</span> is default</div><div class="line">	use &lt;db_name&gt;                <span class="built_in">set</span> current database</div><div class="line">	db.foo.find()                list objects <span class="keyword">in</span> collection foo</div><div class="line">	db.foo.find( &#123; a : 1 &#125; )     list objects <span class="keyword">in</span> foo <span class="built_in">where</span> a == 1</div><div class="line">	it                           result of the last line evaluated; use to further iterate</div><div class="line">	DBQuery.shellBatchSize = x   <span class="built_in">set</span> default number of items to display on shell</div><div class="line">	<span class="built_in">exit</span>                         quit the mongo shell</div><div class="line">&gt;</div></pre></td></tr></table></figure></p>
-<p>下面将演示如何使用mongo客户端对数据进行基本的增删改查:</p>
-<ul>
-<li><p>添加数据<br>语法: db.mycoll.insert(document)<br>用法: 在insert函数内传入你需要记录的json。</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&gt; db.students.insert(&#123;<span class="string">"name"</span>: <span class="string">"Bob"</span>, <span class="string">"age"</span>: 22&#125;)</div><div class="line">WriteResult(&#123; <span class="string">"nInserted"</span> : 1 &#125;)</div></pre></td></tr></table></figure>
-</li>
-<li><p>查看数据<br>语法: db.mycoll.find(query, projection)<br>参数: </p>
+<p>下面将演示如何使用mongo客户端对数据进行基本的增删改查</p>
+<h3 id="添加数据"><a href="#添加数据" class="headerlink" title="添加数据"></a>添加数据</h3><p>语法: db.mycoll.insert(document)<br>用法: 在insert函数内传入你需要记录的json。<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&gt; db.students.insert(&#123;<span class="string">"name"</span>: <span class="string">"Bob"</span>, <span class="string">"age"</span>: 22&#125;)</div><div class="line">WriteResult(&#123; <span class="string">"nInserted"</span> : 1 &#125;)</div></pre></td></tr></table></figure></p>
+<h3 id="查看数据"><a href="#查看数据" class="headerlink" title="查看数据"></a>查看数据</h3><p>语法: db.mycoll.find(query, projection)<br>参数: </p>
 <ul>
 <li>query: 可选，使用查询操作符指定查询条件 </li>
-<li>projection: 可选，使用投影操作符指定返回的键。查询时返回文档中所有键值， 只需省略该参数即可（默认省略）<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 查看所有</span></div><div class="line">&gt; db.students.<span class="function"><span class="title">find</span></span>()</div><div class="line">&#123; <span class="string">"_id"</span> : ObjectId(<span class="string">"5a1632029d83b8def7401005"</span>), <span class="string">"name"</span> : <span class="string">"Bob"</span>, <span class="string">"age"</span> : 22 &#125;</div><div class="line"><span class="comment"># 查看指定某个</span></div><div class="line">&gt; db.students.find(&#123;<span class="string">"name"</span>: <span class="string">"Bob"</span>&#125;);</div><div class="line">&#123; <span class="string">"_id"</span> : ObjectId(<span class="string">"5a1632029d83b8def7401005"</span>), <span class="string">"name"</span> : <span class="string">"Bob"</span>, <span class="string">"age"</span> : 22 &#125;</div><div class="line"><span class="comment"># 查看指定对象的指定字段(注意 1:代表要展现该字段, 0: 代表不展现该字段, 默认"_id"为要展示)</span></div><div class="line">&gt; db.students.find(&#123;<span class="string">"name"</span>: <span class="string">"Bob"</span>&#125;, &#123;<span class="string">"age"</span>: 1, <span class="string">"_id"</span>: 0&#125;);</div><div class="line">&#123; <span class="string">"age"</span> : 22 &#125;</div></pre></td></tr></table></figure>
-</li>
+<li>projection: 可选，使用投影操作符指定返回的键。查询时返回文档中所有键值， 只需省略该参数即可（默认省略）</li>
 </ul>
-</li>
-</ul>
-<p>是不是很简单, 当然不是, 来看看高级点的查询语法:<br>条件比较:</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 查看所有</span></div><div class="line">&gt; db.students.<span class="function"><span class="title">find</span></span>()</div><div class="line">&#123; <span class="string">"_id"</span> : ObjectId(<span class="string">"5a1632029d83b8def7401005"</span>), <span class="string">"name"</span> : <span class="string">"Bob"</span>, <span class="string">"age"</span> : 22 &#125;</div><div class="line"><span class="comment"># 查看指定某个</span></div><div class="line">&gt; db.students.find(&#123;<span class="string">"name"</span>: <span class="string">"Bob"</span>&#125;);</div><div class="line">&#123; <span class="string">"_id"</span> : ObjectId(<span class="string">"5a1632029d83b8def7401005"</span>), <span class="string">"name"</span> : <span class="string">"Bob"</span>, <span class="string">"age"</span> : 22 &#125;</div><div class="line"><span class="comment"># 查看指定对象的指定字段(注意 1:代表要展现该字段, 0: 代表不展现该字段, 默认"_id"为要展示)</span></div><div class="line">&gt; db.students.find(&#123;<span class="string">"name"</span>: <span class="string">"Bob"</span>&#125;, &#123;<span class="string">"age"</span>: 1, <span class="string">"_id"</span>: 0&#125;);</div><div class="line">&#123; <span class="string">"age"</span> : 22 &#125;</div></pre></td></tr></table></figure>
+<p>是不是很简单, 来看看高级点的查询语法:</p>
+<blockquote>
+<p>条件比较</p>
+</blockquote>
 <table>
 <thead>
 <tr>
@@ -120,7 +118,9 @@
 </tr>
 </tbody>
 </table>
+<blockquote>
 <p>条件组合</p>
+</blockquote>
 <table>
 <thead>
 <tr>
@@ -151,7 +151,9 @@
 </tr>
 </tbody>
 </table>
+<blockquote>
 <p>元素查询</p>
+</blockquote>
 <table>
 <thead>
 <tr>
@@ -177,21 +179,21 @@
 </tr>
 </tbody>
 </table>
+<h3 id="修改数据"><a href="#修改数据" class="headerlink" title="修改数据"></a>修改数据</h3><p>语法: db.mycoll.update(query, object[, upsert_bool, multi_bool])<br>参数: </p>
 <ul>
-<li>修改数据<br>语法: db.mycoll.update(query, object[, upsert_bool, multi_bool])<br>参数: <ul>
 <li>query: update的查询条件，类似sql update查询内where后面的。</li>
 <li>update: update的对象和一些更新的操作符（如$,$inc…）等，也可以理解为sql update查询内set后面的。 </li>
 <li>upsert: 可选，这个参数的意思是，如果不存在update的记录，是否插入objNew,true为插入，默认是false，不插入。</li>
-<li>multi: 可选，mongodb 默认是false,只更新找到的第一条记录，如果这个参数为true,就把按条件查出来多条记录全部更新。<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 我们先看看有哪些数据</span></div><div class="line">&gt; db.students.<span class="function"><span class="title">find</span></span>()</div><div class="line">&#123; <span class="string">"_id"</span> : ObjectId(<span class="string">"5a1632029d83b8def7401005"</span>), <span class="string">"name"</span> : <span class="string">"Bob"</span>, <span class="string">"age"</span> : 22 &#125;</div><div class="line">&#123; <span class="string">"_id"</span> : ObjectId(<span class="string">"5a16c89f4da8732f195b4000"</span>), <span class="string">"name"</span> : <span class="string">"Aollen"</span>, <span class="string">"age"</span> : 21 &#125;</div><div class="line">&#123; <span class="string">"_id"</span> : ObjectId(<span class="string">"5a16c8b74da8732f195b4001"</span>), <span class="string">"name"</span> : <span class="string">"tom"</span>, <span class="string">"age"</span> : 20 &#125;</div><div class="line"><span class="comment"># 更新指定对象</span></div><div class="line">&gt; db.students.update(&#123;<span class="string">"name"</span>: <span class="string">"Bob"</span>&#125;, &#123;<span class="variable">$set</span>:&#123;<span class="string">"age"</span>: 32&#125;&#125;)</div><div class="line">WriteResult(&#123; <span class="string">"nMatched"</span> : 1, <span class="string">"nUpserted"</span> : 0, <span class="string">"nModified"</span> : 1 &#125;)</div><div class="line"><span class="comment"># 按条件更新匹配到的第一条(SQL Where)</span></div><div class="line">&gt; db.students.update(&#123;<span class="string">"age"</span>: &#123;<span class="variable">$gt</span>: 20&#125;&#125;, &#123;<span class="variable">$set</span>:&#123;<span class="string">"age"</span>: 30&#125;&#125;)</div><div class="line">WriteResult(&#123; <span class="string">"nMatched"</span> : 1, <span class="string">"nUpserted"</span> : 0, <span class="string">"nModified"</span> : 1 &#125;)</div><div class="line"><span class="comment"># 按条件更新匹配到的所有(SQL Where)</span></div><div class="line">&gt; db.students.update(&#123;<span class="string">"age"</span>: &#123;<span class="variable">$gt</span>: 20&#125;&#125;, &#123;<span class="variable">$set</span>:&#123;<span class="string">"age"</span>: 30&#125;&#125;, <span class="literal">false</span>, <span class="literal">true</span>)</div><div class="line">WriteResult(&#123; <span class="string">"nMatched"</span> : 2, <span class="string">"nUpserted"</span> : 0, <span class="string">"nModified"</span> : 1 &#125;)</div></pre></td></tr></table></figure>
-</li>
+<li>multi: 可选，mongodb 默认是false,只更新找到的第一条记录，如果这个参数为true,就把按条件查出来多条记录全部更新。</li>
 </ul>
-</li>
-</ul>
-<p>高级点的语法:<br>更新第一个被匹配到的文档: db.mycoll.updateOne(filter, update, \<optional params\="">), 可选参数: upsert, w, wtimeout, j<br>更新所有被匹配到的文档: db.mycoll.updateMany(filter, update, \<optional params\="">),  可选参数: upsert, w, wtimeout, j</optional></optional></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 我们先看看有哪些数据</span></div><div class="line">&gt; db.students.<span class="function"><span class="title">find</span></span>()</div><div class="line">&#123; <span class="string">"_id"</span> : ObjectId(<span class="string">"5a1632029d83b8def7401005"</span>), <span class="string">"name"</span> : <span class="string">"Bob"</span>, <span class="string">"age"</span> : 22 &#125;</div><div class="line">&#123; <span class="string">"_id"</span> : ObjectId(<span class="string">"5a16c89f4da8732f195b4000"</span>), <span class="string">"name"</span> : <span class="string">"Aollen"</span>, <span class="string">"age"</span> : 21 &#125;</div><div class="line">&#123; <span class="string">"_id"</span> : ObjectId(<span class="string">"5a16c8b74da8732f195b4001"</span>), <span class="string">"name"</span> : <span class="string">"tom"</span>, <span class="string">"age"</span> : 20 &#125;</div><div class="line"><span class="comment"># 更新指定对象</span></div><div class="line">&gt; db.students.update(&#123;<span class="string">"name"</span>: <span class="string">"Bob"</span>&#125;, &#123;<span class="variable">$set</span>:&#123;<span class="string">"age"</span>: 32&#125;&#125;)</div><div class="line">WriteResult(&#123; <span class="string">"nMatched"</span> : 1, <span class="string">"nUpserted"</span> : 0, <span class="string">"nModified"</span> : 1 &#125;)</div><div class="line"><span class="comment"># 按条件更新匹配到的第一条(SQL Where)</span></div><div class="line">&gt; db.students.update(&#123;<span class="string">"age"</span>: &#123;<span class="variable">$gt</span>: 20&#125;&#125;, &#123;<span class="variable">$set</span>:&#123;<span class="string">"age"</span>: 30&#125;&#125;)</div><div class="line">WriteResult(&#123; <span class="string">"nMatched"</span> : 1, <span class="string">"nUpserted"</span> : 0, <span class="string">"nModified"</span> : 1 &#125;)</div><div class="line"><span class="comment"># 按条件更新匹配到的所有(SQL Where)</span></div><div class="line">&gt; db.students.update(&#123;<span class="string">"age"</span>: &#123;<span class="variable">$gt</span>: 20&#125;&#125;, &#123;<span class="variable">$set</span>:&#123;<span class="string">"age"</span>: 30&#125;&#125;, <span class="literal">false</span>, <span class="literal">true</span>)</div><div class="line">WriteResult(&#123; <span class="string">"nMatched"</span> : 2, <span class="string">"nUpserted"</span> : 0, <span class="string">"nModified"</span> : 1 &#125;)</div></pre></td></tr></table></figure>
+<p>高级点的语法:</p>
 <ul>
-<li>删除数据<br>语法: db.mycoll.remove(\<query\>)<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 删除指定的对象</span></div><div class="line">&gt; db.students.remove(&#123;<span class="string">"name"</span>: <span class="string">"Bob"</span>&#125;)</div><div class="line">WriteResult(&#123; <span class="string">"nRemoved"</span> : 1 &#125;)</div><div class="line"><span class="comment"># 删除该collection里面的所有对象</span></div><div class="line">&gt; db.students.remove(&#123;&#125;)</div><div class="line">WriteResult(&#123; <span class="string">"nRemoved"</span> : 2 &#125;)</div></pre></td></tr></table></figure>
-</query\></li>
+<li>更新第一个被匹配到的文档: db.mycoll.updateOne(filter, update, \<optional params="">), 可选参数: upsert, w, wtimeout, j</optional></li>
+<li>更新所有被匹配到的文档: db.mycoll.updateMany(filter, update, \<optional params="">),  可选参数: upsert, w, wtimeout, j</optional></li>
 </ul>
+<h3 id="删除数据"><a href="#删除数据" class="headerlink" title="删除数据"></a>删除数据</h3><p>语法: db.mycoll.remove(\<query>)</query></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 删除指定的对象</span></div><div class="line">&gt; db.students.remove(&#123;<span class="string">"name"</span>: <span class="string">"Bob"</span>&#125;)</div><div class="line">WriteResult(&#123; <span class="string">"nRemoved"</span> : 1 &#125;)</div><div class="line"><span class="comment"># 删除该collection里面的所有对象</span></div><div class="line">&gt; db.students.remove(&#123;&#125;)</div><div class="line">WriteResult(&#123; <span class="string">"nRemoved"</span> : 2 &#125;)</div></pre></td></tr></table></figure>
 <h2 id="mongo-golang驱动mgo的使用"><a href="#mongo-golang驱动mgo的使用" class="headerlink" title="mongo golang驱动mgo的使用"></a>mongo golang驱动mgo的使用</h2><p>在mongodb的驱动里面Golang驱动推荐使用<code>mgo</code>.<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">go get gopkg.in/mgo.v2</div></pre></td></tr></table></figure></p>
 <p>在使用之前我们先看看连接MongoDB的URI Format: <code>mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database][?options]]</code><br>参数说明:</p>
 <ul>
@@ -850,9 +852,9 @@
       <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
     
     
-      <category term="gRPC" scheme="https://blog.yumaojun.net/tags/gRPC/"/>
-    
       <category term="APIGateway" scheme="https://blog.yumaojun.net/tags/APIGateway/"/>
+    
+      <category term="gRPC" scheme="https://blog.yumaojun.net/tags/gRPC/"/>
     
   </entry>
   
@@ -989,9 +991,9 @@
       <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
     
     
-      <category term="gRPC" scheme="https://blog.yumaojun.net/tags/gRPC/"/>
-    
       <category term="APIGateway" scheme="https://blog.yumaojun.net/tags/APIGateway/"/>
+    
+      <category term="gRPC" scheme="https://blog.yumaojun.net/tags/gRPC/"/>
     
   </entry>
   
