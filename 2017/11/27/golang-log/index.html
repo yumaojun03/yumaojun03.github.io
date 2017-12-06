@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="log," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="紫川秀的博客" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="因为标准库的日志库缺少Log Level, 如果基于标准库扩展自己的logger也需要花一点时间, 看github的上很多开源项目都使用一个叫logrus的模块, 于是研究了下, 发现它具有高度的灵活性, 而且已经有很多写好了的插件, 比如和logstach对接的插件,所以项目后面就切换日志模块为logrus, 这篇博客就是介绍我们使用logrus时遇到的坑, 以及一些解决之道。">
+<meta name="keywords" content="log">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Golang日志之logrus的使用">
+<meta property="og:url" content="https://blog.yumaojun.net/2017/11/27/golang-log/index.html">
+<meta property="og:site_name" content="紫川秀的博客">
+<meta property="og:description" content="因为标准库的日志库缺少Log Level, 如果基于标准库扩展自己的logger也需要花一点时间, 看github的上很多开源项目都使用一个叫logrus的模块, 于是研究了下, 发现它具有高度的灵活性, 而且已经有很多写好了的插件, 比如和logstach对接的插件,所以项目后面就切换日志模块为logrus, 这篇博客就是介绍我们使用logrus时遇到的坑, 以及一些解决之道。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-12-06T09:35:49.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Golang日志之logrus的使用">
+<meta name="twitter:description" content="因为标准库的日志库缺少Log Level, 如果基于标准库扩展自己的logger也需要花一点时间, 看github的上很多开源项目都使用一个叫logrus的模块, 于是研究了下, 发现它具有高度的灵活性, 而且已经有很多写好了的插件, 比如和logstach对接的插件,所以项目后面就切换日志模块为logrus, 这篇博客就是介绍我们使用logrus时遇到的坑, 以及一些解决之道。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://blog.yumaojun.net/2017/11/27/golang-log/"/>
+
+
+
+
+
+  <title>Golang日志之logrus的使用 | 紫川秀的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">紫川秀的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">比你优秀的人不可怕,可怕的是比你优秀的人比你更努力。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2017/11/27/golang-log/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="紫川秀">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://oiw1gzfww.bkt.clouddn.com/me.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="紫川秀的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Golang日志之logrus的使用</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-27T13:04:55+08:00">
+                2017-11-27
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2017-12-06T17:35:49+08:00">
+                2017-12-06
+              </time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开发语言/" itemprop="url" rel="index">
+                    <span itemprop="name">开发语言</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开发语言/Golang/" itemprop="url" rel="index">
+                    <span itemprop="name">Golang</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/11/27/golang-log/" class="leancloud_visitors" data-flag-title="Golang日志之logrus的使用">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>因为标准库的日志库缺少Log Level, 如果基于标准库扩展自己的logger也需要花一点时间, 看github的上很多开源项目都使用一个叫logrus的模块, 于是研究了下, 发现它具有高度的灵活性, 而且已经有很多写好了的插件, 比如和logstach对接的插件,所以项目后面就切换日志模块为logrus, 这篇博客就是介绍我们使用logrus时遇到的坑, 以及一些解决之道。<br><a id="more"></a></p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p><a href="https://github.com/sirupsen/logrus" target="_blank" rel="external">logrus</a>在github上相当受欢迎, 截止目前为止已经6k+的star了, 在很多开源项目中被使用, 比如docker, prometheus等使用该库进行日志记录.<br>官方声称API完全兼容标准包logger, 项目地址: <a href="https://github.com/sirupsen/logrus" target="_blank" rel="external">logrus github 地址</a>, 因此如果你之前项目使用的标准库那么可以无缝迁移.<br>logrus是一个结构化的、可插拔的日志记录器, 你可以通过插件将你的日志发往任意地方, 比如文件, 标准输出, logstash, influxdb, …。这正式它最吸引人的地方。</p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><p>logrus有6个日志等级, 分别为: Debug,Info,Warn,Error,Fatal,Panic, 经过简单的配置就可以使用了。<br>logrus有2种formater, 分别是: JSONFormatter, TextFormatter, 当然如果你觉得都不是你想要的, 可以通过实现Formatter接口定制自己的formater</p>
+<h3 id="基础使用"><a href="#基础使用" class="headerlink" title="基础使用"></a>基础使用</h3><p>当初始化好logrus后, 可以直接调用Debug等进行日志记录。<br>WithFields是一个很好用的功能, 它用于记录你这条message的一些元数据信息, 比如你可以记录是有那个访问触发的(request_id)</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"os"</span></div><div class="line">	<span class="string">"github.com/sirupsen/logrus"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	logrus.WithFields(logrus.Fields&#123;<span class="string">"animal"</span>: <span class="string">"walrus"</span>,<span class="string">"size"</span>: <span class="number">10</span>&#125;).Info(<span class="string">"A group of walrus emerges from the ocean"</span>)</div><div class="line">	logrus.WithFields(logrus.Fields&#123;<span class="string">"request_id"</span>: <span class="string">"requestA"</span>&#125;).Warn(<span class="string">"The group's number increased tremendously!"</span>)</div><div class="line">	logrus.WithFields(logrus.Fields&#123;<span class="string">"request_id"</span>: <span class="string">"requestB"</span>&#125;).Fatal(<span class="string">"The ice breaks!"</span>)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">init</span><span class="params">()</span></span> &#123;</div><div class="line">	<span class="comment">// 以JSON格式为输出，代替默认的ASCII格式</span></div><div class="line">	logrus.SetFormatter(&amp;logrus.JSONFormatter&#123;&#125;)</div><div class="line">	<span class="comment">// 以Stdout为输出，代替默认的stderr</span></div><div class="line">	logrus.SetOutput(os.Stdout)</div><div class="line">	<span class="comment">// 设置日志等级</span></div><div class="line">	logrus.SetLevel(logrus.WarnLevel)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="使用Logger"><a href="#使用Logger" class="headerlink" title="使用Logger"></a>使用Logger</h3><p>logger是一种相对高级的用法, 对于一个大型项目, 往往需要一个全局的logger对象, 用于记录项目所有的日志</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">logger := logrus.New()</div><div class="line">logger.Formatter = &amp;logrus.JSONFormatter&#123;&#125;</div><div class="line"></div><div class="line"><span class="comment">// Use logrus for standard log output</span></div><div class="line"><span class="comment">// Note that `log` here references stdlib's log</span></div><div class="line"><span class="comment">// Not logrus imported under the name `log`.</span></div><div class="line">log.SetOutput(logger.Writer())</div></pre></td></tr></table></figure>
+<h3 id="Hook"><a href="#Hook" class="headerlink" title="Hook"></a>Hook</h3><p>官方有很多现成的Hook, 可以实现 记录日志到文件(日志文件轮转), 记录到kafka, 记录到influxDB, 记录到MySQL…</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> (</div><div class="line">  log <span class="string">"github.com/sirupsen/logrus"</span></div><div class="line">  <span class="string">"gopkg.in/gemnasium/logrus-airbrake-hook.v2"</span> <span class="comment">// the package is named "aibrake"</span></div><div class="line">  logrus_syslog <span class="string">"github.com/sirupsen/logrus/hooks/syslog"</span></div><div class="line">  <span class="string">"log/syslog"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">init</span><span class="params">()</span></span> &#123;</div><div class="line"></div><div class="line">  <span class="comment">// Use the Airbrake hook to report errors that have Error severity or above to</span></div><div class="line">  <span class="comment">// an exception tracker. You can create custom hooks, see the Hooks section.</span></div><div class="line">  log.AddHook(airbrake.NewHook(<span class="number">123</span>, <span class="string">"xyz"</span>, <span class="string">"production"</span>))</div><div class="line"></div><div class="line">  hook, err := logrus_syslog.NewSyslogHook(<span class="string">"udp"</span>, <span class="string">"localhost:514"</span>, syslog.LOG_INFO, <span class="string">""</span>)</div><div class="line">  <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">    log.Error(<span class="string">"Unable to connect to local syslog daemon"</span>)</div><div class="line">  &#125; <span class="keyword">else</span> &#123;</div><div class="line">    log.AddHook(hook)</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>下面这个问题是我们遇到的最郁闷的问题, 因为就连标准库都已经实现的功能,没想到logrus会不提供。</p>
+<h3 id="不记录文件名和行号"><a href="#不记录文件名和行号" class="headerlink" title="不记录文件名和行号"></a>不记录文件名和行号</h3><p>使用logrus有一个很要命的问题: 不会记录日志打印的行号和文件名, 这在排错时会显得很不方便, 而github上关于<a href="https://github.com/sirupsen/logrus/issues/63" target="_blank" rel="external">log filename and line number</a>的issue已经挂了3年了, 大家解决的办法大致为2类:</p>
+<ul>
+<li><p>自己写hook来记录</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">type</span> ContextHook <span class="keyword">struct</span> &#123;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(hook ContextHook)</span> <span class="title">Levels</span><span class="params">()</span> []<span class="title">log</span>.<span class="title">Level</span></span> &#123;</div><div class="line">    <span class="keyword">return</span> log.AllLevels</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(hook ContextHook)</span> <span class="title">Fire</span><span class="params">(entry *log.Entry)</span> <span class="title">error</span></span> &#123;</div><div class="line">    <span class="keyword">if</span> pc, file, line, ok := runtime.Caller(<span class="number">8</span>); ok &#123;</div><div class="line">        funcName := runtime.FuncForPC(pc).Name()</div><div class="line"></div><div class="line">        entry.Data[<span class="string">"file"</span>] = path.Base(file)</div><div class="line">        entry.Data[<span class="string">"func"</span>] = path.Base(funcName)</div><div class="line">        entry.Data[<span class="string">"line"</span>] = line</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">return</span> <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">    log.AddHook(ContextHook&#123;&#125;)</div><div class="line">        …</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>通过装饰器模式来包装一层</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> logger</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"net/http"</span></div><div class="line">	<span class="string">"runtime"</span></div><div class="line">	<span class="string">"strings"</span></div><div class="line"></div><div class="line">	<span class="string">"github.com/Sirupsen/logrus"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="comment">/* truncated */</span></div><div class="line"></div><div class="line"><span class="comment">// Decorate appends line, file and function context to the logger and returns a function to call before</span></div><div class="line"><span class="comment">// each log</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">Decorate</span><span class="params">(logger *logrus.Entry)</span> <span class="title">func</span><span class="params">()</span> *<span class="title">logrus</span>.<span class="title">Entry</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">()</span> *<span class="title">logrus</span>.<span class="title">Entry</span></span> &#123;</div><div class="line">		<span class="keyword">if</span> pc, f, line, ok := runtime.Caller(<span class="number">1</span>); ok &#123;</div><div class="line">			fnName := runtime.FuncForPC(pc).Name()</div><div class="line">			file := strings.Split(f, <span class="string">"mobilebid"</span>)[<span class="number">1</span>]</div><div class="line">			caller := fmt.Sprintf(<span class="string">"%s:%v %s"</span>, file, line, fnName)</div><div class="line"></div><div class="line">			<span class="keyword">return</span> logrus.WithField(<span class="string">"caller"</span>, caller)</div><div class="line">		&#125;</div><div class="line">		<span class="keyword">return</span> logger</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// Log appends line, file and function context to the logger</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">Log</span><span class="params">()</span> *<span class="title">logrus</span>.<span class="title">Entry</span></span> &#123;</div><div class="line">	<span class="keyword">if</span> pc, f, line, ok := runtime.Caller(<span class="number">1</span>); ok &#123;</div><div class="line">		fnName := runtime.FuncForPC(pc).Name()</div><div class="line">		file := strings.Split(f, <span class="string">"mobilebid"</span>)[<span class="number">1</span>]</div><div class="line">		caller := fmt.Sprintf(<span class="string">"%s:%v %s"</span>, file, line, fnName)</div><div class="line"></div><div class="line">		<span class="keyword">return</span> logrus.WithField(<span class="string">"caller"</span>, caller)</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> &amp;logrus.Entry&#123;&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>个人偏向于自己实现一个hook的处理方式, 这也是作者比较认可的一种方式, 作者原话是这样说的<code>Yes, unless someone can prove a negligible performance impact I think this should be a hook.</code>,  因此我测试了上面那段自己实现ContextHook的代码, 很遗憾, 居然没成功, 因此不得不自己写一个ContextHook, 顺便了解下获取filename和line number的原理。</p>
+<h3 id="获取文件名和行号的原理"><a href="#获取文件名和行号的原理" class="headerlink" title="获取文件名和行号的原理"></a>获取文件名和行号的原理</h3><p>在runtime里面有一个caller函数, 源码里面是这样描述caller的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Caller reports file and line number information about function invocations on the calling goroutine&apos;s stack. </div><div class="line">The argument skip is the number of stack frames to ascend, with 0 identifying the caller of Caller.  </div><div class="line">(For historical reasons the meaning of skip differs between Caller and Callers.) </div><div class="line">The return values report the program counter, file name, and line number within the file of the corresponding call. </div><div class="line">The boolean ok is false if it was not possible to recover the information.</div></pre></td></tr></table></figure></p>
+<p>简而言之, 我们通过caller可以追踪每一次函数调用的文件和行号信息, 但是我们的函数调用链往往有深, 而我们需要的仅仅是记录日志时的那一层的函数调用信息。如何找到这一层喃?<br>我们可以把每一层都打印出来, 看看有啥规律:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">/Users/maojun/GoWorkDir/src/openauth/vendor/github.com/sirupsen/logrus/entry.go: 98</div><div class="line">/Users/maojun/GoWorkDir/src/openauth/vendor/github.com/sirupsen/logrus/entry.go: 134</div><div class="line">/Users/maojun/GoWorkDir/src/openauth/vendor/github.com/sirupsen/logrus/logger.go: 181</div><div class="line">/Users/maojun/GoWorkDir/src/openauth/cmd/openauth/cmd/service.go: 55</div><div class="line">...</div><div class="line"></div><div class="line">/Users/maojun/GoWorkDir/src/openauth/vendor/github.com/sirupsen/logrus/entry.go: 98</div><div class="line">/Users/maojun/GoWorkDir/src/openauth/vendor/github.com/sirupsen/logrus/entry.go: 134</div><div class="line">/Users/maojun/GoWorkDir/src/openauth/vendor/github.com/sirupsen/logrus/entry.go: 182</div><div class="line">/Users/maojun/GoWorkDir/src/openauth/vendor/github.com/sirupsen/logrus/logger.go: 118</div><div class="line">/Users/maojun/GoWorkDir/src/openauth/api/http/handler/init.go: 42</div><div class="line">...</div><div class="line"></div><div class="line">/Users/maojun/GoWorkDir/src/openauth/vendor/github.com/sirupsen/logrus/entry.go: 98</div><div class="line">/Users/maojun/GoWorkDir/src/openauth/vendor/github.com/sirupsen/logrus/entry.go: 144</div><div class="line">/Users/maojun/GoWorkDir/src/openauth/vendor/github.com/sirupsen/logrus/logger.go: 189</div><div class="line">/Users/maojun/GoWorkDir/src/openauth/api/http/server.go: 71</div><div class="line">...</div></pre></td></tr></table></figure></p>
+<p>我们可以看出前面几次调用链, 都被logrus自己使用了, 因此我们仅需要除去logrus调用链的函数, 然后第一个被找到的就是我们记录日志的调用了, 比如最后一个: http/server.go: 71, 我在这里调用logrus: logger.Debug(“msg”)</p>
+<p>那么logrus的调用链最多有几层喃？我们执行多少次递归才能找到我们自己的debug call？<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cmd/service.go: 55 [logger.Debug()] ---&gt; logrus/logger.go: 181 [entry.Debug()] ---&gt; logrus/entry.go: 134 [entry.log()] ---&gt; logrus/entry.go: 98 [entry.Logger.Hooks.Fire()]</div><div class="line">handler/init.go: 42 [logger.Debugf()] ---&gt; logrus/logger.go: 118 [entry.Debug()]  ---&gt; logrus/entry.go: 182 [logger.releaseEntry()] ---&gt; logrus/entry.go: 134 [entry.log()] ---&gt; logrus/entry.go: 98 [entry.Logger.Hooks.Fire()]</div></pre></td></tr></table></figure></p>
+<p>由此我们可以看出当我们使用(Debug, Debugf, Debugln), 底层调用链的长度大致为3~4层, 因此我们最少需要递归5次才能找到我们自己的debug call.</p>
+<p>最后找到了记录下来就ok了。</p>
+<h3 id="自己实现一个ContextHook"><a href="#自己实现一个ContextHook" class="headerlink" title="自己实现一个ContextHook"></a>自己实现一个ContextHook</h3><p>如何实现一个logrus的hook喃?<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// A hook to be fired when logging on the logging levels returned from</span></div><div class="line"><span class="comment">// `Levels()` on your implementation of the interface. Note that this is not</span></div><div class="line"><span class="comment">// fired in a goroutine or a channel with workers, you should handle such</span></div><div class="line"><span class="comment">// functionality yourself if your call is non-blocking and you don't wish for</span></div><div class="line"><span class="comment">// the logging calls for levels returned from `Levels()` to block.</span></div><div class="line"><span class="keyword">type</span> Hook <span class="keyword">interface</span> &#123;</div><div class="line">	Levels() []Level</div><div class="line">	Fire(*Entry) error</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>一个Entry为一条日志记录, 我们的Hook需要做的就是在每一个条的日志记录里面添加调用时的文件名和行号. 核心就是实现自己的Fire方法, 以下是参考实现:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> hooks</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"runtime"</span></div><div class="line">	<span class="string">"strings"</span></div><div class="line"></div><div class="line">	<span class="string">"github.com/sirupsen/logrus"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="comment">// ContextHook for log the call context</span></div><div class="line"><span class="keyword">type</span> contextHook <span class="keyword">struct</span> &#123;</div><div class="line">	Field  <span class="keyword">string</span></div><div class="line">	Skip   <span class="keyword">int</span></div><div class="line">	levels []logrus.Level</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// NewContextHook use to make an hook</span></div><div class="line"><span class="comment">// 根据上面的推断, 我们递归深度可以设置到5即可.</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewContextHook</span><span class="params">(levels ...logrus.Level)</span> <span class="title">logrus</span>.<span class="title">Hook</span></span> &#123;</div><div class="line">	hook := contextHook&#123;</div><div class="line">		Field:  <span class="string">"source"</span>,</div><div class="line">		Skip:   <span class="number">5</span>,</div><div class="line">		levels: levels,</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(hook.levels) == <span class="number">0</span> &#123;</div><div class="line">		hook.levels = logrus.AllLevels</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">return</span> &amp;hook</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// Levels implement levels</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(hook contextHook)</span> <span class="title">Levels</span><span class="params">()</span> []<span class="title">logrus</span>.<span class="title">Level</span></span> &#123;</div><div class="line">	<span class="keyword">return</span> logrus.AllLevels</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// Fire implement fire</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(hook contextHook)</span> <span class="title">Fire</span><span class="params">(entry *logrus.Entry)</span> <span class="title">error</span></span> &#123;</div><div class="line">	entry.Data[hook.Field] = findCaller(hook.Skip)</div><div class="line"></div><div class="line">	<span class="keyword">return</span> <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 对caller进行递归查询, 直到找到非logrus包产生的第一个调用.</span></div><div class="line"><span class="comment">// 因为filename我获取到了上层目录名, 因此所有logrus包的调用的文件名都是 logrus/...</span></div><div class="line"><span class="comment">// 因此通过排除logrus开头的文件名, 就可以排除所有logrus包的自己的函数调用</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">findCaller</span><span class="params">(skip <span class="keyword">int</span>)</span> <span class="title">string</span></span> &#123;</div><div class="line">	file := <span class="string">""</span></div><div class="line">	line := <span class="number">0</span></div><div class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="number">10</span>; i++ &#123;</div><div class="line">		file, line = getCaller(skip + i)</div><div class="line">		<span class="keyword">if</span> !strings.HasPrefix(file, <span class="string">"logrus"</span>) &#123;</div><div class="line">			<span class="keyword">break</span></div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	<span class="keyword">return</span> fmt.Sprintf(<span class="string">"%s:%d"</span>, file, line)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// 这里其实可以获取函数名称的: fnName := runtime.FuncForPC(pc).Name()</span></div><div class="line"><span class="comment">// 但是我觉得有 文件名和行号就够定位问题, 因此忽略了caller返回的第一个值:pc</span></div><div class="line"><span class="comment">// 在标准库log里面我们可以选择记录文件的全路径或者文件名, 但是在使用过程成并发最合适的,</span></div><div class="line"><span class="comment">// 因为文件的全路径往往很长, 而文件名在多个包中往往有重复, 因此这里选择多取一层, 取到文件所在的上层目录那层.</span></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">getCaller</span><span class="params">(skip <span class="keyword">int</span>)</span> <span class="params">(<span class="keyword">string</span>, <span class="keyword">int</span>)</span></span> &#123;</div><div class="line">	_, file, line, ok := runtime.Caller(skip)</div><div class="line">	fmt.Println(file)</div><div class="line">	fmt.Println(line)</div><div class="line">	<span class="keyword">if</span> !ok &#123;</div><div class="line">		<span class="keyword">return</span> <span class="string">""</span>, <span class="number">0</span></div><div class="line">	&#125;</div><div class="line"></div><div class="line">	n := <span class="number">0</span></div><div class="line">	<span class="keyword">for</span> i := <span class="built_in">len</span>(file) - <span class="number">1</span>; i &gt; <span class="number">0</span>; i-- &#123;</div><div class="line">		<span class="keyword">if</span> file[i] == <span class="string">'/'</span> &#123;</div><div class="line">			n++</div><div class="line">			<span class="keyword">if</span> n &gt;= <span class="number">2</span> &#123;</div><div class="line">				file = file[i+<span class="number">1</span>:]</div><div class="line">				<span class="keyword">break</span></div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">return</span> file, line</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="http://oiw1gzfww.bkt.clouddn.com/alipay.jpg" alt="紫川秀 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/log/" rel="tag"># log</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/11/22/golang-mongodb/" rel="next" title="MongoDB介绍与Golang驱动使用">
+                <i class="fa fa-chevron-left"></i> MongoDB介绍与Golang驱动使用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  
+    <div class="comments" id="comments">
+      <div id="vcomments"></div>
+    </div>
+  
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://oiw1gzfww.bkt.clouddn.com/me.png"
+                alt="紫川秀" />
+            
+              <p class="site-author-name" itemprop="name">紫川秀</p>
+              <p class="site-description motion-element" itemprop="description">喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">33</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/yumaojun03" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://douban.com/people/155892492" target="_blank" title="豆瓣">
+                    
+                      <i class="fa fa-fw fa-globe"></i>豆瓣</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://www.zhihu.com/people/zi-chuan-xiu-86" target="_blank" title="知乎">
+                    
+                      <i class="fa fa-fw fa-globe"></i>知乎</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-globe"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.liaoxuefeng.com/" title="廖雪峰官网" target="_blank">廖雪峰官网</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://xiaorui.cc/" title="峰云,就她了" target="_blank">峰云,就她了</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用"><span class="nav-number">2.</span> <span class="nav-text">使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基础使用"><span class="nav-number">2.1.</span> <span class="nav-text">基础使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用Logger"><span class="nav-number">2.2.</span> <span class="nav-text">使用Logger</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hook"><span class="nav-number">2.3.</span> <span class="nav-text">Hook</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题"><span class="nav-number">3.</span> <span class="nav-text">问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#不记录文件名和行号"><span class="nav-number">3.1.</span> <span class="nav-text">不记录文件名和行号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取文件名和行号的原理"><span class="nav-number">3.2.</span> <span class="nav-text">获取文件名和行号的原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#自己实现一个ContextHook"><span class="nav-number">3.3.</span> <span class="nav-text">自己实现一个ContextHook</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2016 &mdash; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">紫川秀</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/valine@1.1.4/dist/Valine.min.js"></script>
+  <script type="text/javascript">
+    new Valine({
+        av: AV,
+        el: '#vcomments' ,
+        verify: false,
+        notify: true,
+        app_id: '51RM6PwqfSuyOFX9MxLeq5yY-gzGzoHsz',
+        app_key: 'dNQYvnf4KlnN364JVGClL7bp',
+        placeholder: 'Comment input placeholder'
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("51RM6PwqfSuyOFX9MxLeq5yY-gzGzoHsz", "dNQYvnf4KlnN364JVGClL7bp");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
