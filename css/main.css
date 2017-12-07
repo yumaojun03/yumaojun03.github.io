@@ -780,11 +780,11 @@ pre .javascript .function {
   border-color: #e1e1e1;
   color: #666;
 }
-.post-body .note.default a {
+.post-body .note.default a:not(.btn) {
   color: #666;
   border-bottom: 1px solid #666;
 }
-.post-body .note.default a:hover {
+.post-body .note.default a:not(.btn):hover {
   color: #454545;
   border-bottom: 1px solid #454545;
 }
@@ -793,11 +793,11 @@ pre .javascript .function {
   border-color: #e1c2ff;
   color: #6f42c1;
 }
-.post-body .note.primary a {
+.post-body .note.primary a:not(.btn) {
   color: #6f42c1;
   border-bottom: 1px solid #6f42c1;
 }
-.post-body .note.primary a:hover {
+.post-body .note.primary a:not(.btn):hover {
   color: #453298;
   border-bottom: 1px solid #453298;
 }
@@ -806,11 +806,11 @@ pre .javascript .function {
   border-color: #b3e5ef;
   color: #31708f;
 }
-.post-body .note.info a {
+.post-body .note.info a:not(.btn) {
   color: #31708f;
   border-bottom: 1px solid #31708f;
 }
-.post-body .note.info a:hover {
+.post-body .note.info a:not(.btn):hover {
   color: #215761;
   border-bottom: 1px solid #215761;
 }
@@ -819,11 +819,11 @@ pre .javascript .function {
   border-color: #d0e6be;
   color: #3c763d;
 }
-.post-body .note.success a {
+.post-body .note.success a:not(.btn) {
   color: #3c763d;
   border-bottom: 1px solid #3c763d;
 }
-.post-body .note.success a:hover {
+.post-body .note.success a:not(.btn):hover {
   color: #32562c;
   border-bottom: 1px solid #32562c;
 }
@@ -832,11 +832,11 @@ pre .javascript .function {
   border-color: #fae4cd;
   color: #8a6d3b;
 }
-.post-body .note.warning a {
+.post-body .note.warning a:not(.btn) {
   color: #8a6d3b;
   border-bottom: 1px solid #8a6d3b;
 }
-.post-body .note.warning a:hover {
+.post-body .note.warning a:not(.btn):hover {
   color: #714f30;
   border-bottom: 1px solid #714f30;
 }
@@ -845,11 +845,11 @@ pre .javascript .function {
   border-color: #ebcdd2;
   color: #a94442;
 }
-.post-body .note.danger a {
+.post-body .note.danger a:not(.btn) {
   color: #a94442;
   border-bottom: 1px solid #a94442;
 }
-.post-body .note.danger a:hover {
+.post-body .note.danger a:not(.btn):hover {
   color: #84333f;
   border-bottom: 1px solid #84333f;
 }
@@ -967,12 +967,19 @@ pre .javascript .function {
   transition-duration: 0.2s;
   transition-timing-function: ease-in-out;
   transition-delay: 0s;
+  line-height: 2;
 }
-.btn:hover,
-.post-button .btn:hover {
+.btn:hover {
   border-color: #222;
   color: #222;
   background: #fff;
+}
+.btn +.btn {
+  margin: 0 0 8px 8px;
+}
+.btn .fa-fw {
+  width: 1.285714285714286em;
+  text-align: left;
 }
 .btn-bar {
   display: block;
@@ -1558,18 +1565,6 @@ pre .javascript .function {
 .post-button {
   margin-top: 40px;
 }
-.post-button .btn {
-  color: #fff;
-  font-size: 14px;
-  background: #222;
-  border-radius: 0;
-  line-height: 2;
-  margin: 0 4px 8px 4px;
-}
-.post-button .fa-fw {
-  width: 1.285714285714286em;
-  text-align: left;
-}
 .posts-expand .post-tags {
   margin-top: 40px;
   text-align: center;
@@ -1965,7 +1960,7 @@ pre .javascript .function {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #f2ffa2;
+  background: #8eda93;
 }
 .links-of-blogroll {
   font-size: 13px;
@@ -2768,7 +2763,7 @@ embed {
     padding: 0;
     background: #fff;
     border-bottom: 1px solid #ddd;
-    z-index: 1;
+    z-index: 1050;
   }
 }
 @media (max-width: 767px) {
