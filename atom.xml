@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog.yumaojun.net/"/>
-  <updated>2017-12-08T08:00:03.000Z</updated>
+  <updated>2017-12-10T14:48:58.000Z</updated>
   <id>https://blog.yumaojun.net/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="https://blog.yumaojun.net/2017/12/07/oauth2/"/>
     <id>https://blog.yumaojun.net/2017/12/07/oauth2/</id>
     <published>2017-12-07T07:13:08.000Z</published>
-    <updated>2017-12-08T08:00:03.000Z</updated>
+    <updated>2017-12-10T14:48:58.000Z</updated>
     
     <content type="html"><![CDATA[<p>当今互联网的功能可谓是五花八门, 而很多服务需要依赖用户已有的数据才能提供服务, 比如云冲印, 需要访问用户云盘里面的照片数据, 再比如ci服务, 需要访问用户代码仓库里面的项目数据。如何安全得将用户的数据暴露给第三方应用访问是一个很常见的需求, 而OAuth的出现就是解决这类问题的。<br><a id="more"></a></p>
 <h2 id="传统认证的问题"><a href="#传统认证的问题" class="headerlink" title="传统认证的问题"></a>传统认证的问题</h2><p>在传统的<code>client-server</code>身份认证模型中, 客户端通过资源所有者(resource owner)的凭证来访问服务端的受保护的资源， 为了让第三方应用访问受限资源， 则第三方应用必须分享资源所有者的凭证,<br>这就产生了一些问题和局限性：</p>
@@ -59,7 +59,7 @@
 <li>Client: 第三方应用， 这里指代拉钩网</li>
 <li>Authorization Server: 授权服务器，这里指qq的授权服务器, 及提供授权确认页面的后端授权服务。当用户认证和授权成功后,由该服务向client(第三方应用)颁发access_token</li>
 </ul>
-<h3 id="授权流程"><a href="#授权流程" class="headerlink" title="授权流程"></a>授权流程</h3><p>围绕着这4个概念, 我们来说明下OAuth2.0的授权流程:<br><img src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b10000_10000&amp;sec=1512645676&amp;di=8e090cb8fcd158a0f7a78e264f026635&amp;src=http://img2.shangxueba.com/img/kaifa/20140904/10/5BC0114C4E4C04866AADE7D26D2A83A4.bmp" alt=""><br>uo</p>
+<h3 id="授权流程"><a href="#授权流程" class="headerlink" title="授权流程"></a>授权流程</h3><p>围绕着这4个概念, 我们来说明下OAuth2.0的授权流程:<br><img src="https://timgsa.baidu.com/timg?image&amp;quality=80&amp;size=b10000_10000&amp;sec=1512645676&amp;di=8e090cb8fcd158a0f7a78e264f026635&amp;src=http://img2.shangxueba.com/img/kaifa/20140904/10/5BC0114C4E4C04866AADE7D26D2A83A4.bmp" alt=""></p>
 <ol>
 <li>第三方应用请求资源所有者授权, 授权请求往往通过中转到授权服务来验证资源所有者的身份, 比如应用场景里面那些需要用户登录的页面</li>
 <li>第三方应用获得资源所有者的授权, 比如应用场景里面需要用户点击的授权按钮, OAuth2定义了4种授权的方式,简称授权模式, 后面马上讲到,当然你也可以扩展自己的授权模式。</li>
@@ -77,8 +77,67 @@
 <li>客户端模式（client credentials）</li>
 </ul>
 <p>每一种模式应对不同的授权场景, 如果oauth定义的这4种模式无法满足你的授权需求, 你可以自定义一种授权模式进行实现, 因此灵活性上有很大的保证。</p>
-<h4 id="授权码模式"><a href="#授权码模式" class="headerlink" title="授权码模式"></a>授权码模式</h4><p>授权码模式(authorization code)是功能最完整、流程最严密的授权模式, 也是各大开放平台主要使用的模式, 它的特点就是在client与resource owner直接加入一层s授权服务(authorization server)作为中介, 规避了resource owner和client直接交互产生的安全隐患, 也是解决</p>
-<h4 id="简化模式"><a href="#简化模式" class="headerlink" title="简化模式"></a>简化模式</h4><h4 id="密码模式"><a href="#密码模式" class="headerlink" title="密码模式"></a>密码模式</h4><h4 id="客户端模式"><a href="#客户端模式" class="headerlink" title="客户端模式"></a>客户端模式</h4><h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<h4 id="授权码模式"><a href="#授权码模式" class="headerlink" title="授权码模式"></a>授权码模式</h4><p>授权码模式(authorization code)是功能最完整、流程最严密的授权模式, 也是各大开放平台主要使用的模式, 它的特点就是在client与resource owner直接加入一层授权服务(authorization server)作为中介, 规避了resource owner和client直接交互产生的安全隐患, 该模式完美的解决了之前提到的传统<code>client-server</code>认证模式中的第三方应用访问资产所有者数据的难题。</p>
+<p>应用场景: 第三方应用需要访问资产所有者的数据。<br>典型应用: 第三方登录, 比如上面提到的场景<br>流程图:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">+----------+</div><div class="line">| Resource |</div><div class="line">|   Owner  |</div><div class="line">|          |</div><div class="line">+----------+</div><div class="line">     ^</div><div class="line">     |</div><div class="line">    (B)</div><div class="line">+----|-----+          Client Identifier      +---------------+</div><div class="line">|         -+----(A)-- &amp; Redirection URI ----&gt;|               |</div><div class="line">|  User-   |                                 | Authorization |</div><div class="line">|  Agent  -+----(B)-- User authenticates ---&gt;|     Server    |</div><div class="line">|          |                                 |               |</div><div class="line">|         -+----(C)-- Authorization Code ---&lt;|               |</div><div class="line">+-|----|---+                                 +---------------+</div><div class="line">  |    |                                         ^      v</div><div class="line">(A)  (C)                                         |      |</div><div class="line">  |    |                                         |      |</div><div class="line">  ^    v                                         |      |</div><div class="line">+---------+                                      |      |</div><div class="line">|         |&gt;---(D)-- Authorization Code ---------&apos;      |</div><div class="line">|  Client |          &amp; Redirection URI                  |</div><div class="line">|         |                                             |</div><div class="line">|         |&lt;---(E)----- Access Token -------------------&apos;</div><div class="line">+---------+       (w/ Optional Refresh Token)</div></pre></td></tr></table></figure></p>
+<blockquote>
+<p>用户通过浏览器访问授权服务器, 一般是第三方应用放置链接, 将用户引导至相应的授权服务器。</p>
+</blockquote>
+<p>比如以上面拉勾为例, 他会放置有可能存储用户profile信息的授权服务器的访问地址:<br><figure class="highlight html"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"/oauth20/auth_sinaWeiboProvider.html"</span> <span class="attr">target</span>=<span class="string">"_blank"</span> <span class="attr">class</span>=<span class="string">"icon_wb"</span> <span class="attr">title</span>=<span class="string">"使用新浪微博帐号登录"</span>&gt;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"/oauth20/auth_qqProvider.html"</span> <span class="attr">class</span>=<span class="string">"icon_qq"</span> <span class="attr">target</span>=<span class="string">"_blank"</span> <span class="attr">title</span>=<span class="string">"使用腾讯QQ帐号登录"</span>&gt;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"/oauth20/auth_weixinProvider.html"</span> <span class="attr">class</span>=<span class="string">"icon_weixin"</span> <span class="attr">target</span>=<span class="string">"_blank"</span> <span class="attr">title</span>=<span class="string">"使用微信帐号登录"</span>&gt;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<p>比如我让拉勾网读取我存储在微博上面的用户资料, 因此我会被引导至微博的授权服务,进行授权, 同时拉勾网会带上自己在微博开放平台注册的客户端信息, 如下图:<br><img src="http://oiw1gzfww.bkt.clouddn.com/weibo_oaut2.png" alt=""><br>而具体的授权请求格式如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">GET /authorize?response_type=code&amp;client_id=s6BhdRkqt3&amp;state=xyz</div><div class="line">    &amp;redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb HTTP/1.1</div><div class="line">Host: server.example.com</div></pre></td></tr></table></figure></p>
+<p>其中的参数:</p>
+<ul>
+<li>response_type：表示授权类型，必选项，此处的值固定为”code”</li>
+<li>client_id：表示客户端的ID，必选项</li>
+<li>redirect_uri：表示重定向URI，可选项</li>
+<li>scope：表示申请的权限范围，可选项</li>
+<li>state：表示客户端的当前状态，可以指定任意值，认证服务器会原封不动地返回这个值。</li>
+</ul>
+<blockquote>
+<p>用户授权</p>
+</blockquote>
+<p>现在我已经到了微薄的授权服务页面, 需要我对拉勾网访问的相应数据进行授权, 因此我需要登录, 然后进行授权:</p>
+<ol>
+<li>登录<br><img src="http://oiw1gzfww.bkt.clouddn.com/weibo_login_oauth2.png" alt=""></li>
+<li>授权<br><img src="http://oiw1gzfww.bkt.clouddn.com/weibo_auth2.png" alt=""></li>
+</ol>
+<p>然后我点击连接(其实这个按钮改成授权比较合适, 其他oauth对于的这里也基本都叫授权), 此时我完成了我对拉勾网响应权限的授权。</p>
+<blockquote>
+<p>Authorization server 将用户导向第三方应用(拉勾网)端事先指定的”重定向URI”(A 步骤中传入的redirection_uri),同时附上一个授权码</p>
+</blockquote>
+<p><img src="http://oiw1gzfww.bkt.clouddn.com/oauth2_redirect.png" alt=""><br>从上图中的referer可以看出, 跳转是来自微博的授权服务器的, 并且<code>query string</code>携带这code</p>
+<p>具体格式如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">HTTP/1.1 302 Found</div><div class="line">Location: https://client.example.com/cb?code=SplxlOBeZQQYbYS6WxSbIA</div><div class="line">          &amp;state=xyz</div></pre></td></tr></table></figure></p>
+<p>其中参数:</p>
+<ul>
+<li>code：表示授权码，必选项。该码的有效期应该很短，通常设为10分钟，客户端只能使用该码一次，否则会被授权服务器拒绝。该码与客户端ID和重定向URI，是一一对应关系。</li>
+<li>state：如果客户端的请求中包含这个参数，认证服务器的回应也必须一模一样包含这个参数。</li>
+</ul>
+<blockquote>
+<p>第三方应用(拉勾网)像Authorization server请求token</p>
+</blockquote>
+<p>这一步在拉勾网的后台服务器进行, 从界面上是看不到, 具体过程为: 拉勾网获取到code过后, 以code向微博收取服务器请求, 换取可以访问微博资源服务的token.<br>请求的样例大致如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">POST /token HTTP/1.1</div><div class="line">Host: server.example.com</div><div class="line">Authorization: Basic czZCaGRSa3F0MzpnWDFmQmF0M2JW</div><div class="line">Content-Type: application/x-www-form-urlencoded</div><div class="line"></div><div class="line">grant_type=authorization_code&amp;code=SplxlOBeZQQYbYS6WxSbIA</div><div class="line">&amp;redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb</div></pre></td></tr></table></figure></p>
+<p>其中参数:</p>
+<ul>
+<li>grant_type：表示使用的授权模式，必选项，此处的值固定为”<code>authorization_code</code>“。</li>
+<li>code：表示上一步获得的授权码，必选项。</li>
+<li>redirect_uri：表示重定向URI，必选项，且必须与A步骤中的该参数值保持一致。</li>
+<li>client_id：表示客户端ID，必选项。</li>
+</ul>
+<blockquote>
+<p>Authorization server验证code合法过后返回token</p>
+</blockquote>
+<p>返回的token数据样例大致如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">HTTP/1.1 200 OK</div><div class="line">Content-Type: application/json;charset=UTF-8</div><div class="line">Cache-Control: no-store</div><div class="line">Pragma: no-cache</div><div class="line"></div><div class="line">&#123;</div><div class="line">  &quot;access_token&quot;:&quot;2YotnFZFEjr1zCsicMWpAA&quot;,</div><div class="line">  &quot;token_type&quot;:&quot;example&quot;,</div><div class="line">  &quot;expires_in&quot;:3600,</div><div class="line">  &quot;refresh_token&quot;:&quot;tGzv3JOkF0XG5Qx2TlKWIA&quot;,</div><div class="line">  &quot;example_parameter&quot;:&quot;example_value&quot;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>其中参数:</p>
+<ul>
+<li>access_token：表示访问令牌，必选项。</li>
+<li>token_type：表示令牌类型，该值大小写不敏感，必选项，可以是bearer类型或mac类型。</li>
+<li>expires_in：表示过期时间，单位为秒。如果省略该参数，必须其他方式设置过期时间。</li>
+<li>refresh_token：表示更新令牌，用来获取下一次的访问令牌，可选项。</li>
+<li>scope：表示权限范围，如果与客户端申请的范围一致，此项可省略。</li>
+</ul>
+<h4 id="简化模式"><a href="#简化模式" class="headerlink" title="简化模式"></a>简化模式</h4><p>应用场景: 第三方应用需要访问资产所有者的数据。<br>典型应用: 第三方登录, 比如上面提到的场景<br>流程图:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">+----------+</div><div class="line">| Resource |</div><div class="line">|  Owner   |</div><div class="line">|          |</div><div class="line">+----------+</div><div class="line">    ^</div><div class="line">    |</div><div class="line">    (B)</div><div class="line">+----|-----+          Client Identifier     +---------------+</div><div class="line">|         -+----(A)-- &amp; Redirection URI ---&gt;|               |</div><div class="line">|  User-   |                                | Authorization |</div><div class="line">|  Agent  -|----(B)-- User authenticates --&gt;|     Server    |</div><div class="line">|          |                                |               |</div><div class="line">|          |&lt;---(C)--- Redirection URI ----&lt;|               |</div><div class="line">|          |          with Access Token     +---------------+</div><div class="line">|          |            in Fragment</div><div class="line">|          |                                +---------------+</div><div class="line">|          |----(D)--- Redirection URI ----&gt;|   Web-Hosted  |</div><div class="line">|          |          without Fragment      |     Client    |</div><div class="line">|          |                                |    Resource   |</div><div class="line">|     (F)  |&lt;---(E)------- Script ---------&lt;|               |</div><div class="line">|          |                                +---------------+</div><div class="line">+-|--------+</div><div class="line">  |    |</div><div class="line">(A)  (G) Access Token</div><div class="line">  |    |</div><div class="line">  ^    v</div><div class="line">+---------+</div><div class="line">|         |</div><div class="line">|  Client |</div><div class="line">|         |</div><div class="line">+---------+</div></pre></td></tr></table></figure></p>
+<h4 id="密码模式"><a href="#密码模式" class="headerlink" title="密码模式"></a>密码模式</h4><p>应用场景: 第三方应用需要访问资产所有者的数据。<br>典型应用: 第三方登录, 比如上面提到的场景<br>流程图:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">+----------+</div><div class="line">| Resource |</div><div class="line">|  Owner   |</div><div class="line">|          |</div><div class="line">+----------+</div><div class="line">    v</div><div class="line">    |    Resource Owner</div><div class="line">    (A) Password Credentials</div><div class="line">    |</div><div class="line">    v</div><div class="line">+---------+                                  +---------------+</div><div class="line">|         |&gt;--(B)---- Resource Owner -------&gt;|               |</div><div class="line">|         |         Password Credentials     | Authorization |</div><div class="line">| Client  |                                  |     Server    |</div><div class="line">|         |&lt;--(C)---- Access Token ---------&lt;|               |</div><div class="line">|         |    (w/ Optional Refresh Token)   |               |</div><div class="line">+---------+                                  +---------------+</div></pre></td></tr></table></figure></p>
+<h4 id="客户端模式"><a href="#客户端模式" class="headerlink" title="客户端模式"></a>客户端模式</h4><p>应用场景: 第三方应用需要访问资产所有者的数据。<br>典型应用: 第三方登录, 比如上面提到的场景<br>流程图:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">+---------+                                  +---------------+</div><div class="line">|         |                                  |               |</div><div class="line">|         |&gt;--(A)- Client Authentication ---&gt;| Authorization |</div><div class="line">| Client  |                                  |     Server    |</div><div class="line">|         |&lt;--(B)---- Access Token ---------&lt;|               |</div><div class="line">|         |                                  |               |</div><div class="line">+---------+                                  +---------------+</div></pre></td></tr></table></figure></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
 <li><a href="https://tools.ietf.org/html/rfc6749" target="_blank" rel="external">OAuth2.0 RFC文档</a></li>
 <li><a href="https://tools.ietf.org/html/rfc7636#ref-BCP195" target="_blank" rel="external">PKCE 扩展RFC文档</a></li>
 </ul>
@@ -988,9 +1047,9 @@
       <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
     
     
-      <category term="gRPC" scheme="https://blog.yumaojun.net/tags/gRPC/"/>
-    
       <category term="APIGateway" scheme="https://blog.yumaojun.net/tags/APIGateway/"/>
+    
+      <category term="gRPC" scheme="https://blog.yumaojun.net/tags/gRPC/"/>
     
   </entry>
   
@@ -1127,9 +1186,9 @@
       <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
     
     
-      <category term="gRPC" scheme="https://blog.yumaojun.net/tags/gRPC/"/>
-    
       <category term="APIGateway" scheme="https://blog.yumaojun.net/tags/APIGateway/"/>
+    
+      <category term="gRPC" scheme="https://blog.yumaojun.net/tags/gRPC/"/>
     
   </entry>
   
