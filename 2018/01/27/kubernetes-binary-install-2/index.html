@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="kubernetes," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="紫川秀的博客" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="这是kubernetes集群部署的第二部分, 在上篇中我们部署了一个的kubernetes集群(4个node节点), 接下来我们将部署一些很实用的kubernetes扩展插件, 包括集群网络, 可视化, 服务发现, 集群监控。">
+<meta name="keywords" content="kubernetes">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kubernetes 1.8.7 离线部署手册(下)">
+<meta property="og:url" content="https://blog.yumaojun.net/2018/01/27/kubernetes-binary-install-2/index.html">
+<meta property="og:site_name" content="紫川秀的博客">
+<meta property="og:description" content="这是kubernetes集群部署的第二部分, 在上篇中我们部署了一个的kubernetes集群(4个node节点), 接下来我们将部署一些很实用的kubernetes扩展插件, 包括集群网络, 可视化, 服务发现, 集群监控。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/k8s-dashboard.jpg">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/k8s-dash.jpg">
+<meta property="og:updated_time" content="2018-02-02T21:03:21.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="kubernetes 1.8.7 离线部署手册(下)">
+<meta name="twitter:description" content="这是kubernetes集群部署的第二部分, 在上篇中我们部署了一个的kubernetes集群(4个node节点), 接下来我们将部署一些很实用的kubernetes扩展插件, 包括集群网络, 可视化, 服务发现, 集群监控。">
+<meta name="twitter:image" content="http://oiw1gzfww.bkt.clouddn.com/k8s-dashboard.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://blog.yumaojun.net/2018/01/27/kubernetes-binary-install-2/"/>
+
+
+
+
+
+  <title>kubernetes 1.8.7 离线部署手册(下) | 紫川秀的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">紫川秀的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">比你优秀的人不可怕,可怕的是比你优秀的人比你更努力。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2018/01/27/kubernetes-binary-install-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="紫川秀">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://oiw1gzfww.bkt.clouddn.com/me.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="紫川秀的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">kubernetes 1.8.7 离线部署手册(下)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-27T12:59:12+08:00">
+                2018-01-27
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2018-02-03T05:03:21+08:00">
+                2018-02-03
+              </time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/运维/" itemprop="url" rel="index">
+                    <span itemprop="name">运维</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/运维/kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">kubernetes</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/01/27/kubernetes-binary-install-2/" class="leancloud_visitors" data-flag-title="kubernetes 1.8.7 离线部署手册(下)">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>这是kubernetes集群部署的第二部分, 在上篇中我们部署了一个的kubernetes集群(4个node节点), 接下来我们将部署一些很实用的<a href="https://kubernetes.io/docs/concepts/cluster-administration/addons/" target="_blank" rel="external">kubernetes扩展插件</a>, 包括集群网络, 可视化, 服务发现, 集群监控。<br><a id="more"></a></p>
+<h2 id="插件镜像准备"><a href="#插件镜像准备" class="headerlink" title="插件镜像准备"></a>插件镜像准备</h2><p>kubernetes提供诸多使用的集群插件: <a href="https://kubernetes.io/docs/concepts/cluster-administration/addons/" target="_blank" rel="external">插件列表</a>, 下面我们选取如下4个进行安装:</p>
+<ul>
+<li>Calico:  安全的L3网络和网络策略插件,通过CNI为整体集群的网络打通。</li>
+<li>CoreDNS: 为集群提供DNS服务, 用于服务发现(CoreDNS, 就是为了替换kube-dns的)</li>
+<li>Dashboard: 为用户提供Web UI。</li>
+<li>Heapster: 集群的监控插件, 同时也为 HPA提供指标。</li>
+</ul>
+<p>以下是按照以上插件需要的镜像:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div></pre></td></tr></table></figure></p>
+<p>这些镜像最后会把push到我们自己的私有仓库, 如果你还没安装私有仓库请移步: <a href="/2018/01/23/harbor/" title="企业级Docker镜像仓库harbor的部署和使用">企业级Docker镜像仓库harbor的部署和使用</a></p>
+<p>如果自己能翻墙,自己下载推送到自己的私有仓库, 如果出不去, 请看这里: <a href="">百度网盘kubernetes-adds插件image</a></p>
+<p><strong>加载下载的镜像到本地</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">docker load &lt; coredns.tar</div><div class="line">docker load &lt; calico.tar</div><div class="line">docker load &lt; dashboard.tar</div><div class="line">docker load &lt; heapster.tar</div><div class="line">docker load &lt; heapster-grafana.tar</div><div class="line">docker load &lt; heapster-influxdb.tar</div></pre></td></tr></table></figure></p>
+<p><strong>推送到私有仓库</strong><br>我私有仓库使用的是harbor, 并且已经创建了1个kubernetes的项目, 下面的操作请更换成你自己的仓库地址和项目<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># coredns</span></div><div class="line">docker tag coredns/coredns:1.0.4 192.168.204.15/kubernetes/coredns:1.0.4</div><div class="line">docker push 192.168.204.15/kubernetes/coredns:1.0.4</div><div class="line"><span class="comment"># calico</span></div><div class="line">docker tag quay.io/calico/cni:v2.0.0 192.168.204.15/kubernetes/calico/cni:v2.0.0</div><div class="line">docker push 192.168.204.15/kubernetes/calico/cni:v2.0.0</div><div class="line">docker tag quay.io/calico/kube-controllers:v2.0.0 192.168.204.15/kubernetes/calico/kube-controllers:v2.0.0</div><div class="line">docker push 192.168.204.15/kubernetes/calico/kube-controllers:v2.0.0</div><div class="line">docker tag quay.io/calico/node:v3.0.1 192.168.204.15/kubernetes/calico/node:v3.0.1</div><div class="line">docker push 192.168.204.15/kubernetes/calico/node:v3.0.1</div></pre></td></tr></table></figure></p>
+<h2 id="网络插件-Calico"><a href="#网络插件-Calico" class="headerlink" title="网络插件-Calico"></a>网络插件-Calico</h2><p>Calico是一款纯<code>Layer 3</code>的数据中心网络方案(不需要Overlay网络), Calico好处是他已与各种云原生平台有良好的整合, 而Calico在每一个节点利用Linux Kernel实现高效的vRouter来负责数据的转发，而当数据中心复杂度增加时，可以用BGP route reflector来达成, 是性能最好的网络解决方案之一。<br>Calico还有一大优势：network policy。用户可以动态定义ACL规则，控制进出容器的数据包，实现业务需求, 比如租户隔离。</p>
+<p>最新版本的calico已经到3.0.1, 3.0有不兼容变更, 进过几天的折腾, 问题很多, github上Issue还挂起得, 所以我们按照2.x版本的calico</p>
+<h3 id="master安装calicoctl"><a href="#master安装calicoctl" class="headerlink" title="master安装calicoctl"></a>master安装calicoctl</h3><p>首先需要在master节点安装calico的客户端: calicoctl 用于稍后检查calico的网络节点状态, 到calico的<a href="https://github.com/projectcalico/calicoctl/releases" target="_blank" rel="external">Github Release</a>下载2.6版本calico对于的CLI: calicoctl 1.6.3<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">wget https://github.com/projectcalico/calicoctl/releases/download/v1.6.3/calicoctl</div><div class="line">chmod +x calicoctl</div><div class="line">mv calicoctl /usr/<span class="built_in">local</span>/bin/</div><div class="line">mkdir /etc/calico</div></pre></td></tr></table></figure></p>
+<p>然后配置客户端: /etc/calico/calicoctl.cfg:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">apiVersion: v1</div><div class="line">kind: calicoApiConfig</div><div class="line">metadata:</div><div class="line">spec:</div><div class="line">  datastoreType: <span class="string">"etcdv2"</span></div><div class="line">  etcdEndpoints: <span class="string">"https://192.168.204.3:2379"</span></div><div class="line">  etcdKeyFile: <span class="string">"/etc/kubernetes/pki/kubernetes-key.pem"</span></div><div class="line">  etcdCertFile: <span class="string">"/etc/kubernetes/pki/kubernetes.pem"</span></div><div class="line">  etcdCACertFile: <span class="string">"/etc/kubernetes/pki/ca.pem"</span></div></pre></td></tr></table></figure></p>
+<p>然后等集群启动后测试。</p>
+<h3 id="安装calico插件"><a href="#安装calico插件" class="headerlink" title="安装calico插件"></a>安装calico插件</h3><p>这里采用<a href="https://docs.projectcalico.org/v3.0/getting-started/kubernetes/installation/hosted/hosted" target="_blank" rel="external">calico standard hosted install</a>, 使用2.6的安装说明:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">mkdir calico &amp;&amp; <span class="built_in">cd</span> calico</div><div class="line">wget https://docs.projectcalico.org/v2.6/getting-started/kubernetes/installation/hosted/calico.yaml</div><div class="line">wget https://docs.projectcalico.org/v2.6/getting-started/kubernetes/installation/rbac.yaml</div></pre></td></tr></table></figure></p>
+<p>rbac文件没有需要调整的, 而calico需要配置ETCD的相关参数, 因此修改calico.yaml如下2个部分:</p>
+<ol>
+<li><p>指定etcd的地址(ConfigMap中):</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">etcd_endpoints: <span class="string">"https://192.168.204.3:2379"</span></div></pre></td></tr></table></figure>
+</li>
+<li><p>指定etcd的证书(ConfigMap中)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"># If you&apos;re using TLS enabled etcd uncomment the following.</div><div class="line"># You must also populate the Secret below with these files.</div><div class="line">etcd_ca: &quot;/calico-secrets/etcd-ca&quot;</div><div class="line">etcd_cert: &quot;/calico-secrets/etcd-cert&quot;</div><div class="line">etcd_key: &quot;/calico-secrets/etcd-key&quot;</div></pre></td></tr></table></figure>
+</li>
+<li><p>添加base64编码的证书内容(Secret中):</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"># Populate the following files with etcd TLS configuration if desired, but leave blank if</div><div class="line"># not using TLS for etcd.</div><div class="line"># This self-hosted install expects three files with the following names.  The values</div><div class="line"># should be base64 encoded strings of the entire contents of each file.</div><div class="line">etcd-key: $(cat /etc/kubernetes/pki/kubernetes-key.pem | base64 | tr -d &apos;\n&apos;)</div><div class="line">etcd-cert: $(cat /etc/kubernetes/pki/kubernetes.pem | base64 | tr -d &apos;\n&apos;)</div><div class="line">etcd-ca: $(cat /etc/kubernetes/pki/ca.pem | base64 | tr -d &apos;\n&apos;)</div></pre></td></tr></table></figure>
+</li>
+<li><p>修改3个image为自己私有仓库的地址:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">--&gt; 192.168.204.15/kubernetes/calico/node:v2.6.7</div><div class="line">--&gt; 192.168.204.15/kubernetes/calico/cni:v1.11.2</div><div class="line">--&gt; 192.168.204.15/kubernetes/calico/kube-controllers:v1.0.3</div></pre></td></tr></table></figure>
+</li>
+<li><p>最后执行:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">kubectl apply <span class="_">-f</span>  rbac.yaml</div><div class="line">kubectl create <span class="_">-f</span> calico.yaml</div><div class="line">[root@k8s-apiserver01 calico]<span class="comment"># kubectl get pods -n kube-system</span></div><div class="line">NAME                                       READY     STATUS    RESTARTS   AGE</div><div class="line">calico-kube-controllers-76ddc77958-pc7t2   1/1       Running   1          1d</div><div class="line">calico-node-4jr45                          2/2       Running   2          1d</div><div class="line">calico-node-5cvkj                          2/2       Running   0          1h</div><div class="line">calico-node-sllgc                          2/2       Running   0          1d</div><div class="line">calico-node-xwf7g                          2/2       Running   2          1d</div></pre></td></tr></table></figure>
+</li>
+<li><p>检查网络是否ok<br>现在我们4个node节点已经组成了一个bgp的网络, 先使用calicoctl来检查下个节点的状态:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">[root@k8s-apiserver01 calico]<span class="comment"># calicoctl get node -o wide</span></div><div class="line">NAME              ASN       IPV4               IPV6</div><div class="line">k8s-apiserver01   (64512)   192.168.204.3/24</div><div class="line">k8s-node01        (64512)   192.168.204.4/24</div><div class="line">k8s-node02        (64512)   192.168.204.6/24</div><div class="line">k8s-node03        (64512)   192.168.204.7/24</div><div class="line"><span class="comment"># 看其他几个节点是否正常</span></div><div class="line">[root@k8s-apiserver01 calico]<span class="comment"># calicoctl node status</span></div><div class="line">Calico process is running.</div><div class="line">IPv4 BGP status</div><div class="line">+---------------+-------------------+-------+----------+-------------+</div><div class="line">| PEER ADDRESS  |     PEER TYPE     | STATE |  SINCE   |    INFO     |</div><div class="line">+---------------+-------------------+-------+----------+-------------+</div><div class="line">| 192.168.204.4 | node-to-node mesh | up    | 06:55:36 | Established |</div><div class="line">| 192.168.204.6 | node-to-node mesh | up    | 06:55:33 | Established |</div><div class="line">| 192.168.204.7 | node-to-node mesh | up    | 06:55:35 | Established |</div><div class="line">+---------------+-------------------+-------+----------+-------------+</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>然后我们运行几个pod, 测试不同node上的容器是否能正常通信:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">[root@k8s-apiserver01 calico]<span class="comment"># cat demo.deploy.yaml</span></div><div class="line">apiVersion: apps/v1beta2</div><div class="line">kind: Deployment</div><div class="line">metadata:</div><div class="line">  name: demo-deployment</div><div class="line">spec:</div><div class="line">  replicas: 5</div><div class="line">  selector:</div><div class="line">    matchLabels:</div><div class="line">      app: demo</div><div class="line">  template:</div><div class="line">    metadata:</div><div class="line">      labels:</div><div class="line">        app: demo</div><div class="line">    spec:</div><div class="line">      containers:</div><div class="line">      - name: demo</div><div class="line">        image: mritd/demo</div><div class="line">        imagePullPolicy: IfNotPresent</div><div class="line">        ports:</div><div class="line">        - containerPort: 80</div><div class="line">[root@k8s-apiserver01 calico]<span class="comment"># kubectl create -f demo.deploy.yaml</span></div><div class="line">created <span class="string">"demo-deployment"</span> deployment</div><div class="line">[root@k8s-apiserver01 calico]<span class="comment"># kubectl get pods</span></div><div class="line">NAME                               READY     STATUS    RESTARTS   AGE</div><div class="line">demo-deployment-6969c5cb49-7t8nm   1/1       Running   0          1d</div><div class="line">demo-deployment-6969c5cb49-phxvz   1/1       Running   0          1d</div><div class="line">demo-deployment-6969c5cb49-v2sqs   1/1       Running   0          1d</div><div class="line">demo-deployment-6969c5cb49-z2zvf   1/1       Running   0          1d</div><div class="line">demo-deployment-6969c5cb49-zzjnf   1/1       Running   0          1d</div></pre></td></tr></table></figure></p>
+<p>这个时候我们到node01和node2上面看看是否有运行的demo,<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># node1上面的nginx</span></div><div class="line">[root@k8s-node01 ~]<span class="comment"># docker exec -it 21690463cb6f ip a</span></div><div class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN qlen 1</div><div class="line">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</div><div class="line">    inet 127.0.0.1/8 scope host lo</div><div class="line">       valid_lft forever preferred_lft forever</div><div class="line">2: tunl0@NONE: &lt;NOARP&gt; mtu 1480 qdisc noop state DOWN qlen 1</div><div class="line">    link/ipip 0.0.0.0 brd 0.0.0.0</div><div class="line">4: eth0@<span class="keyword">if</span>44: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue state UP</div><div class="line">    link/ether 52:02:5e:94:d3:8f brd ff:ff:ff:ff:ff:ff</div><div class="line">    inet 192.168.85.200/32 scope global eth0</div><div class="line">       valid_lft forever preferred_lft forever</div><div class="line"><span class="comment"># node2上的nginx</span></div><div class="line">[root@k8s-node02 ~]<span class="comment"># docker exec  -it 7bdeea5b982f  ip a</span></div><div class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN qlen 1</div><div class="line">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</div><div class="line">    inet 127.0.0.1/8 scope host lo</div><div class="line">       valid_lft forever preferred_lft forever</div><div class="line">2: tunl0@NONE: &lt;NOARP&gt; mtu 1480 qdisc noop state DOWN qlen 1</div><div class="line">    link/ipip 0.0.0.0 brd 0.0.0.0</div><div class="line">4: eth0@<span class="keyword">if</span>14: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue state UP</div><div class="line">    link/ether 0a:6d:c6:8b:62:fd brd ff:ff:ff:ff:ff:ff</div><div class="line">    inet 192.168.58.202/32 scope global eth0</div><div class="line">       valid_lft forever preferred_lft forever</div><div class="line"><span class="comment"># node2 ping node1</span></div><div class="line">[root@k8s-node02 ~]<span class="comment"># docker exec -it 7bdeea5b982f  ping 192.168.85.200</span></div><div class="line">PING 192.168.85.200 (192.168.85.200): 56 data bytes</div><div class="line">64 bytes from 192.168.85.200: seq=0 ttl=62 time=10.161 ms</div><div class="line">64 bytes from 192.168.85.200: seq=1 ttl=62 time=1.481 ms</div><div class="line">64 bytes from 192.168.85.200: seq=2 ttl=62 time=1.203 ms</div><div class="line">64 bytes from 192.168.85.200: seq=3 ttl=62 time=3.483 ms</div></pre></td></tr></table></figure></p>
+<p>网络插件部署成功。</p>
+<h2 id="服务发现插件-CoreDNS"><a href="#服务发现插件-CoreDNS" class="headerlink" title="服务发现插件-CoreDNS"></a>服务发现插件-CoreDNS</h2><p>coreDNS是kubeDNS的替代项目, 而且稳定性也比kubeDNS好, 因此这里使用CoreDNS, 该组件必须部署, 因为后面很多服务都依赖它进行服务名称的地址解析(比如后面即将部署的Dashboard)</p>
+<h3 id="部署CoreDNS"><a href="#部署CoreDNS" class="headerlink" title="部署CoreDNS"></a>部署CoreDNS</h3><p>下面是官方提供的模板(官方部署文档<a href="https://github.com/coredns/deployment/tree/master/kubernetes" target="_blank" rel="external">coreDNS deploy</a>):<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div></pre></td><td class="code"><pre><div class="line">apiVersion: v1</div><div class="line">kind: ServiceAccount</div><div class="line">metadata:</div><div class="line">  name: coredns</div><div class="line">  namespace: kube-system</div><div class="line">---</div><div class="line">apiVersion: rbac.authorization.k8s.io/v1beta1</div><div class="line">kind: ClusterRole</div><div class="line">metadata:</div><div class="line">  labels:</div><div class="line">    kubernetes.io/bootstrapping: rbac-defaults</div><div class="line">  name: system:coredns</div><div class="line">rules:</div><div class="line">- apiGroups:</div><div class="line">  - <span class="string">""</span></div><div class="line">  resources:</div><div class="line">  - endpoints</div><div class="line">  - services</div><div class="line">  - pods</div><div class="line">  - namespaces</div><div class="line">  verbs:</div><div class="line">  - list</div><div class="line">  - watch</div><div class="line">---</div><div class="line">apiVersion: rbac.authorization.k8s.io/v1beta1</div><div class="line">kind: ClusterRoleBinding</div><div class="line">metadata:</div><div class="line">  annotations:</div><div class="line">    rbac.authorization.kubernetes.io/autoupdate: <span class="string">"true"</span></div><div class="line">  labels:</div><div class="line">    kubernetes.io/bootstrapping: rbac-defaults</div><div class="line">  name: system:coredns</div><div class="line">roleRef:</div><div class="line">  apiGroup: rbac.authorization.k8s.io</div><div class="line">  kind: ClusterRole</div><div class="line">  name: system:coredns</div><div class="line">subjects:</div><div class="line">- kind: ServiceAccount</div><div class="line">  name: coredns</div><div class="line">  namespace: kube-system</div><div class="line">---</div><div class="line">apiVersion: v1</div><div class="line">kind: ConfigMap</div><div class="line">metadata:</div><div class="line">  name: coredns</div><div class="line">  namespace: kube-system</div><div class="line">data:</div><div class="line">  Corefile: |</div><div class="line">    .:53 &#123;</div><div class="line">        errors</div><div class="line">        health</div><div class="line">        kubernetes CLUSTER_DOMAIN REVERSE_CIDRS &#123;</div><div class="line">          pods insecure</div><div class="line">          upstream /etc/resolv.conf</div><div class="line">          fallthrough <span class="keyword">in</span>-addr.arpa ip6.arpa</div><div class="line">        &#125;</div><div class="line">        prometheus :9153</div><div class="line">        proxy . /etc/resolv.conf</div><div class="line">        cache 30</div><div class="line">    &#125;</div><div class="line">---</div><div class="line">apiVersion: extensions/v1beta1</div><div class="line">kind: Deployment</div><div class="line">metadata:</div><div class="line">  name: coredns</div><div class="line">  namespace: kube-system</div><div class="line">  labels:</div><div class="line">    k8s-app: coredns</div><div class="line">    kubernetes.io/name: <span class="string">"CoreDNS"</span></div><div class="line">spec:</div><div class="line">  replicas: 2</div><div class="line">  strategy:</div><div class="line">    <span class="built_in">type</span>: RollingUpdate</div><div class="line">    rollingUpdate:</div><div class="line">      maxUnavailable: 1</div><div class="line">  selector:</div><div class="line">    matchLabels:</div><div class="line">      k8s-app: coredns</div><div class="line">  template:</div><div class="line">    metadata:</div><div class="line">      labels:</div><div class="line">        k8s-app: coredns</div><div class="line">    spec:</div><div class="line">      serviceAccountName: coredns</div><div class="line">      tolerations:</div><div class="line">        - key: <span class="string">"CriticalAddonsOnly"</span></div><div class="line">          operator: <span class="string">"Exists"</span></div><div class="line">      affinity:</div><div class="line">        podAntiAffinity:</div><div class="line">          preferredDuringSchedulingIgnoredDuringExecution:</div><div class="line">          - weight: 100</div><div class="line">            podAffinityTerm:</div><div class="line">              labelSelector:</div><div class="line">                matchExpressions:</div><div class="line">                - key: k8s-app</div><div class="line">                  operator: In</div><div class="line">                  values:</div><div class="line">                  - coredns</div><div class="line">              topologyKey: kubernetes.io/hostname</div><div class="line">      containers:</div><div class="line">      - name: coredns</div><div class="line">        image: coredns/coredns:1.0.4</div><div class="line">        imagePullPolicy: IfNotPresent</div><div class="line">        args: [ <span class="string">"-conf"</span>, <span class="string">"/etc/coredns/Corefile"</span> ]</div><div class="line">        volumeMounts:</div><div class="line">        - name: config-volume</div><div class="line">          mountPath: /etc/coredns</div><div class="line">        ports:</div><div class="line">        - containerPort: 53</div><div class="line">          name: dns</div><div class="line">          protocol: UDP</div><div class="line">        - containerPort: 53</div><div class="line">          name: dns-tcp</div><div class="line">          protocol: TCP</div><div class="line">        livenessProbe:</div><div class="line">          httpGet:</div><div class="line">            path: /health</div><div class="line">            port: 8080</div><div class="line">            scheme: HTTP</div><div class="line">          initialDelaySeconds: 60</div><div class="line">          timeoutSeconds: 5</div><div class="line">          successThreshold: 1</div><div class="line">          failureThreshold: 5</div><div class="line">      dnsPolicy: Default</div><div class="line">      volumes:</div><div class="line">        - name: config-volume</div><div class="line">          configMap:</div><div class="line">            name: coredns</div><div class="line">            items:</div><div class="line">            - key: Corefile</div><div class="line">              path: Corefile</div><div class="line">---</div><div class="line">apiVersion: v1</div><div class="line">kind: Service</div><div class="line">metadata:</div><div class="line">  name: kube-dns</div><div class="line">  namespace: kube-system</div><div class="line">  labels:</div><div class="line">    k8s-app: coredns</div><div class="line">    kubernetes.io/cluster-service: <span class="string">"true"</span></div><div class="line">    kubernetes.io/name: <span class="string">"CoreDNS"</span></div><div class="line">spec:</div><div class="line">  selector:</div><div class="line">    k8s-app: coredns</div><div class="line">  clusterIP: CLUSTER_DNS_IP</div><div class="line">  ports:</div><div class="line">  - name: dns</div><div class="line">    port: 53</div><div class="line">    protocol: UDP</div><div class="line">  - name: dns-tcp</div><div class="line">    port: 53</div><div class="line">    protocol: TCP</div></pre></td></tr></table></figure></p>
+<p>修改模板中的变量:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">CLUSTER_DOMAIN: 这个在node节点部署的时候已经提前指定为(--cluster-dns=10.254.0.2), 因此这里和node节点指定保持一致, 修改成 10.254.0.2 </div><div class="line">REVERSE_CIDRS: cluster.local</div><div class="line">CLUSTER_DNS_IP: in-addr.arpa ip6.arpa</div></pre></td></tr></table></figure></p>
+<p>修改过后的具体文件请参考<a href="">coredns.yaml</a></p>
+<p>运行:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">kubectl create <span class="_">-f</span> coredns.yaml</div></pre></td></tr></table></figure></p>
+<h3 id="测试DNS是否正常"><a href="#测试DNS是否正常" class="headerlink" title="测试DNS是否正常"></a>测试DNS是否正常</h3><p>创建一个busybox的容器, 然后尝试解析内部apiserver服务的地址:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">[root@k8s-apiserver01 apps]<span class="comment"># cat pod-busybox.yaml</span></div><div class="line">apiVersion: v1</div><div class="line">kind: Pod</div><div class="line">metadata:</div><div class="line">  name: busybox</div><div class="line">  namespace: default</div><div class="line">spec:</div><div class="line">  containers:</div><div class="line">  - image: busybox</div><div class="line">    <span class="built_in">command</span>:</div><div class="line">      - sleep</div><div class="line">      - <span class="string">"3600"</span></div><div class="line">    imagePullPolicy: IfNotPresent</div><div class="line">    name: busybox</div><div class="line">  restartPolicy: Always</div><div class="line">[root@k8s-apiserver01 apps]<span class="comment"># kubectl create -f pod-busybox.yaml</span></div><div class="line">pod <span class="string">"busybox"</span> created</div><div class="line">[root@k8s-apiserver01 apps]<span class="comment"># kubectl exec -it busybox /bin/sh</span></div><div class="line">/ <span class="comment"># nslookup kubernetes.default</span></div><div class="line">Server:    10.254.0.2</div><div class="line">Address 1: 10.254.0.2 kube-dns.kube-system.svc.cluster.local</div><div class="line"></div><div class="line">Name:      kubernetes.default</div><div class="line">Address 1: 10.254.0.1 kubernetes.default.svc.cluster.local</div><div class="line">[root@k8s-apiserver01 apps]<span class="comment"># kubectl delete -f pod-busybox.yaml</span></div><div class="line">pod <span class="string">"busybox"</span> deleted</div></pre></td></tr></table></figure></p>
+<p>由于可以看出内部DNS已经生效.</p>
+<h2 id="可视化插件-Dashborad"><a href="#可视化插件-Dashborad" class="headerlink" title="可视化插件-Dashborad"></a>可视化插件-Dashborad</h2><p>dashborad是集群的可视化插件, 最新版本(1.8.2)已经支持通过web进入容器内部进行操作, 因此几乎一切需求都可以通过这个Web UI来与kubernetes集群进行交互来完成。<br>为了增加dashboard的安全性, 从1.7过后, ashboard默认将采用最小权限安装(基于rabc的kubernetes访问的最小权限), 并且通过https访问。</p>
+<p>我们使用官方的配置文件来安装，首先下载官方配置:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">wget https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml</div></pre></td></tr></table></figure></p>
+<p>将镜像地址: <code>k8s.gcr.io/kubernetes-dashboard-amd64:v1.8.2</code> 修改成我们自己的地址: <code>192.168.204.15/kubernetes/dashboard:v1.8.2</code></p>
+<p>然后到master节点上 创建我们的dashboard插件应用:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">[root@k8s-apiserver01 apps]<span class="comment"># kubectl create -f kubernetes-dashboard.yaml</span></div><div class="line">secret <span class="string">"kubernetes-dashboard-certs"</span> created</div><div class="line">serviceaccount <span class="string">"kubernetes-dashboard"</span> created</div><div class="line">role <span class="string">"kubernetes-dashboard-minimal"</span> created</div><div class="line">rolebinding <span class="string">"kubernetes-dashboard-minimal"</span> created</div><div class="line">deployment <span class="string">"kubernetes-dashboard"</span> created</div><div class="line">service <span class="string">"kubernetes-dashboard"</span> created</div><div class="line">[root@k8s-apiserver01 apps]<span class="comment"># kubectl -n kube-system get svc kubernetes-dashboard</span></div><div class="line">NAME                   TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)         AGE</div><div class="line">kubernetes-dashboard   NodePort   10.254.75.168   &lt;none&gt;        443:32101/TCP   2m</div></pre></td></tr></table></figure></p>
+<p>然后访问对用的port<br><img src="http://oiw1gzfww.bkt.clouddn.com/k8s-dashboard.jpg" alt="dashboard-login-page"></p>
+<p>dashboard的登录支持kubeconfig和token两种方式:</p>
+<ul>
+<li>kubeconfig: 和之前生成的kubeconfig文件一样, 但是多了一个token字段, 而且是必需的参数, 所有之前CLI使用的kubeconfig是登录不了的, 需要为他生成一个token</li>
+<li>token: 我们创建一个用户获取token 就可能登录, 当然你也可以将此token加入到kubeconfig文件里面使用kubeconfig文件来登录。</li>
+</ul>
+<p>下面是</p>
+<ul>
+<li>我们需要在kube-system空间创建一个admin的服务用户</li>
+<li>然后我们将admin用户和cluster-admin 角色进行绑定, 这样admin用户就是系统管理员了, 具有kubenetes集群的所有操作权限。<br>首先我们得创建一个admin角色的账号, 比如就叫admin, 我们通过 admin-role.yaml进行创建, 内容如下:<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">apiVersion: v1</div><div class="line">kind: ServiceAccount</div><div class="line">metadata:</div><div class="line">  name: admin-user</div><div class="line">  namespace: kube-system</div><div class="line">---</div><div class="line">apiVersion: rbac.authorization.k8s.io/v1beta1</div><div class="line">kind: ClusterRoleBinding</div><div class="line">metadata:</div><div class="line">  name: admin-user</div><div class="line">  annotations:</div><div class="line">    rbac.authorization.kubernetes.io/autoupdate: <span class="string">"true"</span></div><div class="line">roleRef:</div><div class="line">  apiGroup: rbac.authorization.k8s.io</div><div class="line">  kind: ClusterRole</div><div class="line">  name: cluster-admin</div><div class="line">subjects:</div><div class="line">- kind: ServiceAccount</div><div class="line">  name: admin-user</div><div class="line">  namespace: kube-system</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>创建并获取token:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">[root@k8s-apiserver01 apps]<span class="comment"># kubectl create -f admin-role.yaml</span></div><div class="line">clusterrolebinding <span class="string">"admin"</span> created</div><div class="line">serviceaccount <span class="string">"admin"</span> created</div><div class="line">[root@k8s-apiserver01 apps]<span class="comment"># kubectl -n kube-system get secret|grep admin-token</span></div><div class="line">admin-token-2p7l7                  kubernetes.io/service-account-token   3         21s</div><div class="line">[root@k8s-apiserver01 apps]<span class="comment"># kubectl -n kube-system describe secret admin-token-2p7l7</span></div><div class="line">Name:         admin-token-2p7l7</div><div class="line">Namespace:    kube-system</div><div class="line">Labels:       &lt;none&gt;</div><div class="line">Annotations:  kubernetes.io/service-account.name=admin</div><div class="line">              kubernetes.io/service-account.uid=c9aad066-fe8d-11e7-8479-fa163ee6f9f6</div><div class="line"></div><div class="line">Type:  kubernetes.io/service-account-token</div><div class="line"></div><div class="line">Data</div><div class="line">====</div><div class="line">ca.crt:     1359 bytes</div><div class="line">namespace:  11 bytes</div><div class="line">token:      eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJhZG1pbi10b2tlbi0ycDdsNyIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJhZG1pbiIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImM5YWFkMDY2LWZlOGQtMTFlNy04NDc5LWZhMTYzZWU2ZjlmNiIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDprdWJlLXN5c3RlbTphZG1pbiJ9.dv9Rt6EA08KFvYDqHYJlHu188vwfPPxf8Yf0cOhHswOsGWhgsoq-UmugcKcq1nqiVEEXR_EXb657ftPrpKOJrt3pkS2__5FdI-h3D6mKj1-zFae-dj8y_tVi4oaHQExIoxgbrzvBVKTpNxDbzWPKf2CChzRPRWqMmAuPlxK8iSvOf11wGe5B_Fh3okObFk5p_CA1Iz9NFRfD3OSR1_9Bt13SfwdKC3oodVBjrrTB-4O00gYM1RHV54_UmhSVJJkZCfvGhfqVt0h0f1Jmihju_D1OyQY5Lp-LpHN0hP<span class="_">-a</span>8TOidmjNYmy96euiZcDPhnb932GYaA2xVzgcIag72bIzbw</div></pre></td></tr></table></figure></p>
+<p>使用获取后的token进行登录<br><img src="http://oiw1gzfww.bkt.clouddn.com/k8s-dash.jpg" alt=""></p>
+<h2 id="集群监控插件-Heapster"><a href="#集群监控插件-Heapster" class="headerlink" title="集群监控插件-Heapster"></a>集群监控插件-Heapster</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">iptables -t nat -A POSTROUTING <span class="_">-s</span> 192.168.135.0/24 <span class="_">-d</span> 192.168.204.0/24 -j SNAT --to-source 192.168.204.7</div><div class="line">[root@k8s-node03 ~]<span class="comment"># iptables -t nat -L -nv | grep SNAT</span></div><div class="line">    7   468 SNAT       all  --  *      *       192.168.135.0/24     192.168.204.0/24     to:192.168.204.7</div></pre></td></tr></table></figure>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="https://github.com/kubernetes/dashboard#kubernetes-dashboard" target="_blank" rel="external">kubernetes-dashboard github</a></li>
+<li><a href="https://github.com/kubernetes/dashboard/wiki/Creating-sample-user" target="_blank" rel="external">kubernetes-dashborad create sample user</a></li>
+<li><a href="https://docs.projectcalico.org/v3.0/getting-started/kubernetes/installation/hosted/" target="_blank" rel="external">calico install documentation</a></li>
+<li><a href="https://github.com/containernetworking/cni" target="_blank" rel="external">cni github</a></li>
+<li><a href="https://github.com/coredns/deployment/tree/master/kubernetes" target="_blank" rel="external">coreDNS deploy</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="http://oiw1gzfww.bkt.clouddn.com/alipay.jpg" alt="紫川秀 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/kubernetes/" rel="tag"># kubernetes</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/23/harbor/" rel="next" title="企业级Docker镜像仓库harbor的部署和使用">
+                <i class="fa fa-chevron-left"></i> 企业级Docker镜像仓库harbor的部署和使用
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjIwMy84NzY3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://oiw1gzfww.bkt.clouddn.com/me.png"
+                alt="紫川秀" />
+            
+              <p class="site-author-name" itemprop="name">紫川秀</p>
+              <p class="site-description motion-element" itemprop="description">喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">50</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/yumaojun03" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://douban.com/people/155892492" target="_blank" title="豆瓣">
+                    
+                      <i class="fa fa-fw fa-globe"></i>豆瓣</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://www.zhihu.com/people/zi-chuan-xiu-86" target="_blank" title="知乎">
+                    
+                      <i class="fa fa-fw fa-globe"></i>知乎</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.liaoxuefeng.com/" title="廖雪峰官网" target="_blank">廖雪峰官网</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://xiaorui.cc/" title="峰云,就她了" target="_blank">峰云,就她了</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#插件镜像准备"><span class="nav-number">1.</span> <span class="nav-text">插件镜像准备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#网络插件-Calico"><span class="nav-number">2.</span> <span class="nav-text">网络插件-Calico</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#master安装calicoctl"><span class="nav-number">2.1.</span> <span class="nav-text">master安装calicoctl</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装calico插件"><span class="nav-number">2.2.</span> <span class="nav-text">安装calico插件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#服务发现插件-CoreDNS"><span class="nav-number">3.</span> <span class="nav-text">服务发现插件-CoreDNS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#部署CoreDNS"><span class="nav-number">3.1.</span> <span class="nav-text">部署CoreDNS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#测试DNS是否正常"><span class="nav-number">3.2.</span> <span class="nav-text">测试DNS是否正常</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#可视化插件-Dashborad"><span class="nav-number">4.</span> <span class="nav-text">可视化插件-Dashborad</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#集群监控插件-Heapster"><span class="nav-number">5.</span> <span class="nav-text">集群监控插件-Heapster</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2016 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">紫川秀</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("51RM6PwqfSuyOFX9MxLeq5yY-gzGzoHsz", "dNQYvnf4KlnN364JVGClL7bp");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
