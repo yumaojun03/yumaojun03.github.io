@@ -84,15 +84,15 @@
 <meta name="description" content="搭建kubernetes集群最大的麻烦其实不在于其复杂度(相对Openstack集群)而在于有GFW, 所以为了避免墙带来的麻烦, 也为了加深对kubernetes的理解, 这里将使用纯手工离线的方式进行部署(相应的文件我已经下载到百度云盘里面)。">
 <meta name="keywords" content="kubernetes">
 <meta property="og:type" content="article">
-<meta property="og:title" content="kubernetes 1.8.7 离线部署手册(上)">
+<meta property="og:title" content="kubernetes 1.8.7 离线部署手册(一)">
 <meta property="og:url" content="https://blog.yumaojun.net/2018/01/18/kubernetes-binary-install/index.html">
 <meta property="og:site_name" content="紫川秀的博客">
 <meta property="og:description" content="搭建kubernetes集群最大的麻烦其实不在于其复杂度(相对Openstack集群)而在于有GFW, 所以为了避免墙带来的麻烦, 也为了加深对kubernetes的理解, 这里将使用纯手工离线的方式进行部署(相应的文件我已经下载到百度云盘里面)。">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/architecture.png">
-<meta property="og:updated_time" content="2018-02-03T06:48:21.000Z">
+<meta property="og:updated_time" content="2018-02-03T07:05:09.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="kubernetes 1.8.7 离线部署手册(上)">
+<meta name="twitter:title" content="kubernetes 1.8.7 离线部署手册(一)">
 <meta name="twitter:description" content="搭建kubernetes集群最大的麻烦其实不在于其复杂度(相对Openstack集群)而在于有GFW, 所以为了避免墙带来的麻烦, 也为了加深对kubernetes的理解, 这里将使用纯手工离线的方式进行部署(相应的文件我已经下载到百度云盘里面)。">
 <meta name="twitter:image" content="http://oiw1gzfww.bkt.clouddn.com/architecture.png">
 
@@ -130,7 +130,7 @@
 
 
 
-  <title>kubernetes 1.8.7 离线部署手册(上) | 紫川秀的博客</title>
+  <title>kubernetes 1.8.7 离线部署手册(一) | 紫川秀的博客</title>
   
 
 
@@ -284,7 +284,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">kubernetes 1.8.7 离线部署手册(上)</h1>
+          <h1 class="post-title" itemprop="name headline">kubernetes 1.8.7 离线部署手册(一)</h1>
         
 
         <div class="post-meta">
@@ -312,7 +312,7 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2018-02-03T14:48:21+08:00">
+              <time title="更新于" itemprop="dateModified" datetime="2018-02-03T15:05:09+08:00">
                 2018-02-03
               </time>
             
@@ -359,7 +359,7 @@
 
           
           
-             <span id="/2018/01/18/kubernetes-binary-install/" class="leancloud_visitors" data-flag-title="kubernetes 1.8.7 离线部署手册(上)">
+             <span id="/2018/01/18/kubernetes-binary-install/" class="leancloud_visitors" data-flag-title="kubernetes 1.8.7 离线部署手册(一)">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -593,7 +593,7 @@
 <h3 id="集群测试"><a href="#集群测试" class="headerlink" title="集群测试"></a>集群测试</h3><p>我们通过部署一个nginx服务来验证集群是否正常工作:<br>为了加快验证的效果, 我们先在node节点上拉取nginx的镜像:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker pull nginx</div></pre></td></tr></table></figure></p>
 <p>然后在master节点上部署服务，并暴露出来:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">$ kubectl run nginx --replicas=2 --labels=<span class="string">"run=load-balancer-example"</span> --image=nginx  --port=80</div><div class="line">deployment <span class="string">"nginx"</span> created</div><div class="line">$ kubectl expose deployment nginx --type=NodePort --name=example-service</div><div class="line">service <span class="string">"example-service"</span> exposed</div><div class="line">$ kubectl describe svc example-service</div><div class="line">Name:                     example-service</div><div class="line">Namespace:                default</div><div class="line">Labels:                   run=load-balancer-example</div><div class="line">Annotations:              &lt;none&gt;</div><div class="line">Selector:                 run=load-balancer-example</div><div class="line">Type:                     NodePort</div><div class="line">IP:                       10.254.100.109</div><div class="line">Port:                     &lt;<span class="built_in">unset</span>&gt;  80/TCP</div><div class="line">TargetPort:               80/TCP</div><div class="line">NodePort:                 &lt;<span class="built_in">unset</span>&gt;  30924/TCP</div><div class="line">Endpoints:                172.30.52.2:80,172.30.52.3:80</div><div class="line">Session Affinity:         None</div><div class="line">External Traffic Policy:  Cluster</div><div class="line">Events:                   &lt;none&gt;</div></pre></td></tr></table></figure></p>
 <p>然后访问暴露出来的服务:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">[root@k8s-apiserver01 ~]<span class="comment"># curl 192.168.204.6:30924</span></div><div class="line">&lt;!DOCTYPE html&gt;</div><div class="line">&lt;html&gt;</div><div class="line">&lt;head&gt;</div><div class="line">&lt;title&gt;Welcome to nginx!&lt;/title&gt;</div><div class="line">&lt;style&gt;</div><div class="line">    body &#123;</div><div class="line">        width: 35em;</div><div class="line">        margin: 0 auto;</div><div class="line">        font-family: Tahoma, Verdana, Arial, sans-serif;</div><div class="line">    &#125;</div><div class="line">&lt;/style&gt;</div><div class="line">&lt;/head&gt;</div><div class="line">&lt;body&gt;</div><div class="line">&lt;h1&gt;Welcome to nginx!&lt;/h1&gt;</div><div class="line">&lt;p&gt;If you see this page, the nginx web server is successfully installed and</div><div class="line">working. Further configuration is required.&lt;/p&gt;</div><div class="line"></div><div class="line">&lt;p&gt;For online documentation and support please refer to</div><div class="line">&lt;a href=<span class="string">"http://nginx.org/"</span>&gt;nginx.org&lt;/a&gt;.&lt;br/&gt;</div><div class="line">Commercial support is available at</div><div class="line">&lt;a href=<span class="string">"http://nginx.com/"</span>&gt;nginx.com&lt;/a&gt;.&lt;/p&gt;</div><div class="line"></div><div class="line">&lt;p&gt;&lt;em&gt;Thank you <span class="keyword">for</span> using nginx.&lt;/em&gt;&lt;/p&gt;</div><div class="line">&lt;/body&gt;</div><div class="line">&lt;/html&gt;</div></pre></td></tr></table></figure></p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>经过这篇博客, 我们成功部署了一个4个节点的kubernetes 1.8.7的集群, 但是此时集群的网络, DNS, DashBoard, 监控都还没完成, 在接下来的<a href="/2018/01/27/kubernetes-binary-install-2/" title="kubernetes 1.8.7 离线部署手册(下)">kubernetes 1.8.7 离线部署手册(下)</a>中将进行这些组件的部署。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>经过这篇博客, 我们成功部署了一个4个节点的kubernetes 1.8.7的集群, 但是此时集群的网络, DNS, DashBoard, 监控都还没完成, 在接下来的<a href="/2018/01/27/kubernetes-binary-install-2/" title="kubernetes 1.8.7 离线部署手册(二)">kubernetes 1.8.7 离线部署手册(二)</a>中将进行这些组件的部署。</p>
 
       
     </div>
