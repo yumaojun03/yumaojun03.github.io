@@ -90,7 +90,7 @@
 <meta property="og:description" content="搭建kubernetes集群最大的麻烦其实不在于其复杂度(相对Openstack集群)而在于有GFW, 所以为了避免墙带来的麻烦, 也为了加深对kubernetes的理解, 这里将使用纯手工离线的方式进行部署(相应的文件我已经下载到百度云盘里面)。">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/architecture.png">
-<meta property="og:updated_time" content="2018-02-02T21:05:19.000Z">
+<meta property="og:updated_time" content="2018-02-03T06:48:21.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="kubernetes 1.8.7 离线部署手册(上)">
 <meta name="twitter:description" content="搭建kubernetes集群最大的麻烦其实不在于其复杂度(相对Openstack集群)而在于有GFW, 所以为了避免墙带来的麻烦, 也为了加深对kubernetes的理解, 这里将使用纯手工离线的方式进行部署(相应的文件我已经下载到百度云盘里面)。">
@@ -312,7 +312,7 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2018-02-03T05:05:19+08:00">
+              <time title="更新于" itemprop="dateModified" datetime="2018-02-03T14:48:21+08:00">
                 2018-02-03
               </time>
             
@@ -457,8 +457,8 @@
 </table>
 <p>这里master节点同时充当node节点, 因为后面一些在部署calico网络时采用的是daemonSet, 这样才能保证master和node节点内部网络通畅。</p>
 <h2 id="镜像准备"><a href="#镜像准备" class="headerlink" title="镜像准备"></a>镜像准备</h2><p>在进行集群搭建时, 由于很多镜像都需要翻墙下载, 因此请先准备一个私有仓库, 关于私有仓库的搭建请参考: <a href="/2018/01/23/harbor/" title="企业级Docker镜像仓库harbor的部署和使用">企业级Docker镜像仓库harbor的部署和使用</a>, 如果还没搭建的请搭建然后继续.</p>
-<p>在后面的安装过程中需要依赖一个基础镜像: pause, 它是根POD镜像, 用于管理POD的网络, 存储等一些共享资源:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">gcr.io/google_containers/pause-amd64                  3.0                 99e59f495ffa        15 months ago       747kB</div></pre></td></tr></table></figure></p>
-<p>如果自己能翻墙就自己下载后推送到自己的私有仓库, 如果自己翻不了墙, 我已帮忙下载, 请到<a href="">国内kubernetes镜像tar包</a><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">docker load &lt; pause-amd64.tar</div><div class="line">docker tag gcr.io/google_containers/pause-amd64:3.0 &#123;PRIVATE_REGISTRIY_ADDR&#125;/&#123;PROJECT&#125;/pause-amd64:3.0</div><div class="line">docker push &#123;PRIVATE_REGISTRIY_ADDR&#125;/&#123;PROJECT&#125;/pause-amd64:3.0</div></pre></td></tr></table></figure></p>
+<p>在后面的安装过程中需要依赖一个基础镜像: pause, 它是根POD镜像, 用于管理POD的网络, 存储等一些共享资源:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">gcr.io/google_containers/pause-amd64:3.0</div></pre></td></tr></table></figure></p>
+<p>如果自己能翻墙就自己下载后推送到自己的私有仓库, 如果自己翻不了墙, 我已帮忙下载, 请到<a href="https://pan.baidu.com/s/1hukv5Nu" target="_blank" rel="external">国内kubernetes镜像tar包</a><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">docker load &lt; pause-amd64.tar</div><div class="line">docker tag gcr.io/google_containers/pause-amd64:3.0 &#123;PRIVATE_REGISTRIY_ADDR&#125;/&#123;PROJECT&#125;/pause-amd64:3.0</div><div class="line">docker push &#123;PRIVATE_REGISTRIY_ADDR&#125;/&#123;PROJECT&#125;/pause-amd64:3.0</div></pre></td></tr></table></figure></p>
 <h2 id="集群准备"><a href="#集群准备" class="headerlink" title="集群准备"></a>集群准备</h2><p>在开始搭建集群前需要做一些基础准备:</p>
 <ol>
 <li><p>同步集群的时间<br>理论上systemd系统都自带了时间同步和管理的工具, 使用timedatectl命令确认下, 确保NTP synchronized为yes:</p>
@@ -768,7 +768,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-count">36</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
