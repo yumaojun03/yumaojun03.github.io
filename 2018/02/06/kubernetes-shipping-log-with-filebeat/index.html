@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="kubernetes," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="紫川秀的博客" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="kubernetes官方插件使用EFK来处理容器日志, 其中F指代Fluentd(Fluentd属于CNCF项目), 用于收集容器的日志。但是由于Fluentd用起来的确不怎么舒服(Ruby风格配置文件), 而Logstash又过于重量级(光启动就需要消耗大约500M内存), 而Elatic家族的Beats系列中的Filebeat既轻量又无依赖, 因此是作为DaemonSet部署的不二之选。">
+<meta name="keywords" content="kubernetes">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用filebeat收集kubernetes容器日志">
+<meta property="og:url" content="https://blog.yumaojun.net/2018/02/06/kubernetes-shipping-log-with-filebeat/index.html">
+<meta property="og:site_name" content="紫川秀的博客">
+<meta property="og:description" content="kubernetes官方插件使用EFK来处理容器日志, 其中F指代Fluentd(Fluentd属于CNCF项目), 用于收集容器的日志。但是由于Fluentd用起来的确不怎么舒服(Ruby风格配置文件), 而Logstash又过于重量级(光启动就需要消耗大约500M内存), 而Elatic家族的Beats系列中的Filebeat既轻量又无依赖, 因此是作为DaemonSet部署的不二之选。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/elk-with-beats.png">
+<meta property="og:image" content="https://jimmysong.io/kubernetes-handbook/images/filebeat-log-collector-arch.png">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/audit-log-discover.jpg">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/audit-log-dashboard.jpg">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/filebeat-with-k8s-discover.jpg">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/filebeat-with-k8s-dashboard.jpg">
+<meta property="og:updated_time" content="2018-02-07T05:47:55.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用filebeat收集kubernetes容器日志">
+<meta name="twitter:description" content="kubernetes官方插件使用EFK来处理容器日志, 其中F指代Fluentd(Fluentd属于CNCF项目), 用于收集容器的日志。但是由于Fluentd用起来的确不怎么舒服(Ruby风格配置文件), 而Logstash又过于重量级(光启动就需要消耗大约500M内存), 而Elatic家族的Beats系列中的Filebeat既轻量又无依赖, 因此是作为DaemonSet部署的不二之选。">
+<meta name="twitter:image" content="http://oiw1gzfww.bkt.clouddn.com/elk-with-beats.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://blog.yumaojun.net/2018/02/06/kubernetes-shipping-log-with-filebeat/"/>
+
+
+
+
+
+  <title>使用filebeat收集kubernetes容器日志 | 紫川秀的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">紫川秀的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">比你优秀的人不可怕,可怕的是比你优秀的人比你更努力。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2018/02/06/kubernetes-shipping-log-with-filebeat/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="紫川秀">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://oiw1gzfww.bkt.clouddn.com/me.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="紫川秀的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">使用filebeat收集kubernetes容器日志</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-06T14:32:05+08:00">
+                2018-02-06
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2018-02-07T13:47:55+08:00">
+                2018-02-07
+              </time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/运维/" itemprop="url" rel="index">
+                    <span itemprop="name">运维</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/运维/kubernetes/" itemprop="url" rel="index">
+                    <span itemprop="name">kubernetes</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/02/06/kubernetes-shipping-log-with-filebeat/" class="leancloud_visitors" data-flag-title="使用filebeat收集kubernetes容器日志">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>kubernetes官方插件使用EFK来处理容器日志, 其中F指代Fluentd(Fluentd属于CNCF项目), 用于收集容器的日志。但是由于Fluentd用起来的确不怎么舒服(Ruby风格配置文件), 而Logstash又过于重量级(光启动就需要消耗大约500M内存), 而Elatic家族的Beats系列中的Filebeat既轻量又无依赖, 因此是作为DaemonSet部署的不二之选。<br><a id="more"></a></p>
+<h2 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h2><p>在进行日志收集的过程中, 我们首先想到的是使用Logstash, 因为它是ELK stack中的重要成员, 但是现在的ELK家族的产品有了新的变化:<br><img src="http://oiw1gzfww.bkt.clouddn.com/elk-with-beats.png" alt=""><br>从中可以看出Logstash的定位变了, 它用于日志的原始数据的分析和转换(grok), 因此在轻量级的方案中首选Beats系列, 下面是基于ELK改造过后的基于Filebeat的容器日志处理方案:<br><img src="https://jimmysong.io/kubernetes-handbook/images/filebeat-log-collector-arch.png" alt=""></p>
+<h2 id="依赖部署"><a href="#依赖部署" class="headerlink" title="依赖部署"></a>依赖部署</h2><p>在Kubernetes中以DaemonSet部署Filebeat之前, 我们需要先做如下准备:</p>
+<ul>
+<li>安装Elasticsearch, Kibana</li>
+<li>安装Filebeat用于测试EFK已经能正常工作</li>
+<li>以DaemonSet部署Filebeat</li>
+</ul>
+<h3 id="部署Elasticsearch和Kibana"><a href="#部署Elasticsearch和Kibana" class="headerlink" title="部署Elasticsearch和Kibana"></a>部署Elasticsearch和Kibana</h3><p>在部署Filebeat之前需要先部署Elasticsearch和Kibana, 关于这2部分的部署请参考:</p>
+<ul>
+<li><a href="https://www.elastic.co/guide/en/beats/libbeat/6.1/elasticsearch-installation.html" target="_blank" rel="external">Install elaticdearch</a></li>
+<li><a href="https://www.elastic.co/guide/en/beats/libbeat/6.1/kibana-installation.html" target="_blank" rel="external">Install kibana</a></li>
+</ul>
+<p>安装完成后确认服务都已经对外提供服务:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[root@es-with-kb ~]<span class="comment"># netstat -tlnup | grep -E  '(:9200 |:5601)'</span></div><div class="line">tcp        0      0 0.0.0.0:5601            0.0.0.0:*               LISTEN      2503/./bin/../node/</div><div class="line">tcp6       0      0 :::9200                 :::*                    LISTEN      2367/java</div></pre></td></tr></table></figure></p>
+<p>对ES添加添加一些我们需要的插件<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">cd</span> /usr/share/elasticsearch</div><div class="line"><span class="comment"># 安装插件 ES的地图需要使用GEOIP来解索IP的经纬度, 所以ES还需要安装一个GEOIP的插件</span></div><div class="line">bin/elasticsearch-plugin install ingest-geoip</div><div class="line">bin/elasticsearch-plugin install x-pack</div><div class="line">systemctl restart elasticsearch</div></pre></td></tr></table></figure></p>
+<p>为内建用户初始化密码(elastic, kibana, and logstash_system):<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bin/x-pack/setup-passwords interactive</div></pre></td></tr></table></figure></p>
+<p>测试ES已经正常工作<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">[root@es-with-kb ~]<span class="comment"># curl http://192.168.204.14:9200</span></div><div class="line">&#123;</div><div class="line">  <span class="string">"name"</span> : <span class="string">"7t3FhoS"</span>,</div><div class="line">  <span class="string">"cluster_name"</span> : <span class="string">"elasticsearch"</span>,</div><div class="line">  <span class="string">"cluster_uuid"</span> : <span class="string">"gwxqxfOmQWKfFg_XF8-kvg"</span>,</div><div class="line">  <span class="string">"version"</span> : &#123;</div><div class="line">    <span class="string">"number"</span> : <span class="string">"6.1.3"</span>,</div><div class="line">    <span class="string">"build_hash"</span> : <span class="string">"af51318"</span>,</div><div class="line">    <span class="string">"build_date"</span> : <span class="string">"2018-01-26T18:22:55.523Z"</span>,</div><div class="line">    <span class="string">"build_snapshot"</span> : <span class="literal">false</span>,</div><div class="line">    <span class="string">"lucene_version"</span> : <span class="string">"7.1.0"</span>,</div><div class="line">    <span class="string">"minimum_wire_compatibility_version"</span> : <span class="string">"5.6.0"</span>,</div><div class="line">    <span class="string">"minimum_index_compatibility_version"</span> : <span class="string">"5.0.0"</span></div><div class="line">  &#125;,</div><div class="line">  <span class="string">"tagline"</span> : <span class="string">"You Know, for Search"</span></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>测试Kibana已经正常工作: 访问<a href="http://192.168.204.14:5601/" target="_blank" rel="external">http://192.168.204.14:5601/</a> , 注意此时Kibana应该还没有数据。</p>
+<h3 id="验证EFK-Filebeat"><a href="#验证EFK-Filebeat" class="headerlink" title="验证EFK(Filebeat)"></a>验证EFK(Filebeat)</h3><p>为了验证EFK能否正常工作, 因此我在EK的机器上安装了Filebeat, Filebeat的安装请查看官方文档: <a href="https://www.elastic.co/guide/en/beats/filebeat/6.1/filebeat-getting-started.html" target="_blank" rel="external">Filebeat安装文档</a></p>
+<p>Filebeat是模块化的, 这里开启审计日志模块, 来进行测试:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">filebeat modules enable auditd</div><div class="line">filebeat modules list</div><div class="line">filebeat setup -e</div><div class="line">systemctl restart filebeat</div></pre></td></tr></table></figure></p>
+<p>稍等片刻我们就可以通过dashboard测试数据收集是否正常:<br><img src="http://oiw1gzfww.bkt.clouddn.com/audit-log-discover.jpg" alt=""><br><img src="http://oiw1gzfww.bkt.clouddn.com/audit-log-dashboard.jpg" alt=""></p>
+<p>到此EFK工作正常。</p>
+<h3 id="DaemonSet部署Filebeat"><a href="#DaemonSet部署Filebeat" class="headerlink" title="DaemonSet部署Filebeat"></a>DaemonSet部署Filebeat</h3><p>以DaemonSet的方式部署Filebeat方便我们处理每个Node阶段上的容器日志, Filebeat容器会将Docker容器的日志目录(/var/lib/docker/containers)挂载进去开启一个prospector来进行处理。</p>
+<p>下载官方manifests<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">curl -L -O https://raw.githubusercontent.com/elastic/beats/6.1/deploy/kubernetes/filebeat-kubernetes.yaml</div></pre></td></tr></table></figure></p>
+<p>注意这个镜像需要翻墙下载: <code>docker.elastic.co/beats/filebeat:6.1.3</code>, 因此提前下载好(<a href="https://pan.baidu.com/s/1hukv5Nu#list/path=%2Fbinary_packages%2Fkube-addon-images&amp;parentPath=%2Fbinary_packages" target="_blank" rel="external">百度网盘</a>), 推送到自己的私有仓库, 然后修改image地址</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"># 修改image地址</div><div class="line">image: 192.168.204.15/kubernetes/filebeat:6.1.3</div><div class="line"># 设置ES相关配置(注意修改成你刚才初始化的密码)</div><div class="line">- name: ELASTICSEARCH_HOST</div><div class="line">  value: 192.168.204.14</div><div class="line">- name: ELASTICSEARCH_USERNAME</div><div class="line">  value: &quot;elastic&quot;</div><div class="line">- name: ELASTICSEARCH_PASSWORD</div><div class="line">  value: &quot;changme&quot;</div><div class="line"># 修改configMap中ES Host的默认值</div><div class="line">output.elasticsearch:</div><div class="line">  hosts: [&apos;$&#123;ELASTICSEARCH_HOST:192.168.204.14&#125;:$&#123;ELASTICSEARCH_PORT:9200&#125;&apos;]</div></pre></td></tr></table></figure>
+<p>然后开始创建:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">[root@k8s-apiserver01 filebeat]<span class="comment"># kubectl create -f filebeat-kubernetes.yaml</span></div><div class="line">configmap <span class="string">"filebeat-config"</span> created</div><div class="line">configmap <span class="string">"filebeat-prospectors"</span> created</div><div class="line">daemonset <span class="string">"filebeat"</span> created</div><div class="line">clusterrolebinding <span class="string">"filebeat"</span> created</div><div class="line">clusterrole <span class="string">"filebeat"</span> created</div><div class="line">serviceaccount <span class="string">"filebeat"</span> created</div></pre></td></tr></table></figure></p>
+<p>检查filebeat是否run起来<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">[root@k8s-apiserver01 filebeat]<span class="comment"># kubectl --namespace=kube-system get ds/filebeat</span></div><div class="line">NAME       DESIRED   CURRENT   READY     UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE</div><div class="line">filebeat   4         4         0         4            0           &lt;none&gt;          1m</div><div class="line">[root@k8s-apiserver01 ~]<span class="comment"># kubectl get pods -n kube-system | grep filebeat</span></div><div class="line">filebeat-sltwm                             1/1       Running   0          25m</div><div class="line">filebeat-tqgjx                             1/1       Running   0          25m</div><div class="line">filebeat-vq4wj                             1/1       Running   0          25m</div><div class="line">filebeat-wq44h                             1/1       Running   0          25m</div></pre></td></tr></table></figure></p>
+<p><strong>注意:</strong><br>如果查看filebeat的日志发现无法节点网络通信, 请使用SNAT进行转换, 如果通讯正常不必进行下面操作:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"># 允许node1上的filebeat所有网络访问node网络, 通过node1为代理(node1上执行)</div><div class="line">iptables -t nat -A POSTROUTING -s 192.168.85.0/24 -d 192.168.204.0/24 -j SNAT --to-source 192.168.204.4</div><div class="line"># 允许node2上的filebeat所有网络访问node网络, 通过node2为代理(node2上执行)</div><div class="line">iptables -t nat -A POSTROUTING -s 192.168.58.0/24 -d 192.168.204.0/24 -j SNAT --to-source 192.168.204.6</div></pre></td></tr></table></figure></p>
+<p>通过kabina观察4个节点上面的filebeat daemonset的日志是否收集:<br><img src="http://oiw1gzfww.bkt.clouddn.com/filebeat-with-k8s-discover.jpg" alt=""><br><img src="http://oiw1gzfww.bkt.clouddn.com/filebeat-with-k8s-dashboard.jpg" alt=""></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="https://www.elastic.co/guide/en/beats/libbeat/6.1/getting-started.html" target="_blank" rel="external">Getting Started With Beats and the Elatic Stack</a></li>
+<li><a href="https://www.elastic.co/guide/en/elasticsearch/reference/6.1/installing-xpack-es.html" target="_blank" rel="external">Elasticsearch 安装X-Pack</a></li>
+<li><a href="https://github.com/elastic/beats/tree/master/deploy/kubernetes/filebeat" target="_blank" rel="external">Deploy filebeat as daemonset in kubernetes cluster</a></li>
+<li><a href="https://www.elastic.co/guide/en/beats/filebeat/6.1/filebeat-modules.html" target="_blank" rel="external">Filebeat 模块列表</a></li>
+<li><a href="https://www.elastic.co/guide/en/beats/libbeat/6.1/elasticsearch-installation.html" target="_blank" rel="external">Install elaticdearch</a></li>
+<li><a href="https://www.elastic.co/guide/en/beats/libbeat/6.1/kibana-installation.html" target="_blank" rel="external">Install kibana</a></li>
+<li><a href="https://jimmysong.io/kubernetes-handbook/practice/app-log-collection.html" target="_blank" rel="external">应用日志收集</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="http://oiw1gzfww.bkt.clouddn.com/alipay.jpg" alt="紫川秀 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/kubernetes/" rel="tag"># kubernetes</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/27/kubernetes-binary-install-2/" rel="next" title="kubernetes 1.8.7 离线部署手册(二)">
+                <i class="fa fa-chevron-left"></i> kubernetes 1.8.7 离线部署手册(二)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjIwMy84NzY3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://oiw1gzfww.bkt.clouddn.com/me.png"
+                alt="紫川秀" />
+            
+              <p class="site-author-name" itemprop="name">紫川秀</p>
+              <p class="site-description motion-element" itemprop="description">喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">51</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">36</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/yumaojun03" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://douban.com/people/155892492" target="_blank" title="豆瓣">
+                    
+                      <i class="fa fa-fw fa-globe"></i>豆瓣</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://www.zhihu.com/people/zi-chuan-xiu-86" target="_blank" title="知乎">
+                    
+                      <i class="fa fa-fw fa-globe"></i>知乎</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.liaoxuefeng.com/" title="廖雪峰官网" target="_blank">廖雪峰官网</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://xiaorui.cc/" title="峰云,就她了" target="_blank">峰云,就她了</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#架构"><span class="nav-number">1.</span> <span class="nav-text">架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#依赖部署"><span class="nav-number">2.</span> <span class="nav-text">依赖部署</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#部署Elasticsearch和Kibana"><span class="nav-number">2.1.</span> <span class="nav-text">部署Elasticsearch和Kibana</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#验证EFK-Filebeat"><span class="nav-number">2.2.</span> <span class="nav-text">验证EFK(Filebeat)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DaemonSet部署Filebeat"><span class="nav-number">2.3.</span> <span class="nav-text">DaemonSet部署Filebeat</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2016 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">紫川秀</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("51RM6PwqfSuyOFX9MxLeq5yY-gzGzoHsz", "dNQYvnf4KlnN364JVGClL7bp");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
