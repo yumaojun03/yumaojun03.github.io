@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="紫川秀, 博客" />
+  <meta name="keywords" content="blockchain," />
 
 
 
@@ -81,16 +81,20 @@
 
 
 
-<meta name="description" content="喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。">
-<meta property="og:type" content="website">
-<meta property="og:title" content="紫川秀的博客">
-<meta property="og:url" content="https://blog.yumaojun.net/archives/2018/01/index.html">
+<meta name="description" content="区块链是目前最热门的话题, 比如比特币, 以太坊, 以及百度最近推出的莱茨狗, 相信你和我一样对这些新崛起的事物感到新奇, 并且想知道其背后的技术——区块链是怎样实现的, 这个系列将带领你使用Go语言一步一步实现一个基本功能齐全的区块链, 从而解开区块链技术的神秘面纱, 但是在动手之前需要先普及下区块链的基础理论。">
+<meta name="keywords" content="blockchain">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用Go打造一条自己的区块链系列之区块链理论介绍">
+<meta property="og:url" content="https://blog.yumaojun.net/2018/02/08/blockchain-go-part1/index.html">
 <meta property="og:site_name" content="紫川秀的博客">
-<meta property="og:description" content="喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。">
+<meta property="og:description" content="区块链是目前最热门的话题, 比如比特币, 以太坊, 以及百度最近推出的莱茨狗, 相信你和我一样对这些新崛起的事物感到新奇, 并且想知道其背后的技术——区块链是怎样实现的, 这个系列将带领你使用Go语言一步一步实现一个基本功能齐全的区块链, 从而解开区块链技术的神秘面纱, 但是在动手之前需要先普及下区块链的基础理论。">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://oiw1gzfww.bkt.clouddn.com/simpleBlockchain.png">
+<meta property="og:updated_time" content="2018-02-08T12:54:21.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="紫川秀的博客">
-<meta name="twitter:description" content="喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。">
+<meta name="twitter:title" content="使用Go打造一条自己的区块链系列之区块链理论介绍">
+<meta name="twitter:description" content="区块链是目前最热门的话题, 比如比特币, 以太坊, 以及百度最近推出的莱茨狗, 相信你和我一样对这些新崛起的事物感到新奇, 并且想知道其背后的技术——区块链是怎样实现的, 这个系列将带领你使用Go语言一步一步实现一个基本功能齐全的区块链, 从而解开区块链技术的神秘面纱, 但是在动手之前需要先普及下区块链的基础理论。">
+<meta name="twitter:image" content="http://oiw1gzfww.bkt.clouddn.com/simpleBlockchain.png">
 
 
 
@@ -120,13 +124,13 @@
 
 
 
-  <link rel="canonical" href="https://blog.yumaojun.net/archives/2018/01/"/>
+  <link rel="canonical" href="https://blog.yumaojun.net/2018/02/08/blockchain-go-part1/"/>
 
 
 
 
 
-  <title>归档 | 紫川秀的博客</title>
+  <title>使用Go打造一条自己的区块链系列之区块链理论介绍 | 紫川秀的博客</title>
   
 
 
@@ -145,7 +149,7 @@
     
   
 
-  <div class="container sidebar-position-left page-archive">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -249,184 +253,261 @@
           <div id="content" class="content">
             
 
-  
-  
-  
-  <div class="post-block archive">
-    <div id="posts" class="posts-collapse">
-      <span class="archive-move-on"></span>
+  <div id="posts" class="posts-expand">
+    
 
-      <span class="archive-page-counter">
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2018/02/08/blockchain-go-part1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="紫川秀">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://oiw1gzfww.bkt.clouddn.com/me.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="紫川秀的博客">
+    </span>
+
+    
+      <header class="post-header">
+
         
         
-         
+          <h1 class="post-title" itemprop="name headline">使用Go打造一条自己的区块链系列之区块链理论介绍</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-08T14:58:50+08:00">
+                2018-02-08
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2018-02-08T20:54:21+08:00">
+                2018-02-08
+              </time>
+            
+          </span>
+
           
-        好! 目前共计 52 篇日志。 继续努力。
-      </span>
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开发语言/" itemprop="url" rel="index">
+                    <span itemprop="name">开发语言</span>
+                  </a>
+                </span>
 
-      
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开发语言/Golang/" itemprop="url" rel="index">
+                    <span itemprop="name">Golang</span>
+                  </a>
+                </span>
 
-        
-        
-        
-
-        
+                
+                
+              
+            </span>
           
-          <div class="collection-title">
-            <h1 class="archive-year" id="archive-year-2018">2018</h1>
-          </div>
-        
-        
 
-        
+          
+            
+          
 
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+          
+          
+             <span id="/2018/02/08/blockchain-go-part1/" class="leancloud_visitors" data-flag-title="使用Go打造一条自己的区块链系列之区块链理论介绍">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
 
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/01/27/kubernetes-binary-install-2/" itemprop="url">
-              
-                <span itemprop="name">kubernetes 1.8.7 离线部署手册(二)</span>
-              
-            </a>
-        
-      </h2>
+          
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-01-27T12:59:12+08:00"
-              content="2018-01-27" >
-          01-27
-        </time>
-      </div>
+          
 
-    </header>
-  </article>
+          
 
+        </div>
+      </header>
+    
 
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/01/23/harbor/" itemprop="url">
-              
-                <span itemprop="name">企业级Docker镜像仓库harbor的部署和使用</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-01-23T09:34:05+08:00"
-              content="2018-01-23" >
-          01-23
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/01/22/kubernetes-hpa/" itemprop="url">
-              
-                <span itemprop="name">如何利用kubernetes实现应用的水平扩展(HPA)</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-01-22T17:10:57+08:00"
-              content="2018-01-22" >
-          01-22
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
       
 
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/01/18/kubernetes-binary-install/" itemprop="url">
-              
-                <span itemprop="name">kubernetes 1.8.7 离线部署手册(一)</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2018-01-18T15:07:51+08:00"
-              content="2018-01-18" >
-          01-18
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
+      
+        <p>区块链是目前最热门的话题, 比如比特币, 以太坊, 以及百度最近推出的莱茨狗, 相信你和我一样对这些新崛起的事物感到新奇, 并且想知道其背后的技术——区块链是怎样实现的, 这个系列将带领你使用Go语言一步一步实现一个基本功能齐全的区块链, 从而解开区块链技术的神秘面纱, 但是在动手之前需要先普及下区块链的基础理论。<br><a id="more"></a></p>
+<h2 id="比特币与区块链"><a href="#比特币与区块链" class="headerlink" title="比特币与区块链"></a>比特币与区块链</h2><p>公认的最早关于区块链的描述性文献是中本聪所撰写的<a href="https://bitcoin.org/bitcoin.pdf" target="_blank" rel="external">比特币：一种点对点的电子现金系统</a>，但该文献重点在于讨论比特币系统，实际上并没有明确提出区块链的定义和概念。在其中, 区块链被描述为用于记录比特币交易的账目历史。 所以区块链技术的雏形出现在比特币项目中。</p>
+<p>从本质上讲, 区块链属于一种去中心化的记录技术, 参与到系统上的节点，可能不属于同一组织、彼此无需信任, 区块链数据由所有节点共同维护，每个参与维护节点都能复制获得一份完整记录的拷贝。跟传统的记账技术相比，他从技术上解决了多方互信问题, 其特点包括:</p>
+<ul>
+<li>维护一条不断增长的链，只可能添加记录，而发生过的记录都不可篡改；</li>
+<li>去中心化，或者说多中心化，无需集中的控制而能达成共识，实现上尽量分布式；</li>
+<li>通过密码学的机制来确保交易无法抵赖和破坏，并尽量保护用户信息和记录的隐私性</li>
+</ul>
+<p>区块链是一种分布式的记录技术, 它作为分布式记账平台出现在比特币项目中, 但是它的应用并不仅仅限于数字货币(比特币), 可以运用到各种需要解决信任问题的场景, 比如: 信息公正, 交易资产, 学历认证, 社区能用共享等, 因此区块链可以说是21世纪最具革命性的技术之一，它仍在不断成长发展，潜力无限。</p>
+<h2 id="区块链依赖技术"><a href="#区块链依赖技术" class="headerlink" title="区块链依赖技术"></a>区块链依赖技术</h2><p>   但是他并不是一种完全革新的技术, 而是通过合理的组合现有的技术:</p>
+<ul>
+<li>分布式系统的核心问题:  CAP理论, ACID原则, 数据一致性算法(Paxos, Raft), 共识算法(PBFT系列、PoW系列)</li>
+<li>密码学和安全技术: 散列算法, 加解密算法, 数字证书, 数字签名, PKI体系</li>
+</ul>
+<h2 id="区块链基本原理"><a href="#区块链基本原理" class="headerlink" title="区块链基本原理"></a>区块链基本原理</h2><p>区块链的基本原理理解起来并不难。基本概念包括: </p>
+<ul>
+<li>交易(Transaction): 一次操作，导致账本状态的一次改变，如添加一条记录；</li>
+<li>区块(Block): 记录一段时间内发生的交易和状态结果，是对当前账本状态的一次共识；</li>
+<li>链(Chain): 由一个个区块按照发生顺序串联而成，是整个状态变化的日志记录。<br>如果把区块链作为一个状态机，则每次交易就是试图改变一次状态，而每次共识生成的区块，就是参与者对于区块中所有交易内容导致状态改变的结果进行确认。</li>
+</ul>
+<p><img src="http://oiw1gzfww.bkt.clouddn.com/simpleBlockchain.png" alt="区块链示例"></p>
+<h2 id="区块链分类与应用"><a href="#区块链分类与应用" class="headerlink" title="区块链分类与应用"></a>区块链分类与应用</h2><p>根据参与者的不同, 可以分为公开(Public)链、联盟(Consortium)链和私有(Private)链:</p>
+<ul>
+<li>公开链: 顾名思义，任何人都可以参与使用和维护，典型的如比特币区块链，信息是完全公开的。公开链将会更多的吸引社区和媒体的眼球,比如比特币和以太坊。</li>
+<li>私有链: 则是集中管理者进行限制，只能得到内部少数人可以使用，信息不公开。</li>
+<li>联盟链: 则介于两者之间，由若干组织一起合作维护一条区块链，该区块链的使用必须是有权限的管理，相关信息会得到保护，典型如银联组织。<br>根据使用目的和场景的不同，又可以分为:</li>
+<li>货币链: 以数字货币为目的</li>
+<li>产权链: 以记录产权为目的</li>
+<li>众筹链: 以众筹为目的的</li>
+<li>其他场景…</li>
+</ul>
+<h2 id="动手实现"><a href="#动手实现" class="headerlink" title="动手实现"></a>动手实现</h2><p>在了解了上面这些基本理论过后, 我们可以动手来实现</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="https://jeiwan.cc/posts/building-blockchain-in-go-part-1/" target="_blank" rel="external">Basic Prototype</a>   </li>
+</ul>
 
       
-
     </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="http://oiw1gzfww.bkt.clouddn.com/alipay.jpg" alt="紫川秀 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/blockchain/" rel="tag"># blockchain</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/06/kubernetes-shipping-log-with-filebeat/" rel="next" title="使用filebeat收集kubernetes容器日志">
+                <i class="fa fa-chevron-left"></i> 使用filebeat收集kubernetes容器日志
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
+  </article>
 
-  
 
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -434,6 +515,15 @@
 
 
           
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjIwMy84NzY3"></div>
+    </div>
+
+  
+
+
 
         </div>
         
@@ -454,8 +544,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -566,6 +665,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#比特币与区块链"><span class="nav-number">1.</span> <span class="nav-text">比特币与区块链</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#区块链依赖技术"><span class="nav-number">2.</span> <span class="nav-text">区块链依赖技术</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#区块链基本原理"><span class="nav-number">3.</span> <span class="nav-text">区块链基本原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#区块链分类与应用"><span class="nav-number">4.</span> <span class="nav-text">区块链分类与应用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#动手实现"><span class="nav-number">5.</span> <span class="nav-text">动手实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -719,6 +834,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
 
   
 
@@ -747,6 +866,17 @@
 
 
 
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
   
 
 

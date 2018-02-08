@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title><![CDATA[使用Go打造一条自己的区块链系列之区块链理论介绍]]></title>
+    <url>%2F2018%2F02%2F08%2Fblockchain-go-part1%2F</url>
+    <content type="text"><![CDATA[区块链是目前最热门的话题, 比如比特币, 以太坊, 以及百度最近推出的莱茨狗, 相信你和我一样对这些新崛起的事物感到新奇, 并且想知道其背后的技术——区块链是怎样实现的, 这个系列将带领你使用Go语言一步一步实现一个基本功能齐全的区块链, 从而解开区块链技术的神秘面纱, 但是在动手之前需要先普及下区块链的基础理论。 比特币与区块链公认的最早关于区块链的描述性文献是中本聪所撰写的比特币：一种点对点的电子现金系统，但该文献重点在于讨论比特币系统，实际上并没有明确提出区块链的定义和概念。在其中, 区块链被描述为用于记录比特币交易的账目历史。 所以区块链技术的雏形出现在比特币项目中。 从本质上讲, 区块链属于一种去中心化的记录技术, 参与到系统上的节点，可能不属于同一组织、彼此无需信任, 区块链数据由所有节点共同维护，每个参与维护节点都能复制获得一份完整记录的拷贝。跟传统的记账技术相比，他从技术上解决了多方互信问题, 其特点包括: 维护一条不断增长的链，只可能添加记录，而发生过的记录都不可篡改； 去中心化，或者说多中心化，无需集中的控制而能达成共识，实现上尽量分布式； 通过密码学的机制来确保交易无法抵赖和破坏，并尽量保护用户信息和记录的隐私性 区块链是一种分布式的记录技术, 它作为分布式记账平台出现在比特币项目中, 但是它的应用并不仅仅限于数字货币(比特币), 可以运用到各种需要解决信任问题的场景, 比如: 信息公正, 交易资产, 学历认证, 社区能用共享等, 因此区块链可以说是21世纪最具革命性的技术之一，它仍在不断成长发展，潜力无限。 区块链依赖技术 但是他并不是一种完全革新的技术, 而是通过合理的组合现有的技术: 分布式系统的核心问题: CAP理论, ACID原则, 数据一致性算法(Paxos, Raft), 共识算法(PBFT系列、PoW系列) 密码学和安全技术: 散列算法, 加解密算法, 数字证书, 数字签名, PKI体系 区块链基本原理区块链的基本原理理解起来并不难。基本概念包括: 交易(Transaction): 一次操作，导致账本状态的一次改变，如添加一条记录； 区块(Block): 记录一段时间内发生的交易和状态结果，是对当前账本状态的一次共识； 链(Chain): 由一个个区块按照发生顺序串联而成，是整个状态变化的日志记录。如果把区块链作为一个状态机，则每次交易就是试图改变一次状态，而每次共识生成的区块，就是参与者对于区块中所有交易内容导致状态改变的结果进行确认。 区块链分类与应用根据参与者的不同, 可以分为公开(Public)链、联盟(Consortium)链和私有(Private)链: 公开链: 顾名思义，任何人都可以参与使用和维护，典型的如比特币区块链，信息是完全公开的。公开链将会更多的吸引社区和媒体的眼球,比如比特币和以太坊。 私有链: 则是集中管理者进行限制，只能得到内部少数人可以使用，信息不公开。 联盟链: 则介于两者之间，由若干组织一起合作维护一条区块链，该区块链的使用必须是有权限的管理，相关信息会得到保护，典型如银联组织。根据使用目的和场景的不同，又可以分为: 货币链: 以数字货币为目的 产权链: 以记录产权为目的 众筹链: 以众筹为目的的 其他场景… 动手实现在了解了上面这些基本理论过后, 我们可以动手来实现 参考 Basic Prototype]]></content>
+      <categories>
+        <category>开发语言</category>
+        <category>Golang</category>
+      </categories>
+      <tags>
+        <tag>blockchain</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[使用filebeat收集kubernetes容器日志]]></title>
     <url>%2F2018%2F02%2F06%2Fkubernetes-shipping-log-with-filebeat%2F</url>
     <content type="text"><![CDATA[kubernetes官方插件使用EFK来处理容器日志, 其中F指代Fluentd(Fluentd属于CNCF项目), 用于收集容器的日志。但是由于Fluentd用起来的确不怎么舒服(Ruby风格配置文件), 而Logstash又过于重量级(光启动就需要消耗大约500M内存), 而Elatic家族的Beats系列中的Filebeat既轻量又无依赖, 因此是作为DaemonSet部署的不二之选。 架构在进行日志收集的过程中, 我们首先想到的是使用Logstash, 因为它是ELK stack中的重要成员, 但是现在的ELK家族的产品有了新的变化:从中可以看出Logstash的定位变了, 它用于日志的原始数据的分析和转换(grok), 因此在轻量级的方案中首选Beats系列, 下面是基于ELK改造过后的基于Filebeat的容器日志处理方案: 依赖部署在Kubernetes中以DaemonSet部署Filebeat之前, 我们需要先做如下准备: 安装Elasticsearch, Kibana 安装Filebeat用于测试EFK已经能正常工作 以DaemonSet部署Filebeat 部署Elasticsearch和Kibana在部署Filebeat之前需要先部署Elasticsearch和Kibana, 关于这2部分的部署请参考: Install elaticdearch Install kibana 安装完成后确认服务都已经对外提供服务:123[root@es-with-kb ~]# netstat -tlnup | grep -E '(:9200 |:5601)'tcp 0 0 0.0.0.0:5601 0.0.0.0:* LISTEN 2503/./bin/../node/tcp6 0 0 :::9200 :::* LISTEN 2367/java 对ES添加添加一些我们需要的插件12345cd /usr/share/elasticsearch# 安装插件 ES的地图需要使用GEOIP来解索IP的经纬度, 所以ES还需要安装一个GEOIP的插件bin/elasticsearch-plugin install ingest-geoipbin/elasticsearch-plugin install x-packsystemctl restart elasticsearch 为内建用户初始化密码(elastic, kibana, and logstash_system):1bin/x-pack/setup-passwords interactive 测试ES已经正常工作12345678910111213141516[root@es-with-kb ~]# curl http://192.168.204.14:9200&#123; "name" : "7t3FhoS", "cluster_name" : "elasticsearch", "cluster_uuid" : "gwxqxfOmQWKfFg_XF8-kvg", "version" : &#123; "number" : "6.1.3", "build_hash" : "af51318", "build_date" : "2018-01-26T18:22:55.523Z", "build_snapshot" : false, "lucene_version" : "7.1.0", "minimum_wire_compatibility_version" : "5.6.0", "minimum_index_compatibility_version" : "5.0.0" &#125;, "tagline" : "You Know, for Search"&#125; 测试Kibana已经正常工作: 访问http://192.168.204.14:5601/ , 注意此时Kibana应该还没有数据。 验证EFK(Filebeat)为了验证EFK能否正常工作, 因此我在EK的机器上安装了Filebeat, Filebeat的安装请查看官方文档: Filebeat安装文档 Filebeat是模块化的, 这里开启审计日志模块, 来进行测试:1234filebeat modules enable auditdfilebeat modules listfilebeat setup -esystemctl restart filebeat 稍等片刻我们就可以通过dashboard测试数据收集是否正常: 到此EFK工作正常。 DaemonSet部署Filebeat以DaemonSet的方式部署Filebeat方便我们处理每个Node阶段上的容器日志, Filebeat容器会将Docker容器的日志目录(/var/lib/docker/containers)挂载进去开启一个prospector来进行处理。 下载官方manifests1curl -L -O https://raw.githubusercontent.com/elastic/beats/6.1/deploy/kubernetes/filebeat-kubernetes.yaml 注意这个镜像需要翻墙下载: docker.elastic.co/beats/filebeat:6.1.3, 因此提前下载好(百度网盘), 推送到自己的私有仓库, 然后修改image地址 123456789101112# 修改image地址image: 192.168.204.15/kubernetes/filebeat:6.1.3# 设置ES相关配置(注意修改成你刚才初始化的密码)- name: ELASTICSEARCH_HOST value: 192.168.204.14- name: ELASTICSEARCH_USERNAME value: &quot;elastic&quot;- name: ELASTICSEARCH_PASSWORD value: &quot;changme&quot;# 修改configMap中ES Host的默认值output.elasticsearch: hosts: [&apos;$&#123;ELASTICSEARCH_HOST:192.168.204.14&#125;:$&#123;ELASTICSEARCH_PORT:9200&#125;&apos;] 然后开始创建:1234567[root@k8s-apiserver01 filebeat]# kubectl create -f filebeat-kubernetes.yamlconfigmap "filebeat-config" createdconfigmap "filebeat-prospectors" createddaemonset "filebeat" createdclusterrolebinding "filebeat" createdclusterrole "filebeat" createdserviceaccount "filebeat" created 检查filebeat是否run起来12345678[root@k8s-apiserver01 filebeat]# kubectl --namespace=kube-system get ds/filebeatNAME DESIRED CURRENT READY UP-TO-DATE AVAILABLE NODE SELECTOR AGEfilebeat 4 4 0 4 0 &lt;none&gt; 1m[root@k8s-apiserver01 ~]# kubectl get pods -n kube-system | grep filebeatfilebeat-sltwm 1/1 Running 0 25mfilebeat-tqgjx 1/1 Running 0 25mfilebeat-vq4wj 1/1 Running 0 25mfilebeat-wq44h 1/1 Running 0 25m 注意:如果查看filebeat的日志发现无法节点网络通信, 请使用SNAT进行转换, 如果通讯正常不必进行下面操作:1234# 允许node1上的filebeat所有网络访问node网络, 通过node1为代理(node1上执行)iptables -t nat -A POSTROUTING -s 192.168.85.0/24 -d 192.168.204.0/24 -j SNAT --to-source 192.168.204.4# 允许node2上的filebeat所有网络访问node网络, 通过node2为代理(node2上执行)iptables -t nat -A POSTROUTING -s 192.168.58.0/24 -d 192.168.204.0/24 -j SNAT --to-source 192.168.204.6 通过kabina观察4个节点上面的filebeat daemonset的日志是否收集: 参考 Getting Started With Beats and the Elatic Stack Elasticsearch 安装X-Pack Deploy filebeat as daemonset in kubernetes cluster Filebeat 模块列表 Install elaticdearch Install kibana 应用日志收集]]></content>
@@ -165,8 +177,8 @@
         <category>Golang</category>
       </categories>
       <tags>
-        <tag>APIGateway</tag>
         <tag>gRPC</tag>
+        <tag>APIGateway</tag>
       </tags>
   </entry>
   <entry>
@@ -190,8 +202,8 @@
         <category>Golang</category>
       </categories>
       <tags>
-        <tag>APIGateway</tag>
         <tag>gRPC</tag>
+        <tag>APIGateway</tag>
       </tags>
   </entry>
   <entry>

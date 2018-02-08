@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog.yumaojun.net/"/>
-  <updated>2018-02-07T05:47:55.000Z</updated>
+  <updated>2018-02-08T12:54:21.000Z</updated>
   <id>https://blog.yumaojun.net/</id>
   
   <author>
@@ -14,6 +14,65 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>使用Go打造一条自己的区块链系列之区块链理论介绍</title>
+    <link href="https://blog.yumaojun.net/2018/02/08/blockchain-go-part1/"/>
+    <id>https://blog.yumaojun.net/2018/02/08/blockchain-go-part1/</id>
+    <published>2018-02-08T06:58:50.000Z</published>
+    <updated>2018-02-08T12:54:21.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>区块链是目前最热门的话题, 比如比特币, 以太坊, 以及百度最近推出的莱茨狗, 相信你和我一样对这些新崛起的事物感到新奇, 并且想知道其背后的技术——区块链是怎样实现的, 这个系列将带领你使用Go语言一步一步实现一个基本功能齐全的区块链, 从而解开区块链技术的神秘面纱, 但是在动手之前需要先普及下区块链的基础理论。<br><a id="more"></a></p>
+<h2 id="比特币与区块链"><a href="#比特币与区块链" class="headerlink" title="比特币与区块链"></a>比特币与区块链</h2><p>公认的最早关于区块链的描述性文献是中本聪所撰写的<a href="https://bitcoin.org/bitcoin.pdf" target="_blank" rel="external">比特币：一种点对点的电子现金系统</a>，但该文献重点在于讨论比特币系统，实际上并没有明确提出区块链的定义和概念。在其中, 区块链被描述为用于记录比特币交易的账目历史。 所以区块链技术的雏形出现在比特币项目中。</p>
+<p>从本质上讲, 区块链属于一种去中心化的记录技术, 参与到系统上的节点，可能不属于同一组织、彼此无需信任, 区块链数据由所有节点共同维护，每个参与维护节点都能复制获得一份完整记录的拷贝。跟传统的记账技术相比，他从技术上解决了多方互信问题, 其特点包括:</p>
+<ul>
+<li>维护一条不断增长的链，只可能添加记录，而发生过的记录都不可篡改；</li>
+<li>去中心化，或者说多中心化，无需集中的控制而能达成共识，实现上尽量分布式；</li>
+<li>通过密码学的机制来确保交易无法抵赖和破坏，并尽量保护用户信息和记录的隐私性</li>
+</ul>
+<p>区块链是一种分布式的记录技术, 它作为分布式记账平台出现在比特币项目中, 但是它的应用并不仅仅限于数字货币(比特币), 可以运用到各种需要解决信任问题的场景, 比如: 信息公正, 交易资产, 学历认证, 社区能用共享等, 因此区块链可以说是21世纪最具革命性的技术之一，它仍在不断成长发展，潜力无限。</p>
+<h2 id="区块链依赖技术"><a href="#区块链依赖技术" class="headerlink" title="区块链依赖技术"></a>区块链依赖技术</h2><p>   但是他并不是一种完全革新的技术, 而是通过合理的组合现有的技术:</p>
+<ul>
+<li>分布式系统的核心问题:  CAP理论, ACID原则, 数据一致性算法(Paxos, Raft), 共识算法(PBFT系列、PoW系列)</li>
+<li>密码学和安全技术: 散列算法, 加解密算法, 数字证书, 数字签名, PKI体系</li>
+</ul>
+<h2 id="区块链基本原理"><a href="#区块链基本原理" class="headerlink" title="区块链基本原理"></a>区块链基本原理</h2><p>区块链的基本原理理解起来并不难。基本概念包括: </p>
+<ul>
+<li>交易(Transaction): 一次操作，导致账本状态的一次改变，如添加一条记录；</li>
+<li>区块(Block): 记录一段时间内发生的交易和状态结果，是对当前账本状态的一次共识；</li>
+<li>链(Chain): 由一个个区块按照发生顺序串联而成，是整个状态变化的日志记录。<br>如果把区块链作为一个状态机，则每次交易就是试图改变一次状态，而每次共识生成的区块，就是参与者对于区块中所有交易内容导致状态改变的结果进行确认。</li>
+</ul>
+<p><img src="http://oiw1gzfww.bkt.clouddn.com/simpleBlockchain.png" alt="区块链示例"></p>
+<h2 id="区块链分类与应用"><a href="#区块链分类与应用" class="headerlink" title="区块链分类与应用"></a>区块链分类与应用</h2><p>根据参与者的不同, 可以分为公开(Public)链、联盟(Consortium)链和私有(Private)链:</p>
+<ul>
+<li>公开链: 顾名思义，任何人都可以参与使用和维护，典型的如比特币区块链，信息是完全公开的。公开链将会更多的吸引社区和媒体的眼球,比如比特币和以太坊。</li>
+<li>私有链: 则是集中管理者进行限制，只能得到内部少数人可以使用，信息不公开。</li>
+<li>联盟链: 则介于两者之间，由若干组织一起合作维护一条区块链，该区块链的使用必须是有权限的管理，相关信息会得到保护，典型如银联组织。<br>根据使用目的和场景的不同，又可以分为:</li>
+<li>货币链: 以数字货币为目的</li>
+<li>产权链: 以记录产权为目的</li>
+<li>众筹链: 以众筹为目的的</li>
+<li>其他场景…</li>
+</ul>
+<h2 id="动手实现"><a href="#动手实现" class="headerlink" title="动手实现"></a>动手实现</h2><p>在了解了上面这些基本理论过后, 我们可以动手来实现</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="https://jeiwan.cc/posts/building-blockchain-in-go-part-1/" target="_blank" rel="external">Basic Prototype</a>   </li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;区块链是目前最热门的话题, 比如比特币, 以太坊, 以及百度最近推出的莱茨狗, 相信你和我一样对这些新崛起的事物感到新奇, 并且想知道其背后的技术——区块链是怎样实现的, 这个系列将带领你使用Go语言一步一步实现一个基本功能齐全的区块链, 从而解开区块链技术的神秘面纱, 但是在动手之前需要先普及下区块链的基础理论。&lt;br&gt;
+    
+    </summary>
+    
+      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
+    
+      <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
+    
+    
+      <category term="blockchain" scheme="https://blog.yumaojun.net/tags/blockchain/"/>
+    
+  </entry>
   
   <entry>
     <title>使用filebeat收集kubernetes容器日志</title>
@@ -1684,9 +1743,9 @@
       <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
     
     
-      <category term="APIGateway" scheme="https://blog.yumaojun.net/tags/APIGateway/"/>
-    
       <category term="gRPC" scheme="https://blog.yumaojun.net/tags/gRPC/"/>
+    
+      <category term="APIGateway" scheme="https://blog.yumaojun.net/tags/APIGateway/"/>
     
   </entry>
   
@@ -1823,9 +1882,9 @@
       <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
     
     
-      <category term="APIGateway" scheme="https://blog.yumaojun.net/tags/APIGateway/"/>
-    
       <category term="gRPC" scheme="https://blog.yumaojun.net/tags/gRPC/"/>
+    
+      <category term="APIGateway" scheme="https://blog.yumaojun.net/tags/APIGateway/"/>
     
   </entry>
   
@@ -2393,134 +2452,6 @@
     
       <category term="Python" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Python/"/>
     
-    
-      <category term="mqtt" scheme="https://blog.yumaojun.net/tags/mqtt/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>物联网之MQTT</title>
-    <link href="https://blog.yumaojun.net/2017/07/02/mqtt-introduce/"/>
-    <id>https://blog.yumaojun.net/2017/07/02/mqtt-introduce/</id>
-    <published>2017-07-02T04:46:42.000Z</published>
-    <updated>2017-08-08T03:16:07.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>物联网物接入协议MQTT<br><a id="more"></a></p>
-<p>相对来说，IoT的技术挑战，主要在安全隐患、连接管理、海量数据管理，用关键字来说就是海量、通用、可扩展、简单。<br>物接入云端，有很多挑战, 数据的安全尤为重要 </p>
-<h2 id="协议比较"><a href="#协议比较" class="headerlink" title="协议比较"></a>协议比较</h2><p><a href="http://www.365yg.com/group/6408407122584879362/" target="_blank" rel="external">协议比较</a></p>
-<h2 id="MQTT简介"><a href="#MQTT简介" class="headerlink" title="MQTT简介"></a>MQTT简介</h2><p>MQTT是一个客户端服务端架构的发布/订阅模式的消息传输协议。它的设计思想是轻巧、开放、简单、规范，易于实现。这些特点使得它对很多场景来说都是很好的选择，特别是对于受限的环境如机器与机器的通信(M2M)以及物联网环境(IoT)。<br>总体来说MQTT有如下特性:</p>
-<ul>
-<li>轻量级的 machine-to-machine 通信协议。</li>
-<li>publish/subscribe模式。</li>
-<li>基于TCP/IP。</li>
-<li>支持QoS。</li>
-<li>适合于低带宽、不可靠连接、嵌入式设备、CPU内存资源紧张。</li>
-<li>是一种比较不错的Android消息推送方案。</li>
-<li>FacebookMessenger采用了MQTT。</li>
-<li>MQTT有可能成为物联网的重要协议</li>
-</ul>
-<p><a href="http://dataguild.org/?p=6817" target="_blank" rel="external">mqtt协议简介</a></p>
-<p><a href="http://www.cnblogs.com/caca/p/mqtt.html" target="_blank" rel="external">协议简介</a></p>
-<h2 id="报文格式"><a href="#报文格式" class="headerlink" title="报文格式"></a>报文格式</h2><table class="tg"><tr><th class="tg-baqh">bit</th><th class="tg-yw4l">7</th><th class="tg-yw4l">6</th><th class="tg-yw4l">5</th><th class="tg-yw4l">4</th><th class="tg-yw4l">3</th><th class="tg-yw4l">2</th><th class="tg-yw4l">1</th><th class="tg-yw4l">0</th></tr><tr><td class="tg-q1yk">byte 1</td><td class="tg-6k2t" colspan="4">Message type</td><td class="tg-6k2t">DUP</td><td class="tg-6k2t" colspan="2">QoS level</td><td class="tg-6k2t">RETAIN</td></tr><tr><td class="tg-jogk">byte 2</td><td class="tg-yw4l" colspan="8">Message length (between one and four bytes)</td></tr><tr><td class="tg-r78f">byte 3</td><td class="tg-j0tj" colspan="8">… if needed to encode message length</td></tr><tr><td class="tg-574v">byte 4</td><td class="tg-baqh" colspan="8">… if needed to encode message length</td></tr><tr><td class="tg-r78f">byte 5</td><td class="tg-j0tj" colspan="8">… if needed to encode message length</td></tr></table>
-
-<h2 id="控制指令"><a href="#控制指令" class="headerlink" title="控制指令"></a>控制指令</h2><table>
-<thead>
-<tr>
-<th>Message Type</th>
-<th style="text-align:center">Value</th>
-<th style="text-align:center">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>CONNECT</td>
-<td style="text-align:center">1</td>
-<td style="text-align:center">Client request to connect to Server</td>
-</tr>
-<tr>
-<td>CONNACK</td>
-<td style="text-align:center">2</td>
-<td style="text-align:center">Connect Acknowledgment</td>
-</tr>
-<tr>
-<td>PUBLISH</td>
-<td style="text-align:center">3</td>
-<td style="text-align:center">Publish message</td>
-</tr>
-<tr>
-<td>PUBACK</td>
-<td style="text-align:center">4</td>
-<td style="text-align:center">Publish Acknowledgment</td>
-</tr>
-<tr>
-<td>PUBREC</td>
-<td style="text-align:center">5</td>
-<td style="text-align:center">Publish Received (assured delivery part 1)</td>
-</tr>
-<tr>
-<td>PUBREL</td>
-<td style="text-align:center">6</td>
-<td style="text-align:center">Publish Release (assured delivery part 2)</td>
-</tr>
-<tr>
-<td>PUBCOMP</td>
-<td style="text-align:center">7</td>
-<td style="text-align:center">Publish Complete (assured delivery part 3)</td>
-</tr>
-<tr>
-<td>SUBSCRIBE</td>
-<td style="text-align:center">8</td>
-<td style="text-align:center">Client Subscribe request</td>
-</tr>
-<tr>
-<td>SUBACK</td>
-<td style="text-align:center">9</td>
-<td style="text-align:center">Subscribe Acknowledgment</td>
-</tr>
-<tr>
-<td>UNSUBSCRIBE</td>
-<td style="text-align:center">10</td>
-<td style="text-align:center">Client Unsubscribe request</td>
-</tr>
-<tr>
-<td>UNSUBACK</td>
-<td style="text-align:center">11</td>
-<td style="text-align:center">Unsubscribe Acknowledgment</td>
-</tr>
-<tr>
-<td>PINGREQ</td>
-<td style="text-align:center">12</td>
-<td style="text-align:center">PING Request</td>
-</tr>
-<tr>
-<td>PINGRESP</td>
-<td style="text-align:center">13</td>
-<td style="text-align:center">PING Response</td>
-</tr>
-<tr>
-<td>DISCONNECT</td>
-<td style="text-align:center">14</td>
-<td style="text-align:center">Client is Disconnecting</td>
-</tr>
-</tbody>
-</table>
-<h2 id="Qos"><a href="#Qos" class="headerlink" title="Qos"></a>Qos</h2><p><img src="https://image.slidesharecdn.com/mqttiotprotocolscomparison-140219090749-phpapp01/95/mqtt-iot-protocols-comparison-8-638.jpg?cb=1392817944" alt=""></p>
-<h2 id="mqtt的状态机"><a href="#mqtt的状态机" class="headerlink" title="mqtt的状态机"></a>mqtt的状态机</h2><p><img src="http://www.sharetechnote.com/html/IoT/image/IoT_MQTT_ProtocolOverview_01.png" alt=""><br>wo </p>
-<p><img src="https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.iotsdk.v0.9.0/msc_mqtt.png" alt=""></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;物联网物接入协议MQTT&lt;br&gt;
-    
-    </summary>
-    
-      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
-    
-      <category term="Python" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Python/"/>
-    
-    
-      <category term="iot" scheme="https://blog.yumaojun.net/tags/iot/"/>
     
       <category term="mqtt" scheme="https://blog.yumaojun.net/tags/mqtt/"/>
     
