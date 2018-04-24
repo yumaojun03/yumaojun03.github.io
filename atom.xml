@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://blog.yumaojun.net/"/>
-  <updated>2018-02-08T12:54:21.000Z</updated>
+  <updated>2018-04-24T09:51:12.000Z</updated>
   <id>https://blog.yumaojun.net/</id>
   
   <author>
@@ -16,23 +16,141 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>使用Go打造一条自己的区块链系列之区块链理论介绍</title>
+    <title>Go 插件系统</title>
+    <link href="https://blog.yumaojun.net/2018/04/18/go-plugin/"/>
+    <id>https://blog.yumaojun.net/2018/04/18/go-plugin/</id>
+    <published>2018-04-18T02:35:48.000Z</published>
+    <updated>2018-04-24T09:51:12.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>通过使用插件在运行时扩展程序的功能, 而无需重新编译程序, 这是一个很常见的功能需求, 特别是在模块化设计的程序里面, 比如Nginx的模块系统。 在C/C++中通过使用动态库的方式可以实现动态加载, 但是Go直到1.8官方才开始支持, 下面将介绍Go如何基于动态链接库来实现动态加载。</p>
+<a id="more"></a>
+<h2 id="动态加载的优劣"><a href="#动态加载的优劣" class="headerlink" title="动态加载的优劣"></a>动态加载的优劣</h2><p>优点:</p>
+<ul>
+<li>动态加载, 也称热加载, 每次升级时不用重新编译整个工程，重新部署服务, 而是添加插件时进行动态更新。这对于很多比较重型的服务来说非常重要。</li>
+</ul>
+<p>缺点:</p>
+<ul>
+<li>带来一定的安全风险, 如果一些非法模块被注入如何防范</li>
+<li>给系统带来一定的不稳定的因素, 如果模块有问题, 没有经过良好的测试, 容易导致服务崩溃</li>
+<li>为版本管理带来了难题, 特别是在微服务的今天, 同一个服务, 加载了不同的插件, 应该怎么管理版本, 插件版本应该如何管理</li>
+</ul>
+<p>因此请慎重考虑, 是使用动态插件还是在源码里面进行插件化。</p>
+<h2 id="Go的插件系统-Plugin"><a href="#Go的插件系统-Plugin" class="headerlink" title="Go的插件系统:Plugin"></a>Go的插件系统:Plugin</h2><p>从1.8版开始, 官方提供了这种插件化的手段: plugin. 此功能使程序员可以使用动态链接库构建松散耦合的模块化程序，可以在运行时动态加载和绑定。</p>
+<p>Go插件是使用<code>-buildmode = plugin</code>标记编译的一个包, 用于生成一个共享对象(.so)库文件。 Go包中的导出的函数和变量被公开为ELF符号，可以使用<code>plugin</code>包在运行时查找并绑定ELF符号。Go编译器能够使用build flag -buildmode = c-shared创建C风格的动态共享库。</p>
+<p>1.8版本插件功能只能在Linux上使用。 1.10也可以在Mac上运行。</p>
+<p>下面将介绍使用Go插件系统创建模块化软件的一些开发原则, 并提供一个功能齐全的示例。</p>
+<h2 id="插件开发原则"><a href="#插件开发原则" class="headerlink" title="插件开发原则"></a>插件开发原则</h2><p>使用Go插件创建模块化程序需要遵循与常规Go软件包一样严格的软件实践。然而，插件引入了新的设计问题，因为它们的解耦性质被放大了。因此我们在设计可插拔系统时, 有一些原则需要关注:</p>
+<ul>
+<li>插件独立</li>
+</ul>
+<p>应该将插件视为与其他组件分离的独立组件。这允许插件独立于他们的消费者，并拥有自己的开发和部署生命周期。注意插件的可用性很重要, 因为它有肯能为整个系统带来不稳定的因素, 因此系统必须为插件集成提供一个简单的封装层, 插件开发人员将系统视为黑盒，不作为所提供的合约以外的假设, 从而保证插件自身的可用性。</p>
+<ul>
+<li>使用接口类型作为边界</li>
+</ul>
+<p>Go插件可以导出任何类型的包函数和变量。您可以设计插件来将其功能解耦为一组松散的函数。缺点是您必须单独查找和绑定每个函数符号。<br>然而，更为简单的方法是使用接口类型。创建导出功能的接口提供了统一简洁的交互，并具有清晰的功能划分。解析到接口的符号将提供对该功能的整个方法集的访问，而不仅仅是一个方法。</p>
+<ul>
+<li>Unix模块化原则</li>
+</ul>
+<p>插件代码应该设计成只关注一个功能点。</p>
+<ul>
+<li>版本控制</li>
+</ul>
+<p>插件是不透明而独立的实体，应该进行版本控制，以向用户提示其支持的功能。这里的一个建议是在命名共享对象文件时使用语义版本控制。例如，上面的文件编译插件可以命名为eng.so.1.0.0。</p>
+<h2 id="插件开发示例"><a href="#插件开发示例" class="headerlink" title="插件开发示例"></a>插件开发示例</h2><p>我以我遇到的一个实际需求为例, 在开发物联网接入组件的时候, 需要动态支持物解析, 下面就开发一个物解析的插件系统。</p>
+<p>下面是项目结构, parser.go是接口规约, main.go是主程序, plugins存放多个插件包<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">.</div><div class="line">├── main.go</div><div class="line">├── parser.go</div><div class="line">└── plugins</div><div class="line">    ├── car</div><div class="line">    │   └── car.go</div><div class="line">    └── phone</div><div class="line">        └── phone.go</div></pre></td></tr></table></figure></p>
+<h3 id="编写插件"><a href="#编写插件" class="headerlink" title="编写插件"></a>编写插件</h3><ol>
+<li><p>编写主程序接口规约: main.go</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="comment">// Parser use to parse things</span></div><div class="line"><span class="keyword">type</span> Parser <span class="keyword">interface</span> &#123;</div><div class="line">	Parse([]<span class="keyword">byte</span>) (meta <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>, data <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">float64</span>, err error)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>根据接口规约编写插件: car.go</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">type</span> car <span class="keyword">string</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *car)</span> <span class="title">Parse</span><span class="params">([]<span class="keyword">byte</span>)</span> <span class="params">(meta <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>, data <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">float64</span>, err error)</span></span> &#123;</div><div class="line">	meta = <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>&#123;<span class="string">"key1"</span>: <span class="string">"a"</span>&#125;</div><div class="line">	data = <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">float64</span>&#123;<span class="string">"key1"</span>: <span class="number">1</span>&#125;</div><div class="line"></div><div class="line">	<span class="keyword">return</span> meta, data, <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">var</span> Car car</div></pre></td></tr></table></figure>
+</li>
+<li><p>根据接口规约编写插件: phone.go</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">type</span> phone <span class="keyword">string</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *phone)</span> <span class="title">Parse</span><span class="params">([]<span class="keyword">byte</span>)</span> <span class="params">(meta <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>, data <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">float64</span>, err error)</span></span> &#123;</div><div class="line">	meta = <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>&#123;<span class="string">"key1"</span>: <span class="string">"b"</span>&#125;</div><div class="line">	data = <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">float64</span>&#123;<span class="string">"key1"</span>: <span class="number">2</span>&#125;</div><div class="line"></div><div class="line">	<span class="keyword">return</span> meta, data, <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">var</span> Phone phone</div></pre></td></tr></table></figure>
+</li>
+<li><p>编译插件<br>插件写完后将在plugins目录下编译插件:</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ <span class="built_in">cd</span> plugins</div><div class="line">$ go build -buildmode=plugin -o car.so car/car.go</div><div class="line">$ go build -buildmode=plugin -o phone.so phone/phone.go</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>最终在plugins目录下会生成好我们编译好的插件:<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ ls *.so</div><div class="line">car.so   phone.so</div></pre></td></tr></table></figure></p>
+<h3 id="使用插件"><a href="#使用插件" class="headerlink" title="使用插件"></a>使用插件</h3><p>插件的使用很简单, 大概步骤如下:</p>
+<ul>
+<li>用plugin.Open()打开插件文件</li>
+<li>用plguin.Lookup(“Export-Variable-Name”)查找导出的符号”Car”或者”Phone”。 请注意，符号名称与插件模块中定义的变量名称相匹配</li>
+<li>使用该变量</li>
+</ul>
+<ol>
+<li><p>主程序使用插件: main.go</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"plugin"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="comment">// Parser use to parse things</span></div><div class="line"><span class="keyword">type</span> Parser <span class="keyword">interface</span> &#123;</div><div class="line">	Parse([]<span class="keyword">byte</span>) (meta <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>, data <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">float64</span>, err error)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">pa</span><span class="params">()</span></span> &#123;</div><div class="line">	plug, err := plugin.Open(<span class="string">"./plugins/car.so"</span>)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="built_in">panic</span>(err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	car, err := plug.Lookup(<span class="string">"Car"</span>)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="built_in">panic</span>(err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	p, ok := car.(Parser)</div><div class="line">	<span class="keyword">if</span> ok &#123;</div><div class="line">		meta, data, err := p.Parse([]<span class="keyword">byte</span>(<span class="string">"a"</span>))</div><div class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">			<span class="built_in">panic</span>(err)</div><div class="line">		&#125;</div><div class="line">		fmt.Printf(<span class="string">"meta: %v, data: %v \n"</span>, meta, data)</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">pb</span><span class="params">()</span></span> &#123;</div><div class="line">	plug, err := plugin.Open(<span class="string">"./plugins/phone.so"</span>)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="built_in">panic</span>(err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	phone, err := plug.Lookup(<span class="string">"Phone"</span>)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="built_in">panic</span>(err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	p, ok := phone.(Parser)</div><div class="line">	<span class="keyword">if</span> ok &#123;</div><div class="line">		meta, data, _ := p.Parse([]<span class="keyword">byte</span>(<span class="string">"a"</span>))</div><div class="line">		fmt.Printf(<span class="string">"meta: %v, data: %v \n"</span>, meta, data)</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	pa()</div><div class="line">	pb()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>测试是否正常运行:</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ go run main.go</div><div class="line">meta: map[key1:a], data: map[key1:1]</div><div class="line">meta: map[key1:b], data: map[key1:2]</div></pre></td></tr></table></figure></li>
+</ol>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;通过使用插件在运行时扩展程序的功能, 而无需重新编译程序, 这是一个很常见的功能需求, 特别是在模块化设计的程序里面, 比如Nginx的模块系统。 在C/C++中通过使用动态库的方式可以实现动态加载, 但是Go直到1.8官方才开始支持, 下面将介绍Go如何基于动态链接库来实现动态加载。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
+    
+      <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
+    
+    
+      <category term="plugin" scheme="https://blog.yumaojun.net/tags/plugin/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>亲手打造区块链系列之区块链原型</title>
+    <link href="https://blog.yumaojun.net/2018/02/11/blockchain-go-part2/"/>
+    <id>https://blog.yumaojun.net/2018/02/11/blockchain-go-part2/</id>
+    <published>2018-02-11T03:15:19.000Z</published>
+    <updated>2018-04-18T02:31:51.000Z</updated>
+    
+    <content type="html"><![CDATA[<a id="more"></a>
+<p><img src="https://1.bp.blogspot.com/-pojjt7PHiVs/WT5A5mzK0II/AAAAAAAAwms/lAn-u3041JILsmf7u4uXXsve5rlANqp5ACK4B/s1600/BlockChain%2B1.jpg" alt=""></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;a id=&quot;more&quot;&gt;&lt;/a&gt;
+&lt;p&gt;&lt;img src=&quot;https://1.bp.blogspot.com/-pojjt7PHiVs/WT5A5mzK0II/AAAAAAAAwms/lAn-u3041JILsmf7u4uXXsve5rlANqp5ACK4B/s1600/Bl
+    
+    </summary>
+    
+      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
+    
+      <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
+    
+    
+      <category term="blockchain" scheme="https://blog.yumaojun.net/tags/blockchain/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>亲手打造区块链系列之区块链理论介绍</title>
     <link href="https://blog.yumaojun.net/2018/02/08/blockchain-go-part1/"/>
     <id>https://blog.yumaojun.net/2018/02/08/blockchain-go-part1/</id>
     <published>2018-02-08T06:58:50.000Z</published>
-    <updated>2018-02-08T12:54:21.000Z</updated>
+    <updated>2018-02-27T01:53:42.000Z</updated>
     
-    <content type="html"><![CDATA[<p>区块链是目前最热门的话题, 比如比特币, 以太坊, 以及百度最近推出的莱茨狗, 相信你和我一样对这些新崛起的事物感到新奇, 并且想知道其背后的技术——区块链是怎样实现的, 这个系列将带领你使用Go语言一步一步实现一个基本功能齐全的区块链, 从而解开区块链技术的神秘面纱, 但是在动手之前需要先普及下区块链的基础理论。<br><a id="more"></a></p>
-<h2 id="比特币与区块链"><a href="#比特币与区块链" class="headerlink" title="比特币与区块链"></a>比特币与区块链</h2><p>公认的最早关于区块链的描述性文献是中本聪所撰写的<a href="https://bitcoin.org/bitcoin.pdf" target="_blank" rel="external">比特币：一种点对点的电子现金系统</a>，但该文献重点在于讨论比特币系统，实际上并没有明确提出区块链的定义和概念。在其中, 区块链被描述为用于记录比特币交易的账目历史。 所以区块链技术的雏形出现在比特币项目中。</p>
+    <content type="html"><![CDATA[<p>区块链是目前最热门的话题, 比如比特币, 以太坊, 以及百度最近推出的莱茨狗, 相信你和我一样对这些新崛起的事物感到新奇, 并且想知道其背后的技术——区块链是怎样实现的, 这个系列将带领你使用Go语言一步一步实现一个基本功能齐全的区块链的原型, 从而解开区块链技术的神秘面纱, 但是在动手之前需要先普及下区块链的基础知识。<br><a id="more"></a></p>
+<h2 id="比特币与区块链"><a href="#比特币与区块链" class="headerlink" title="比特币与区块链"></a>比特币与区块链</h2><p>公认的最早关于区块链的描述性文献是中本聪所撰写的<a href="https://bitcoin.org/bitcoin.pdf" target="_blank" rel="external">比特币：一种点对点的电子现金系统</a>，但该文献重点在于讨论比特币系统，实际上并没有明确提出区块链的定义和概念。在其中, 区块链被描述为用于记录比特币交易的账目历史。 所以我们可以这样理解比特币和区块链之间的关系: 区块链技术的雏形出现在比特币项目中。</p>
 <p>从本质上讲, 区块链属于一种去中心化的记录技术, 参与到系统上的节点，可能不属于同一组织、彼此无需信任, 区块链数据由所有节点共同维护，每个参与维护节点都能复制获得一份完整记录的拷贝。跟传统的记账技术相比，他从技术上解决了多方互信问题, 其特点包括:</p>
 <ul>
 <li>维护一条不断增长的链，只可能添加记录，而发生过的记录都不可篡改；</li>
 <li>去中心化，或者说多中心化，无需集中的控制而能达成共识，实现上尽量分布式；</li>
 <li>通过密码学的机制来确保交易无法抵赖和破坏，并尽量保护用户信息和记录的隐私性</li>
 </ul>
-<p>区块链是一种分布式的记录技术, 它作为分布式记账平台出现在比特币项目中, 但是它的应用并不仅仅限于数字货币(比特币), 可以运用到各种需要解决信任问题的场景, 比如: 信息公正, 交易资产, 学历认证, 社区能用共享等, 因此区块链可以说是21世纪最具革命性的技术之一，它仍在不断成长发展，潜力无限。</p>
-<h2 id="区块链依赖技术"><a href="#区块链依赖技术" class="headerlink" title="区块链依赖技术"></a>区块链依赖技术</h2><p>   但是他并不是一种完全革新的技术, 而是通过合理的组合现有的技术:</p>
+<p>区块链是一种分布式的记录技术, 它作为分布式记账平台出现在比特币项目中, 但是它的应用并不仅仅限于数字货币(比特币), 它可以运用到各种需要解决信任问题的场景, 比如: 信息公正, 交易资产, 学历认证, 社区能用共享等, 因此区块链可以说是21世纪最具革命性的技术之一，它仍在不断成长发展，潜力无限。</p>
+<h2 id="区块链依赖技术"><a href="#区块链依赖技术" class="headerlink" title="区块链依赖技术"></a>区块链依赖技术</h2><p>虽然说区块链是21世纪最具革命性的技术之一, 但是它并不是颠覆现有技术, 而是基于多项已有技术而出现的新事物, 这些技术涉及到的领域比较杂，包括分布式、存储、密码学、心理学、经济学、博弈论、网络协议等，下面列出了目前认为有待解决或改进的关键技术点。</p>
 <ul>
+<li>密码学技术</li>
+<li>分布式共识</li>
+<li>数据库和存储系统</li>
 <li>分布式系统的核心问题:  CAP理论, ACID原则, 数据一致性算法(Paxos, Raft), 共识算法(PBFT系列、PoW系列)</li>
 <li>密码学和安全技术: 散列算法, 加解密算法, 数字证书, 数字签名, PKI体系</li>
 </ul>
@@ -53,15 +171,28 @@
 <li>众筹链: 以众筹为目的的</li>
 <li>其他场景…</li>
 </ul>
+<p>真实案例</p>
+<ul>
+<li><a href="https://mp.weixin.qq.com/s/t5TKLtUQ2-ET9d7q99Jm7w" target="_blank" rel="external">别人在忙挖矿，京东架构师却悄悄用区块链搞了件大事</a></li>
+</ul>
 <h2 id="动手实现"><a href="#动手实现" class="headerlink" title="动手实现"></a>动手实现</h2><p>在了解了上面这些基本理论过后, 我们可以动手来实现</p>
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
-<li><a href="https://jeiwan.cc/posts/building-blockchain-in-go-part-1/" target="_blank" rel="external">Basic Prototype</a>   </li>
+<li><a href="https://edu.csdn.net/huiyiCourse/series_detail/16" target="_blank" rel="external">区块链技术公开课</a></li>
+<li><a href="https://www.jianshu.com/p/7d9569a05fe9" target="_blank" rel="external">卿苏德：区块链在物联网中的应用</a></li>
+<li><a href="https://www.jianshu.com/p/acdff92bd16c?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=seo_notes&amp;utm_source=recommendation" target="_blank" rel="external">区块链与数字货币：原理、特征和构想</a></li>
+<li><a href="https://yeasy.gitbooks.io/blockchain_guide/content/born/what.html" target="_blank" rel="external">什么是区块链</a>   </li>
+<li><a href="https://mp.weixin.qq.com/s/bo5pZqDqqAOu5kanKrP_bQ" target="_blank" rel="external">什么是区块链</a></li>
+<li><a href="https://mp.weixin.qq.com/s/S-vKz_oQ5XiN9IIXSj6Kyg" target="_blank" rel="external">关于区块链，程序员需要了解什么</a></li>
+<li><a href="https://mp.weixin.qq.com/s/S872uxRHUcCZtMpwDMvxKA" target="_blank" rel="external">人才稀缺的区块链，程序员转型入门必看这四项技能</a></li>
+<li><a href="http://www.sohu.com/a/219815076_268033" target="_blank" rel="external">只用200行Go代码写一个自己的区块链</a></li>
+<li><a href="https://jeiwan.cc/posts/building-blockchain-in-go-part-1/" target="_blank" rel="external">Basic Prototype</a></li>
+<li><a href="https://mp.weixin.qq.com/s/qTw_WELfVZCGIjxTXy4aBA" target="_blank" rel="external">用Python撸一个区块链</a></li>
 </ul>
 ]]></content>
     
     <summary type="html">
     
-      &lt;p&gt;区块链是目前最热门的话题, 比如比特币, 以太坊, 以及百度最近推出的莱茨狗, 相信你和我一样对这些新崛起的事物感到新奇, 并且想知道其背后的技术——区块链是怎样实现的, 这个系列将带领你使用Go语言一步一步实现一个基本功能齐全的区块链, 从而解开区块链技术的神秘面纱, 但是在动手之前需要先普及下区块链的基础理论。&lt;br&gt;
+      &lt;p&gt;区块链是目前最热门的话题, 比如比特币, 以太坊, 以及百度最近推出的莱茨狗, 相信你和我一样对这些新崛起的事物感到新奇, 并且想知道其背后的技术——区块链是怎样实现的, 这个系列将带领你使用Go语言一步一步实现一个基本功能齐全的区块链的原型, 从而解开区块链技术的神秘面纱, 但是在动手之前需要先普及下区块链的基础知识。&lt;br&gt;
     
     </summary>
     
@@ -1969,491 +2100,6 @@
     
     
       <category term="APIGateway" scheme="https://blog.yumaojun.net/tags/APIGateway/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>IOT架构</title>
-    <link href="https://blog.yumaojun.net/2017/07/17/iot-architecture/"/>
-    <id>https://blog.yumaojun.net/2017/07/17/iot-architecture/</id>
-    <published>2017-07-17T08:58:05.000Z</published>
-    <updated>2017-08-08T03:15:59.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>最近开发了一次IOT组件, 在此期间也参考了下其他IOT平台的设计架构, 有所感想, 因此将其记录下来, 和大家分享, 欢迎交流。<br><a id="more"></a></p>
-<h2 id="IOT是什么"><a href="#IOT是什么" class="headerlink" title="IOT是什么"></a>IOT是什么</h2><p>IoT是Internet of Things的缩写, 它是互联网从人向物的延伸, 核心和基础仍然是互联网技术，是互联网技术基础上的延伸和扩展。 它将各种信息传感设备，如射频识别装置、红外感应器、全球定位系统、激光扫描器等种种装置, 按约定的协议, 将任何物品与互联网相连接, 达到物品之间进行信息交换和通讯的目的，以实现智能化识别、定位、追踪、监控和管理等。<br>IOT也将加速AI的觉醒, 它将万物互联, 再加上成熟的大数据处理, 深度学习的应用 会让万物都带有灵性, 这是多么宏大的一个时代, 2016被称为AI的元年, 随着IOT的加速, 我们将是这样一个时代的见证者,见证AI觉醒的第一代人。<br>下面是一张物联网在工业引用的一张图<br><img src="http://www.mr-wu.cn/wp-content/uploads/2015/12/The-internet-of-things.jpg" alt="应用场景"><br>这样看来未来很美好, 但是现实很残酷, 如何实现落地一套可靠的IOT方案任然是个难题, 在参考了一些国外的方案过后, 结合自己的实践, 给出了一种我认为的可落到的IOT方案架构。</p>
-<h2 id="IOT的难点"><a href="#IOT的难点" class="headerlink" title="IOT的难点"></a>IOT的难点</h2><p>IOT在落地过程中有诸多难点, 国内很多IOT也是刚起步的状态, 能参考的就国外几家云的大厂商。</p>
-<h3 id="涉及技术众多"><a href="#涉及技术众多" class="headerlink" title="涉及技术众多"></a>涉及技术众多</h3><p>IOT涉及到很多技术, 下面一张图 从几个维度展示了IOT涉及到的一些技术点:<br><img src="http://oiw1gzfww.bkt.clouddn.com/iot-tech.png" alt="技术体系"><br>从技术上看, 涉及众多技术, 因此对开发者有一定的要求, 招人是个问题。</p>
-<h3 id="架构难设计"><a href="#架构难设计" class="headerlink" title="架构难设计"></a>架构难设计</h3><p>IOT面对的是万物, 在万物接入时需要考虑到 数据的安全, 链接的管理, 海量流数据上传, 海量数据的存储 管理 分析。综合来说 架构设计必须满足: 海量、通用、可扩展、简单 因此这是一套庞大灵活的系统, 而这样的系统 往往云厂商比较有经验, 比如Openstack的设计就是一个不错的架构。<br>整体而言IOT的架构应该属于微服务架构, 微服务架构的设计和开发 往往都是把双刃剑, 如果划不清服务的边界(领域划分)和规范不了服务交互的流程和方式, 那么这样的架构也是一个灾难, 最终造成 理不断剪还乱的一个局面。<br>下面是一张基础的IOT架构图, 能很好的描述IOT中核心的关键点:<br><img src="http://www.eeiot.com/Public/Upload/attached/image/20150529/20150529151253_23315.jpg" alt="基于MQTT的物联网架构"></p>
-<h2 id="架构概述"><a href="#架构概述" class="headerlink" title="架构概述"></a>架构概述</h2><p>再复杂的事儿, 也需要抓住其核心点 才能有效展开。因此我们需要知道这个架构的精髓是啥, 在围绕那核心点。<br>参考上面那张架构图, 我们可以理解IOT的核心在完成这样几件事:</p>
-<ul>
-<li>连接设备</li>
-<li>设备数据分析</li>
-<li>设备数据运营与可视化</li>
-</ul>
-<p>核心之外是以下周边服务, 用于提升和扩展功能:</p>
-<ul>
-<li>功能平台: 比如消息通知, 提供对平台核心功能以外的一些补充。</li>
-</ul>
-<h2 id="架构详解"><a href="#架构详解" class="headerlink" title="架构详解"></a>架构详解</h2><p>在参考了AWS和Azure的IOT过后, 结合自己的认识,总结出来的IOT架构图。<br><img src="http://oiw1gzfww.bkt.clouddn.com/iot-define.png" alt="iot架构图"><br>按照领域对模块进行划分, 主要由几下几个模块组成:</p>
-<ul>
-<li>连接设备: <ul>
-<li>本地: 负责设备数据的采集上报与反向控制。</li>
-<li>云端: 将所有设备接入云，接收数据，同时负责管理这些设备的授权和限制 </li>
-</ul>
-</li>
-<li>数据分析: 通过提供 离线计算或者在线计算的可编程接口 为用户提供数据分析的能力</li>
-<li>数据可视化与运营: 采集上报的数据以及分析过后的数据的可视化, 数据标记, 数据授权等带业务性质的数据管理。</li>
-<li>API网关: 负责请求的统一代理, 屏蔽掉内部系统的复杂性。</li>
-<li>用户管理: 统一的用户体系 用于用户管理, 权限管理 </li>
-</ul>
-<h3 id="概念简介"><a href="#概念简介" class="headerlink" title="概念简介"></a>概念简介</h3><p>整个架构中 设计到如下一些概念:</p>
-<ul>
-<li>业务概念: 与数据相关, 用户自己定义的<ol>
-<li>设备(device): 用户的需要接入互联网的实体设备</li>
-</ol>
-</li>
-<li>系统概念: 与系统组件相关, 通过系统组件来接入的数据的组件<ol>
-<li>代理(agent): 获取设备信息和控制设备的代理</li>
-<li>设备网关代理(device-gateway-proxy): 代理device-gateway验证设备, 代理设备与云端通信</li>
-<li>设备网关(device-gateway): 云端设备网关, 管理设备接入<br>整个系统对于不同角色的划分:</li>
-<li>超级管理员: 具有系统已经数据的所有权限</li>
-<li>设备管理员: 负责将设备加入系统, 查看设备的数据, 以及以设备为维度的数据权限分配</li>
-<li>数据运营员: 负责点位数据的多维度管理(基础维度是设备), 以业务为维度的数据权限分配</li>
-<li>算法管理员: 负责管理和运行相应维度的算法(基础维度是设备), 以及数据的查看权限</li>
-<li>普通用户或者第三方开发者: 负责点位数据的多维度查看(基础维度是设备)</li>
-</ol>
-</li>
-</ul>
-<h3 id="设备连接"><a href="#设备连接" class="headerlink" title="设备连接"></a>设备连接</h3><p>设备的连接分为2部分云端和本地2部分构成, 由于云端和本地网络的差异, 需要考虑:</p>
-<ul>
-<li>网络的安全</li>
-<li>网络的不稳定<br>为了方便本地设备与云端相连, 需要约定一个协议, 因此需要考虑:</li>
-<li>通信协议的多适配: 比如MQTT, HTTP, CoAP等</li>
-<li>数据格式定义<br>由于本地网络的复杂多变性, 我们可能需要面对不同的场景:</li>
-<li>设备能直接联网上报数据</li>
-<li>设备无法联网, 需要将数据发生给本地一个网关代理, 由网关代理统一上报数据<br>设备连接的一个架构示意图:<br><img src="http://oiw1gzfww.bkt.clouddn.com/local_agent_arch.png" alt="设备连接"></li>
-</ul>
-<h4 id="本地"><a href="#本地" class="headerlink" title="本地"></a>本地</h4><p>本地会负责设备数据的采集上报以及控制, 这些功能由一个agent负责完成, 它功能方向如下:</p>
-<ul>
-<li>数据采集与上报: 配置云端凭证, 按照约定协议上报设备数据。</li>
-<li>接收云端控制: 向云端汇报控制指令, 接收云端发起的控制,以及返回执行结果。</li>
-</ul>
-<h5 id="设备代理-agent"><a href="#设备代理-agent" class="headerlink" title="设备代理(agent)"></a>设备代理(agent)</h5><p>设备代理负责收集设备的数据, 然后上报给云端网关, agent位于数据第一线, 需要考虑良好的扩展性, 因此适合采用 插件式 驱动开发模式。<br>采集器需要从云端获取证书, 配置云端设备编号, 然后按照指定的报文格式 将数据上报给云端。比如云端规范的数据上报格式,以influxDB的数据写入格式为例说明:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">measurement[,tag_key1=tag_value1...] field_key=field_value[,field_key2=field_value2] [timestamp]</div><div class="line"></div><div class="line">1. 一类设备一个库, 比如车, 比如飞机, 一个库里面存放所有这类设备的指标, 一组相关的指标一个组, 比如变速器, 齿轮箱, 算法计算的平均飞速</div><div class="line">2. 所有与数据无关的数据 均以标签的方式录入, 这些Tag分为2类: 1.系统标签: device-id, collector-id 2. 用户自定义标签</div></pre></td></tr></table></figure></p>
-<p>agent核心功能点概述:</p>
-<ul>
-<li>数据采集与上报<ol>
-<li>数据采集: 以插件的形式, 支持多协议适配,  默认情况下 只要数据符合规范 就可以上报</li>
-<li>数据处理: 如何数据不符合规范, 需要编写 数据处理插件, 处理成合法规则</li>
-<li>聚合数据: 如果数据量过大, 可以编写聚合插件, 对数据进行聚合, 比如针对设备震频数据。</li>
-<li>数据上报: 经历所有以上步骤过后, 将数据通过设备的数据上报管道上报云端</li>
-</ol>
-</li>
-<li>设备控制:<ol>
-<li>控制指令上报: agent启动时需要将 已经实现的控制指令通过控制上传通道向云端汇报。</li>
-<li>执行控制指令: agent订阅控制下发管道, 当有命令到来时, 立马执行, 并且将结果写回控制上传管道。</li>
-</ol>
-</li>
-<li>异常处理:<ol>
-<li>设备下线异常: 由于设备下线无法和设备建立连接, 无法采集数据(DeviceOffLineError), 通过控制上传通道上报</li>
-<li>点位采集异常: 由于设备没有该点位, 无法获取到该点位数据(NoPointError), 通过控制上传通道上报</li>
-</ol>
-</li>
-<li>agent控制:<ol>
-<li>代理配置: 通过控制下发通道, 下发代理配置.</li>
-<li>代理重启: 通过控制下发通道, 得知代理重新通知, 重启代理.</li>
-<li>状态上报: 通过控制上传通道, 汇报代理状态</li>
-</ol>
-</li>
-<li>agent异常:<ol>
-<li>代理运行异常: 代理异常下线及时通知云端(AgentRuntimeError)</li>
-</ol>
-</li>
-</ul>
-<h5 id="网关代理-device-gateway-proxy"><a href="#网关代理-device-gateway-proxy" class="headerlink" title="网关代理(device-gateway-proxy)"></a>网关代理(device-gateway-proxy)</h5><p>网关代理主要运用于代理无法访问公网的场景(有火墙), 它在本地网络中扮演着云端网关的角色, 控制着所有设备的连接, 因为他是代理, 所有相关控制信息均从云端网关获取。<br>网关代理在设计时需要满足如下原则:</p>
-<ul>
-<li>透明性: 对于云端来说, 不能因为代理而带来设备处理的差异性, 因此代理主要功能是代理设备 与 云端通信, 对于云网关来说 看到的依然是设备,而不是代理。</li>
-<li>缓存性: 代理需要面临网络中断,所以需要有数据缓存机制, 并且可以配置存储策略。<br>以下是gateway-proxy的核心功能概述:</li>
-<li>数据上报:<ol>
-<li>检查设备合法性: 网关代理能代理那些设备建立连接 需要从云端网关获取, 如果设备不合法, 则拒绝为该设备建立连接。</li>
-<li>数据上报: 网关代理模拟agent与真正的网关建立连接, 通过设备数据上报通道上报数据到云端。 </li>
-</ol>
-</li>
-<li>设备控制:<ol>
-<li>控制指令上报: 代理设备建立控制上传通道, 上报控制指令到云端。</li>
-<li>执行控制指令: 代理设备接收控制下发通道里面的 控制指令, 调度给agent执行, 将结果返回到控制上去通道。</li>
-</ol>
-</li>
-<li>异常处理:<ol>
-<li>设备下线异常: 由于设备下线无法和设备建立连接, 无法采集数据(DeviceOffLineError), 通过控制上传通道上报</li>
-<li>点位采集异常: 由于设备没有该点位, 无法获取到该点位数据(NoPointError), 通过控制上传通道上报</li>
-</ol>
-</li>
-<li>网关代理控制:<ol>
-<li>proxy配置: 通过proxy的控制上传通道 请求 proxy的配置信息, 配置proxy需要代理的设备列表</li>
-<li>proxy从启: 通过proxy的控制下发通道 执行云端对proxy的操作</li>
-<li>proxy状态上报: proxy通过控制上传通道 上报自身状态</li>
-<li>agent状态代理上报: proxy代理agent 上报状态(proxy控制上传通道)</li>
-<li>agent异常代理上报: proxy代理agent 上报异常(proxy控制上传通道)</li>
-</ol>
-</li>
-<li>网关代理异常:<ol>
-<li>proxy运行异常: 及时向云端上报(ProxyRuntimeError), 通过proxy控制上传通道</li>
-</ol>
-</li>
-</ul>
-<h4 id="云端-device-gateway"><a href="#云端-device-gateway" class="headerlink" title="云端(device-gateway)"></a>云端(device-gateway)</h4><p>云端负责设备的连接的组件我们称之为设备网关(device-gateway), 它负责接收设备上传的数据与设备的控制。<br>设备网关在设计时需要满足如下原则:</p>
-<ul>
-<li>数据安全: 为了确保网关和数据上报者之间这段公网数据链路的安全, 需采用TLS进行加密和双向认证。 数据网关需充当CA的角色, 向agent或者颁发数字证书 </li>
-<li>接入设备资产的管理</li>
-<li>数据存储: 在数据存入数据库之前,这些数据被称为事件, 数据被存储之后成为历史数据, 事件和历史数据分别对应不同的场景<br>device-gateway的控制层功能概述:</li>
-<li>类型管理:<br>连接上云端的设备必须要指明设备的类型, 设备类型用于校验 设备上传的数据 是否合规, 如果不合规,就丢弃掉, 但是需要记录日志, 让用户可以查看<br>类型的定义以Json为主, 需要定义 属性名称(字段名称), 字段的值的数据类型, 以及其他字段的相关信息。<ol>
-<li>类型的增删改查</li>
-</ol>
-</li>
-<li>设备管理<ol>
-<li>设备创建: 必须参数参数: 设备名称, 接入方式(通过agent接入还是通过proxy接入), 设备类型(先定义类型)  可选参数: 地理位置, 设备标签, 其他属性,<br>真正创建时我们需要考虑:<ol>
-<li>配额检查(限制一个用户可以创建的设备数)</li>
-<li>如果通过agent接入, 为agent颁发设备接入证书和私钥</li>
-<li>生成接入云端的用户和密码</li>
-<li>配置设备和云端通信的通道</li>
-<li>云端订阅这些通道, 等待数据上报或者来自agent的请求</li>
-</ol>
-</li>
-<li>查看设备:<br>设备创建成功过后用户可以查看到:<ol>
-<li>设备的基本信息, 比如名称, ID, 接入方式, 地理位置, 创建时间</li>
-<li>设备标签信息, 这是简单的资产, 用于通过标签分类设备, 简单的资产分类管理</li>
-<li>设备通道信息, 数据上报通道和设备控制通道的名称</li>
-<li>接入信息, 接入云端的用户名和密码</li>
-<li>设备状态信息, 设备是否下线, 能否和设备通信</li>
-<li>agent状态信息, agent是否运行</li>
-<li>如果是通过proxy接入, 显示proxy名称和状态信息</li>
-</ol>
-</li>
-<li>修改设备:<br>  提供设备基本信息的修改:<ol>
-<li>设备名称, 接入方式, 地理位置, 以及其他用户自定义属性的修改</li>
-</ol>
-</li>
-<li>禁用设备:<br>  禁用设备后, 将禁止设备与云端建立连接:<ol>
-<li>如果是agent接入, 剔除该agent的回话, 并禁止该设备 与云端建立连接</li>
-<li>如果是proxy接入, 通知proxy, 停止为该设备建立与云端的连接</li>
-</ol>
-</li>
-<li>启用设备:<br>  启用设备后, 恢复允许设备与云端建立连接:<ol>
-<li>如果是agent接入, 撤销设备禁止接入云端的控制</li>
-<li>如果是proxy接入, 通知proxy, 重新为该设备建立与云端的连接</li>
-</ol>
-</li>
-<li>删除设备:<br>  删除设备后, 与设备相关的所有连接都将断开, 该设备从此以后将无法与云端建立连接<ol>
-<li>取消该设备通道的所有处理</li>
-<li>清除接入用户信息, 用户无法和云端建立连接</li>
-<li>如果是proxy接入, 通知代理 该设备已经删除, 更新代理列表, 停止为该设备代理</li>
-<li>清除设备相关元数据</li>
-</ol>
-</li>
-<li>设备配额管理:<br>  限制用户可以创建的设备数量<ol>
-<li>查询配置:</li>
-<li>修改配额: 由管理员修改配额</li>
-</ol>
-</li>
-<li>设备标签管理:<br>  基于标签的资产管理<ol>
-<li>标签的创建,查看,修改,删除</li>
-<li>为设备添加标签</li>
-<li>移除设备的标签</li>
-</ol>
-</li>
-<li>设备状态影子:<ol>
-<li>查看设备最新状态, 设备数据接入云端时需要通过 设备类型 检查设备的上报的数据是否合法, 并且经最新状态 录入, 用户可以看到该设备的 最新状态数据.</li>
-</ol>
-</li>
-</ol>
-</li>
-<li>设备的反向控制:<ol>
-<li>控制指令查看<br>控制指令由agent的控制器实现, 在agent启动时上报给云端:<ol>
-<li>控制指令的基本信息: 控制指令的名称, 功能说明, 使用方式, 预期结果, 异常说明。</li>
-<li>控制指令的上报时间, 执行权使用者列表</li>
-<li>控制指令的执行记录</li>
-</ol>
-</li>
-<li>执行权分配<br>将控制指令的执行权分配给有个用户, 该用户可以执行该控制指令</li>
-<li>执行权回收<br>将控制指令的执行权回收。用户将没有改指令的执行权</li>
-<li>执行控制指令<br>默认仅有管理员可以执行控制指令, 执行控制指令, 得到执行结果</li>
-<li>禁用控制指令<br> 由管理员决定是否禁用该控制指令</li>
-<li>启用控制指令<br>由管理员决定是否启用该控制指令</li>
-</ol>
-</li>
-<li>proxy管理:<ol>
-<li>创建代理: 必须参数: 代理名称, 可选参数: 地理位置, 其他创建属性</li>
-<li>查看代理:<ol>
-<li>名称, 地理位置, 其他属性, 创建时间</li>
-<li>代理状态: 未接入, 运行中, 禁用</li>
-<li>代理的 数字签名证书, CA证书, 代理私钥</li>
-<li>代理自己使用的控制通道(代理和云端通信的接口), 和异常上报通道</li>
-</ol>
-</li>
-<li>修改代理:<br>名称, 地理位置, 其他属性</li>
-<li>删除代理:<ol>
-<li>确认该代理下面没有设备后方可以删除, 移除后的设备属于无上报方式的设备, </li>
-<li>吊销代理的证书</li>
-<li>剔除代理 的上报回话(非常危险, 如果代理正在上报数据)</li>
-<li>清除代理信息</li>
-</ol>
-</li>
-<li>禁用代理: 禁止该代理发布数据到云端(的数据管道)</li>
-<li>启用代理: 禁止该代理发布数据到云端(的数据管道)</li>
-<li>查看代理下的设备: 列出该代理下面的设备列表</li>
-<li>添加设备到该代理下面</li>
-<li>移除该代理下面的设备</li>
-</ol>
-</li>
-</ul>
-<p>device-gateway后台功能概述:</p>
-<ul>
-<li>数据存储<br>负责将数据存储到后端存储<ol>
-<li>状态数据存储</li>
-<li>热数据存储</li>
-<li>历史数据存储</li>
-</ol>
-</li>
-</ul>
-<h3 id="数据可视化与运营-data-manager"><a href="#数据可视化与运营-data-manager" class="headerlink" title="数据可视化与运营(data-manager)"></a>数据可视化与运营(data-manager)</h3><p>主要负责数据的管理和查看, 数据以类型组织在一起, 以点位为核心, 用户通过为这些 数据添加标签 来添加 数据维度, 方便业务使用。</p>
-<ul>
-<li>数据分类<br>提供数据的查看与运营管理, 数据以指标的方式存储, 用户通过标签来运营数据。运营的数据主要由2类构成: </li>
-</ul>
-<ol>
-<li>物理指标数据: 采集上来的原始数据, 以点位的最小逻辑单元为指标,比如 齿轮箱等。</li>
-<li>分析过后的指标数据: 经过分析过后的数据 以算法为指标, 分析根据需要为这些数据打算标签。(比如打算设备标签)</li>
-</ol>
-<ul>
-<li>数据查看<br>提供对数据的基本展现的支持, 但不提供大量原始数据的导出功能, 大量原始数据是留给计算平台使用的, 如需导出请使用导出工具进行导出。</li>
-</ul>
-<ol>
-<li>数据查询配置查看: <ol>
-<li>历史数据分层配置: 1. 按时间为维度进行划分, 默认为3个月 2. 按容量进行划分, 默认为最近1w条数据, 默认按规则1执行。</li>
-<li>状态数据查询容量限制: 默认为1000条数据, 及设备点位不得默认不得超过1000</li>
-<li>历史数据查询容量限制: 默认为100 * 100条数据, 及设备点位不能超过100个，每个点位的数据不得超过100条</li>
-</ol>
-</li>
-<li>数据查询配置修改: 修改以上那些默认配置</li>
-<li>查询数据: <ol>
-<li>状态查询:  也就是当前接入事件的查询(用于查看当下接入的数据, 不能查看历史数据), 如果设备接入异常 请显示接入异常信息, 以websocket 进行实时提供</li>
-<li>历史查询: 也就是趋势查询<ol>
-<li>热数据查询:   如果数据量过大，需要分组进行聚合</li>
-<li>冷数据查询:   如果数据量过大，需要分组进行聚合</li>
-</ol>
-</li>
-</ol>
-</li>
-</ol>
-<ul>
-<li>数据标签管理<ol>
-<li>数据标签查询, 默认标签属于系统标签(比如数据属于那台设备, 数据是由那个采集器采集上来的), 禁止修改, 为只读状态, 其他是用户为数据 进行的自定义标签</li>
-<li>添加标签: 为数据 添加标签， 标签有长度限制(最长不得超过16个字符)</li>
-<li>删除标签: 删除标签,但是删除之前 需要确认数据是否已经授权, 如果已经授权分享, 需要撤销分享 才能删除</li>
-</ol>
-</li>
-<li>数据授权<br> 用户按照自己的需要 将数据打上标签, 或者使用默认标签, 将对应的数据 分析给其他用户访问.<ol>
-<li>数据分享查询: 查询那些数据,被分析给了那些用户</li>
-<li>分享权限撤销: 撤销已经分析出去的数据授权</li>
-<li>数据分享: 指定某些用户可以访问那些标签的数据。</li>
-</ol>
-</li>
-</ul>
-<h3 id="数据分析"><a href="#数据分析" class="headerlink" title="数据分析"></a>数据分析</h3><p>数据分析围绕算法和任务进行展开, 关键的在于 算法的高度可定制化, 算法测试, 运行时检查, 以及算法执行过程中任务的可视化。功能是满足高级用户 对于数据分析的需求。 通过算法对数据进行深度分析的功能。</p>
-<ul>
-<li>实时计算</li>
-<li>离线计算(报表统计和深度学习, 深度需要依赖大量数据训练出模型，然后通过模型 应用到事件分析, 达到智能分析的目的)</li>
-<li>混合计算: 比如先使用离线计算训练模型, 然后将模型 应用到实时计算, 或者使用实时计算作为测试数据,以历史数据作为训练数据 进行交叉验证,以便训练准确的模型。</li>
-</ul>
-<h4 id="算法管"><a href="#算法管" class="headerlink" title="算法管"></a>算法管</h4><p>管理算法文件, 算法文件表现为一个脚本文件, 对于storm 平台而已, 算法文件是groove脚本, 对于spark 平台而言, 算法文件 可以是spark支持的多种语言的脚本。</p>
-<ul>
-<li>上传算法: 上传脚本文件,  算法名称(默认是算法文件的名称,去掉后缀), 算法描述信息(包含算法要解决的问题, 输入参数的解释和输出参数的解释), 算法运行平台()</li>
-<li>下载算法: 下载算法文件。</li>
-<li>删除算法: 删除算法文件.</li>
-<li>更新算法元数据: 更新算法的名称 或者算法的描述信息</li>
-<li>查看算法: 查看所有算法。</li>
-<li>算法访问授权: 授权算法给某个用户访问。</li>
-<li>算法授权撤销: 撤销某个用户访问某个算法的权限。</li>
-</ul>
-<h4 id="任务执行"><a href="#任务执行" class="headerlink" title="任务执行"></a>任务执行</h4><p>算法 运行时产生一个真正的任务, 因此运行算法 需要有以下这些参数:</p>
-<ul>
-<li>算法文件, 通过指定算法文件的id来完成</li>
-<li>算法的输入和输出:<ol>
-<li>扫描获取算法文件的 输入和输出形参()</li>
-<li>选定输入源的形参对应的数据, 通过去输入源 查看得出, 选择输出源 对应的名称。(可以检查输入源是否有数据)</li>
-</ol>
-</li>
-<li>执行平台, 根据算法文件id, 得知该算法调度到那个平台上运行(jstrom, spark), 如果没有对应平台支持,  则报错</li>
-</ul>
-<h2 id="现有物联网平台参考"><a href="#现有物联网平台参考" class="headerlink" title="现有物联网平台参考"></a>现有物联网平台参考</h2><p><a href="http://www.cnblogs.com/kinging/category/881401.html" target="_blank" rel="external">国内外物联网平台架构</a><br><a href="http://www.chengshiluntan.com/wg/a/20160907/503c29c323fd2d59999501e91099ecf7.html" target="_blank" rel="external">微软Azure IoT</a><br><a href="http://www.cnblogs.com/kinging/articles/5865116.html" target="_blank" rel="external">亚马逊AWS IoT</a><br><a href="http://www.cnblogs.com/kinging/articles/5865139.html" target="_blank" rel="external">IBM Watson IOT</a></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;最近开发了一次IOT组件, 在此期间也参考了下其他IOT平台的设计架构, 有所感想, 因此将其记录下来, 和大家分享, 欢迎交流。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
-    
-      <category term="Golang" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Golang/"/>
-    
-    
-      <category term="iot" scheme="https://blog.yumaojun.net/tags/iot/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Python的mqtt客户端使用说明</title>
-    <link href="https://blog.yumaojun.net/2017/07/04/mqtt-reconnect/"/>
-    <id>https://blog.yumaojun.net/2017/07/04/mqtt-reconnect/</id>
-    <published>2017-07-04T07:21:58.000Z</published>
-    <updated>2017-08-08T03:16:16.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>最近使用Python写一个后台服务处理mqtt里面的事件时遇到了一个麻烦: mqtt连接重置时(重启mqtt服务后), 之前pub消息的线程不能正常工作了, 经过多次踩坑, 终于解决. 引发问题的原因是我使用姿势不对造成的, 一旦你使用姿势不对 会造成一些奇怪的问题,并且很难解决。 因此请正确使用mqtt。<br><a id="more"></a></p>
-<h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><p>关于MQTT协议的介绍请参考之前博客: <a href="/2017/07/02/mqtt-introduce/" title="物联网之MQTT">物联网之MQTT</a>, 只有在了解MQTT协议过后, 我们才能以正确的姿势使用她, 以下是我觉得需要注意的地方:</p>
-<ul>
-<li>按需使用MQTT的Qos, 当Qos=2时可靠性最高, 但是会损失性能。</li>
-<li>尽量使用<code>client_id</code>来标示客户端, 但是注意 如果2个客户端使用同一个<code>client_id</code>, 会出现client争抢连接的状态, 所以全局持有一个client是不错的选择。</li>
-<li>注意异步处理, 在回调函数中不能阻塞。</li>
-<li>将所有数据处理逻辑放到回调函数里面, 防止链接重置时，漏掉处理逻</li>
-<li>在on_message的回调里面 处理所有的订阅消息</li>
-<li>断开连接时尽量从新连接, 避免mqtt离线后, 重新上线, 造成服务连接异常。(注意loop的返回, 保证loop网络事件持续处理中)</li>
-</ul>
-<h2 id="环境介绍"><a href="#环境介绍" class="headerlink" title="环境介绍"></a>环境介绍</h2><p>介绍下我的测试环境:</p>
-<ul>
-<li>Python Version: 3.6</li>
-<li>MQTT Server: emqttserver:2.2-rc1</li>
-<li>MQTT Client: paho-mqtt: 1.3.0</li>
-</ul>
-<p>emqtt server安装参考<a href="http://emqtt.io/docs/v2/install.html#install-via-docker-image" target="_blank" rel="external">emqtt docker安装</a><br>python mqtt客户端的安装请参考<a href="https://github.com/eclipse/paho.mqtt.python" target="_blank" rel="external">Github地址</a></p>
-<h2 id="客户端使用介绍"><a href="#客户端使用介绍" class="headerlink" title="客户端使用介绍"></a>客户端使用介绍</h2><p>paho-mqtt有一个客户端类, 我们主要使用该类来和mqttserver进行交互, 那么如何使用这个类喃: </p>
-<ul>
-<li>建立连接: 使用connect()/connect_async()来链接到broker(mqtt server)</li>
-<li>断开连接: 使用disconnect()方法来断开和broker(mqtt server)之间的网络连接。</li>
-<li>处理网络事件: 请频繁调用loop()来维持和broker(mqtt server)之间的网络事件。如果不想自己频繁的调用loop来维护网络事件, 可以使用loop_forever()方法来处理,该方法会帮你循环调用loop, 因此该方法是一个阻塞的方法。如果不想在程序里面阻塞,可以使用loop_start()方法,该方法会启动一个线程在后台执行loop_forever。</li>
-<li>订阅消息: 使用subscribe()方法来订阅topic和接收数据</li>
-<li>发布消息: 使用publish()方法来发布消息</li>
-</ul>
-<p>mqtt的通信是异步的, 通过网络事件来进行回调处理, 因此我们基本采用回调来编程, 回调函数的签名如下, 所有的回调函数都2个固定参数: </p>
-<blockquote>
-<ol>
-<li>client: 回调时传递来的客户端实例 </li>
-<li>userdata: user的任何类型的数据, 实例化client时传入, 用户自己使用。</li>
-</ol>
-</blockquote>
-<h3 id="on-connect-client-userdata-flags-rc"><a href="#on-connect-client-userdata-flags-rc" class="headerlink" title="on_connect(client, userdata, flags, rc)"></a>on_connect(client, userdata, flags, rc)</h3><p>当broker响应了我们链接之后调用, 涉及到的参数:</p>
-<ul>
-<li><p>flags: 是一个字典, 包含broker返回的响应标志<br>现在只有1中标志: session present, 通过flags[‘session present’]获取到该标志里面的内容, 当clean session为0时(clean_session=False), broker会保存client的的session信息, 该信息会在client重新上线时, 通过session present这个标志 返回给客户端。</p>
-</li>
-<li><p>rc: retrun code, 返回状态码</p>
-</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>RC</th>
-<th style="text-align:center">Status</th>
-<th style="text-align:center">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>0</td>
-<td style="text-align:center">successful</td>
-<td style="text-align:center">connected</td>
-</tr>
-<tr>
-<td>1</td>
-<td style="text-align:center">refused</td>
-<td style="text-align:center">incorrect protocol version</td>
-</tr>
-<tr>
-<td>2</td>
-<td style="text-align:center">refused</td>
-<td style="text-align:center">invalid client identifier</td>
-</tr>
-<tr>
-<td>3</td>
-<td style="text-align:center">refused</td>
-<td style="text-align:center">server unavailable</td>
-</tr>
-<tr>
-<td>4</td>
-<td style="text-align:center">refused</td>
-<td style="text-align:center">bad username or password</td>
-</tr>
-<tr>
-<td>5</td>
-<td style="text-align:center">refused</td>
-<td style="text-align:center">not authorised</td>
-</tr>
-<tr>
-<td>6-255</td>
-<td style="text-align:center">refused</td>
-<td style="text-align:center">Currently unused</td>
-</tr>
-</tbody>
-</table>
-<h3 id="on-disconnect-client-userdata-rc"><a href="#on-disconnect-client-userdata-rc" class="headerlink" title="on_disconnect(client, userdata, rc)"></a>on_disconnect(client, userdata, rc)</h3><p>当client和broker断开连接时调用. rc表示断开连接是的状态</p>
-<table>
-<thead>
-<tr>
-<th>RC</th>
-<th style="text-align:center">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>0</td>
-<td style="text-align:center">MQTT_ERR_SUCCESS, 客户端调用disconnect()方法断开连接, 属于正常断开</td>
-</tr>
-<tr>
-<td>1</td>
-<td style="text-align:center">网络等其他原因照成的连接断开, 异常断开</td>
-</tr>
-</tbody>
-</table>
-<h3 id="on-message-client-userdata-message"><a href="#on-message-client-userdata-message" class="headerlink" title="on_message(client, userdata, message)"></a>on_message(client, userdata, message)</h3><p>当客户端订阅的topic上有数据 被接收时调用, message是一个MQTTMessage的类, 该类包含了message的所有数据:</p>
-<ul>
-<li>topic: 数据所在的topic</li>
-<li>payload: message的数据部分</li>
-<li>qos: 该消息的质量: 0, 1, 2</li>
-<li>retain: 该消息是否是保留消息, 如果为True 这为保留消息, 如果为False就是最新的消息。</li>
-<li>mid: message id</li>
-</ul>
-<h3 id="on-publish-client-userdata-mid"><a href="#on-publish-client-userdata-mid" class="headerlink" title="on_publish(client, userdata, mid)"></a>on_publish(client, userdata, mid)</h3><p>当使用publish方法将message传输到broker后调用, 但是这要针对不同的qos, 对于qos1和2而言, 这表示消息已经到达后的回调, 如果qos是0那么仅仅表示消息离开了客户端之后的回调。这个回调很重要，因为即使publish()调用返回成功，并不总是意味着已经发送了消息</p>
-<ul>
-<li>mid: 表示已经publish出去的消息的message id</li>
-</ul>
-<h3 id="on-subscribe-client-userdata-mid-granted-qos"><a href="#on-subscribe-client-userdata-mid-granted-qos" class="headerlink" title="on_subscribe(client, userdata, mid, granted_qos)"></a>on_subscribe(client, userdata, mid, granted_qos)</h3><p>当broker响应了subscribe请求之后调用。</p>
-<ul>
-<li>mid: 被订阅消息的message id</li>
-<li>granted_qos: broker为不同的订阅请求授权的qos级别。是一个列表。</li>
-</ul>
-<h3 id="on-unsubscribe-client-userdata-mid"><a href="#on-unsubscribe-client-userdata-mid" class="headerlink" title="on_unsubscribe(client, userdata, mid)"></a>on_unsubscribe(client, userdata, mid)</h3><p>当broker响应了取消订阅的请求过后调用。</p>
-<ul>
-<li>mid: 取消订阅的消息的message id</li>
-</ul>
-<h3 id="on-log-client-userdata-level-buf"><a href="#on-log-client-userdata-level-buf" class="headerlink" title="on_log(client, userdata, level, buf)"></a>on_log(client, userdata, level, buf)</h3><p>MQTT通信过程中的一些Debug信息</p>
-<ul>
-<li>level: 日志级别MQTT_LOG_INFO, MQTT_LOG_NOTICE, MQTT_LOG_WARNING, MQTT_LOG_ERR, and MQTT_LOG_DEBUG</li>
-<li>buf: message buffer, debug信息本身。</li>
-</ul>
-<h2 id="示例代码"><a href="#示例代码" class="headerlink" title="示例代码"></a>示例代码</h2><p>我Github上有: <a href="https://github.com/yumaojun03/python/blob/master/mqtt/main.py" target="_blank" rel="external">完整示例代码</a><br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#!/usr/bin/env python3</span></div><div class="line"><span class="comment"># -*- coding: utf8 -*-</span></div><div class="line"></div><div class="line"><span class="keyword">import</span> threading</div><div class="line"><span class="keyword">import</span> logging</div><div class="line"><span class="keyword">import</span> time</div><div class="line"></div><div class="line"><span class="keyword">from</span> paho.mqtt.client <span class="keyword">import</span> Client</div><div class="line"></div><div class="line">FORMAT = <span class="string">'%(asctime)s - %(name)s - %(levelname)s - %(message)s'</span></div><div class="line">logging.basicConfig(format=FORMAT, level=logging.INFO)</div><div class="line">logger = logging.getLogger()</div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">pub_topic_test01</span><span class="params">(client)</span>:</span></div><div class="line">    <span class="keyword">while</span> <span class="keyword">True</span>:</div><div class="line">        client.publish(topic=<span class="string">"test01"</span>, qos=<span class="number">2</span>, payload=<span class="string">"test01 topic data"</span>)</div><div class="line">        time.sleep(<span class="number">2</span>)</div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">pub_topic_test02</span><span class="params">(client)</span>:</span></div><div class="line">    <span class="keyword">while</span> <span class="keyword">True</span>:</div><div class="line">        client.publish(topic=<span class="string">"test02"</span>, qos=<span class="number">2</span>, payload=<span class="string">"test02 topic data"</span>)</div><div class="line">        time.sleep(<span class="number">2</span>)</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyMQTTClass</span><span class="params">(Client)</span>:</span></div><div class="line">    <span class="string">"""</span></div><div class="line">    mqtt client for deal data</div><div class="line">    """</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></div><div class="line">        super(MyMQTTClass, self).__init__(client_id=<span class="string">"test client"</span>, clean_session=<span class="keyword">False</span>)</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">on_connect</span><span class="params">(self, client, obj, flags, rc)</span>:</span></div><div class="line">        logger.info(<span class="string">"on connect, rc: %s"</span> % rc)</div><div class="line"></div><div class="line">        <span class="comment"># 链接过后先处理sub</span></div><div class="line">        client.subscribe(topic=<span class="string">"test01"</span>, qos=<span class="number">2</span>)</div><div class="line">        client.subscribe(topic=<span class="string">"test02"</span>, qos=<span class="number">2</span>)</div><div class="line"></div><div class="line">        logger.info(<span class="string">"start topic service1..."</span>)</div><div class="line">        t1 = threading.Thread(target=pub_topic_test01, args=(client,))</div><div class="line">        t1.start()</div><div class="line">        self.worker1 = t1</div><div class="line"></div><div class="line">        logger.info(<span class="string">"start topic service2..."</span>)</div><div class="line">        t2 = threading.Thread(target=pub_topic_test02, args=(client,))</div><div class="line">        t2.start()</div><div class="line">        self.worker2 = t2</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">on_message</span><span class="params">(self, client, obj, msg)</span>:</span></div><div class="line">        logger.debug(<span class="string">"on message, topic: %s, qos: %s, data: %s"</span> % (msg.topic, msg.qos, msg.payload))</div><div class="line"></div><div class="line">        <span class="keyword">if</span> msg.topic == <span class="string">"test01"</span>:</div><div class="line">            logger.info(<span class="string">"deal test01, data: %s"</span> % msg.payload)</div><div class="line"></div><div class="line">        <span class="keyword">elif</span> msg.topic == <span class="string">"test02"</span>:</div><div class="line">            logger.info(<span class="string">"deal test02, data: %s"</span> % msg.payload)</div><div class="line"></div><div class="line">        <span class="keyword">else</span>:</div><div class="line">            logger.info(<span class="string">"other topic %s, data: %s"</span> %(msg.topic, msg.payload))</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">on_publish</span><span class="params">(self, client, obj, mid)</span>:</span></div><div class="line">        logger.debug(<span class="string">"publish -&gt; ,mid: %s"</span> % mid)</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">on_subscribe</span><span class="params">(self, client, obj, mid, granted_qos)</span>:</span></div><div class="line">        logger.debug(<span class="string">"subscribed &lt;- ,mid: %s, qos: %s"</span> %(mid, granted_qos))</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">on_log</span><span class="params">(self, mqttc, obj, level, string)</span>:</span></div><div class="line">        logger.debug(<span class="string">"mqtt debug: %s"</span> % string)</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">on_disconnect</span><span class="params">(self, client, userdata, rc)</span>:</span></div><div class="line">        logger.info(<span class="string">"disconnect: %s"</span> % rc)</div><div class="line"></div><div class="line">        <span class="keyword">while</span> rc == <span class="number">1</span>:</div><div class="line">            <span class="keyword">try</span>:</div><div class="line">                client.reconnect()</div><div class="line">                logger.info(<span class="string">"reconnect success"</span>)</div><div class="line">                rc = <span class="number">0</span></div><div class="line">            <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</div><div class="line">                logger.error(<span class="string">"reconnect error, %s retry after 3s"</span> % e)</div><div class="line">                time.sleep(<span class="number">3</span>)</div><div class="line"></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(self)</span>:</span></div><div class="line">        self.connect(<span class="string">"172.16.112.251"</span>, <span class="number">1883</span>, <span class="number">60</span>)</div><div class="line"></div><div class="line">        <span class="keyword">while</span> <span class="keyword">True</span>:</div><div class="line">            rc = self.loop()</div><div class="line">            <span class="keyword">if</span> rc != <span class="number">0</span>:</div><div class="line">                time.sleep(<span class="number">1</span>)</div><div class="line">                rc = self.loop()</div><div class="line">                logger.info(<span class="string">"recovery from error loop, %s"</span> % rc)</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></div><div class="line">    client = MyMQTTClass()</div><div class="line">    client.run()</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</div><div class="line">    main()</div></pre></td></tr></table></figure></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;最近使用Python写一个后台服务处理mqtt里面的事件时遇到了一个麻烦: mqtt连接重置时(重启mqtt服务后), 之前pub消息的线程不能正常工作了, 经过多次踩坑, 终于解决. 引发问题的原因是我使用姿势不对造成的, 一旦你使用姿势不对 会造成一些奇怪的问题,并且很难解决。 因此请正确使用mqtt。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="开发语言" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/"/>
-    
-      <category term="Python" scheme="https://blog.yumaojun.net/categories/%E5%BC%80%E5%8F%91%E8%AF%AD%E8%A8%80/Python/"/>
-    
-    
-      <category term="mqtt" scheme="https://blog.yumaojun.net/tags/mqtt/"/>
     
   </entry>
   

@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="plugin," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="紫川秀的博客" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="通过使用插件在运行时扩展程序的功能, 而无需重新编译程序, 这是一个很常见的功能需求, 特别是在模块化设计的程序里面, 比如Nginx的模块系统。 在C/C++中通过使用动态库的方式可以实现动态加载, 但是Go直到1.8官方才开始支持, 下面将介绍Go如何基于动态链接库来实现动态加载。">
+<meta name="keywords" content="plugin">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go 插件系统">
+<meta property="og:url" content="https://blog.yumaojun.net/2018/04/18/go-plugin/index.html">
+<meta property="og:site_name" content="紫川秀的博客">
+<meta property="og:description" content="通过使用插件在运行时扩展程序的功能, 而无需重新编译程序, 这是一个很常见的功能需求, 特别是在模块化设计的程序里面, 比如Nginx的模块系统。 在C/C++中通过使用动态库的方式可以实现动态加载, 但是Go直到1.8官方才开始支持, 下面将介绍Go如何基于动态链接库来实现动态加载。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-04-24T09:51:12.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Go 插件系统">
+<meta name="twitter:description" content="通过使用插件在运行时扩展程序的功能, 而无需重新编译程序, 这是一个很常见的功能需求, 特别是在模块化设计的程序里面, 比如Nginx的模块系统。 在C/C++中通过使用动态库的方式可以实现动态加载, 但是Go直到1.8官方才开始支持, 下面将介绍Go如何基于动态链接库来实现动态加载。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://blog.yumaojun.net/2018/04/18/go-plugin/"/>
+
+
+
+
+
+  <title>Go 插件系统 | 紫川秀的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">紫川秀的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">比你优秀的人不可怕,可怕的是比你优秀的人比你更努力。</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://blog.yumaojun.net/2018/04/18/go-plugin/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="紫川秀">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://oiw1gzfww.bkt.clouddn.com/me.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="紫川秀的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Go 插件系统</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-18T10:35:48+08:00">
+                2018-04-18
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于&#58;</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2018-04-24T17:51:12+08:00">
+                2018-04-24
+              </time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开发语言/" itemprop="url" rel="index">
+                    <span itemprop="name">开发语言</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/开发语言/Golang/" itemprop="url" rel="index">
+                    <span itemprop="name">Golang</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/04/18/go-plugin/" class="leancloud_visitors" data-flag-title="Go 插件系统">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>通过使用插件在运行时扩展程序的功能, 而无需重新编译程序, 这是一个很常见的功能需求, 特别是在模块化设计的程序里面, 比如Nginx的模块系统。 在C/C++中通过使用动态库的方式可以实现动态加载, 但是Go直到1.8官方才开始支持, 下面将介绍Go如何基于动态链接库来实现动态加载。</p>
+<a id="more"></a>
+<h2 id="动态加载的优劣"><a href="#动态加载的优劣" class="headerlink" title="动态加载的优劣"></a>动态加载的优劣</h2><p>优点:</p>
+<ul>
+<li>动态加载, 也称热加载, 每次升级时不用重新编译整个工程，重新部署服务, 而是添加插件时进行动态更新。这对于很多比较重型的服务来说非常重要。</li>
+</ul>
+<p>缺点:</p>
+<ul>
+<li>带来一定的安全风险, 如果一些非法模块被注入如何防范</li>
+<li>给系统带来一定的不稳定的因素, 如果模块有问题, 没有经过良好的测试, 容易导致服务崩溃</li>
+<li>为版本管理带来了难题, 特别是在微服务的今天, 同一个服务, 加载了不同的插件, 应该怎么管理版本, 插件版本应该如何管理</li>
+</ul>
+<p>因此请慎重考虑, 是使用动态插件还是在源码里面进行插件化。</p>
+<h2 id="Go的插件系统-Plugin"><a href="#Go的插件系统-Plugin" class="headerlink" title="Go的插件系统:Plugin"></a>Go的插件系统:Plugin</h2><p>从1.8版开始, 官方提供了这种插件化的手段: plugin. 此功能使程序员可以使用动态链接库构建松散耦合的模块化程序，可以在运行时动态加载和绑定。</p>
+<p>Go插件是使用<code>-buildmode = plugin</code>标记编译的一个包, 用于生成一个共享对象(.so)库文件。 Go包中的导出的函数和变量被公开为ELF符号，可以使用<code>plugin</code>包在运行时查找并绑定ELF符号。Go编译器能够使用build flag -buildmode = c-shared创建C风格的动态共享库。</p>
+<p>1.8版本插件功能只能在Linux上使用。 1.10也可以在Mac上运行。</p>
+<p>下面将介绍使用Go插件系统创建模块化软件的一些开发原则, 并提供一个功能齐全的示例。</p>
+<h2 id="插件开发原则"><a href="#插件开发原则" class="headerlink" title="插件开发原则"></a>插件开发原则</h2><p>使用Go插件创建模块化程序需要遵循与常规Go软件包一样严格的软件实践。然而，插件引入了新的设计问题，因为它们的解耦性质被放大了。因此我们在设计可插拔系统时, 有一些原则需要关注:</p>
+<ul>
+<li>插件独立</li>
+</ul>
+<p>应该将插件视为与其他组件分离的独立组件。这允许插件独立于他们的消费者，并拥有自己的开发和部署生命周期。注意插件的可用性很重要, 因为它有肯能为整个系统带来不稳定的因素, 因此系统必须为插件集成提供一个简单的封装层, 插件开发人员将系统视为黑盒，不作为所提供的合约以外的假设, 从而保证插件自身的可用性。</p>
+<ul>
+<li>使用接口类型作为边界</li>
+</ul>
+<p>Go插件可以导出任何类型的包函数和变量。您可以设计插件来将其功能解耦为一组松散的函数。缺点是您必须单独查找和绑定每个函数符号。<br>然而，更为简单的方法是使用接口类型。创建导出功能的接口提供了统一简洁的交互，并具有清晰的功能划分。解析到接口的符号将提供对该功能的整个方法集的访问，而不仅仅是一个方法。</p>
+<ul>
+<li>Unix模块化原则</li>
+</ul>
+<p>插件代码应该设计成只关注一个功能点。</p>
+<ul>
+<li>版本控制</li>
+</ul>
+<p>插件是不透明而独立的实体，应该进行版本控制，以向用户提示其支持的功能。这里的一个建议是在命名共享对象文件时使用语义版本控制。例如，上面的文件编译插件可以命名为eng.so.1.0.0。</p>
+<h2 id="插件开发示例"><a href="#插件开发示例" class="headerlink" title="插件开发示例"></a>插件开发示例</h2><p>我以我遇到的一个实际需求为例, 在开发物联网接入组件的时候, 需要动态支持物解析, 下面就开发一个物解析的插件系统。</p>
+<p>下面是项目结构, parser.go是接口规约, main.go是主程序, plugins存放多个插件包<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">.</div><div class="line">├── main.go</div><div class="line">├── parser.go</div><div class="line">└── plugins</div><div class="line">    ├── car</div><div class="line">    │   └── car.go</div><div class="line">    └── phone</div><div class="line">        └── phone.go</div></pre></td></tr></table></figure></p>
+<h3 id="编写插件"><a href="#编写插件" class="headerlink" title="编写插件"></a>编写插件</h3><ol>
+<li><p>编写主程序接口规约: main.go</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="comment">// Parser use to parse things</span></div><div class="line"><span class="keyword">type</span> Parser <span class="keyword">interface</span> &#123;</div><div class="line">	Parse([]<span class="keyword">byte</span>) (meta <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>, data <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">float64</span>, err error)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>根据接口规约编写插件: car.go</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">type</span> car <span class="keyword">string</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *car)</span> <span class="title">Parse</span><span class="params">([]<span class="keyword">byte</span>)</span> <span class="params">(meta <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>, data <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">float64</span>, err error)</span></span> &#123;</div><div class="line">	meta = <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>&#123;<span class="string">"key1"</span>: <span class="string">"a"</span>&#125;</div><div class="line">	data = <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">float64</span>&#123;<span class="string">"key1"</span>: <span class="number">1</span>&#125;</div><div class="line"></div><div class="line">	<span class="keyword">return</span> meta, data, <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">var</span> Car car</div></pre></td></tr></table></figure>
+</li>
+<li><p>根据接口规约编写插件: phone.go</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">type</span> phone <span class="keyword">string</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p *phone)</span> <span class="title">Parse</span><span class="params">([]<span class="keyword">byte</span>)</span> <span class="params">(meta <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>, data <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">float64</span>, err error)</span></span> &#123;</div><div class="line">	meta = <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>&#123;<span class="string">"key1"</span>: <span class="string">"b"</span>&#125;</div><div class="line">	data = <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">float64</span>&#123;<span class="string">"key1"</span>: <span class="number">2</span>&#125;</div><div class="line"></div><div class="line">	<span class="keyword">return</span> meta, data, <span class="literal">nil</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">var</span> Phone phone</div></pre></td></tr></table></figure>
+</li>
+<li><p>编译插件<br>插件写完后将在plugins目录下编译插件:</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ <span class="built_in">cd</span> plugins</div><div class="line">$ go build -buildmode=plugin -o car.so car/car.go</div><div class="line">$ go build -buildmode=plugin -o phone.so phone/phone.go</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>最终在plugins目录下会生成好我们编译好的插件:<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ ls *.so</div><div class="line">car.so   phone.so</div></pre></td></tr></table></figure></p>
+<h3 id="使用插件"><a href="#使用插件" class="headerlink" title="使用插件"></a>使用插件</h3><p>插件的使用很简单, 大概步骤如下:</p>
+<ul>
+<li>用plugin.Open()打开插件文件</li>
+<li>用plguin.Lookup(“Export-Variable-Name”)查找导出的符号”Car”或者”Phone”。 请注意，符号名称与插件模块中定义的变量名称相匹配</li>
+<li>使用该变量</li>
+</ul>
+<ol>
+<li><p>主程序使用插件: main.go</p>
+<figure class="highlight golang"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> main</div><div class="line"></div><div class="line"><span class="keyword">import</span> (</div><div class="line">	<span class="string">"fmt"</span></div><div class="line">	<span class="string">"plugin"</span></div><div class="line">)</div><div class="line"></div><div class="line"><span class="comment">// Parser use to parse things</span></div><div class="line"><span class="keyword">type</span> Parser <span class="keyword">interface</span> &#123;</div><div class="line">	Parse([]<span class="keyword">byte</span>) (meta <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>, data <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">float64</span>, err error)</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">pa</span><span class="params">()</span></span> &#123;</div><div class="line">	plug, err := plugin.Open(<span class="string">"./plugins/car.so"</span>)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="built_in">panic</span>(err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	car, err := plug.Lookup(<span class="string">"Car"</span>)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="built_in">panic</span>(err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	p, ok := car.(Parser)</div><div class="line">	<span class="keyword">if</span> ok &#123;</div><div class="line">		meta, data, err := p.Parse([]<span class="keyword">byte</span>(<span class="string">"a"</span>))</div><div class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">			<span class="built_in">panic</span>(err)</div><div class="line">		&#125;</div><div class="line">		fmt.Printf(<span class="string">"meta: %v, data: %v \n"</span>, meta, data)</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">pb</span><span class="params">()</span></span> &#123;</div><div class="line">	plug, err := plugin.Open(<span class="string">"./plugins/phone.so"</span>)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="built_in">panic</span>(err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	phone, err := plug.Lookup(<span class="string">"Phone"</span>)</div><div class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</div><div class="line">		<span class="built_in">panic</span>(err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	p, ok := phone.(Parser)</div><div class="line">	<span class="keyword">if</span> ok &#123;</div><div class="line">		meta, data, _ := p.Parse([]<span class="keyword">byte</span>(<span class="string">"a"</span>))</div><div class="line">		fmt.Printf(<span class="string">"meta: %v, data: %v \n"</span>, meta, data)</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</div><div class="line">	pa()</div><div class="line">	pb()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>测试是否正常运行:</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ go run main.go</div><div class="line">meta: map[key1:a], data: map[key1:1]</div><div class="line">meta: map[key1:b], data: map[key1:2]</div></pre></td></tr></table></figure></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="http://oiw1gzfww.bkt.clouddn.com/alipay.jpg" alt="紫川秀 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/plugin/" rel="tag"># plugin</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/11/blockchain-go-part2/" rel="next" title="亲手打造区块链系列之区块链原型">
+                <i class="fa fa-chevron-left"></i> 亲手打造区块链系列之区块链原型
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMjIwMy84NzY3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="http://oiw1gzfww.bkt.clouddn.com/me.png"
+                alt="紫川秀" />
+            
+              <p class="site-author-name" itemprop="name">紫川秀</p>
+              <p class="site-description motion-element" itemprop="description">喜欢Linux, Coding, 文艺, 运动。 生活如此多彩，我时间挥霍不过来。</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">54</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">38</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/yumaojun03" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://douban.com/people/155892492" target="_blank" title="豆瓣">
+                    
+                      <i class="fa fa-fw fa-globe"></i>豆瓣</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="http://www.zhihu.com/people/zi-chuan-xiu-86" target="_blank" title="知乎">
+                    
+                      <i class="fa fa-fw fa-globe"></i>知乎</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.liaoxuefeng.com/" title="廖雪峰官网" target="_blank">廖雪峰官网</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://xiaorui.cc/" title="峰云,就她了" target="_blank">峰云,就她了</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#动态加载的优劣"><span class="nav-number">1.</span> <span class="nav-text">动态加载的优劣</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Go的插件系统-Plugin"><span class="nav-number">2.</span> <span class="nav-text">Go的插件系统:Plugin</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#插件开发原则"><span class="nav-number">3.</span> <span class="nav-text">插件开发原则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#插件开发示例"><span class="nav-number">4.</span> <span class="nav-text">插件开发示例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#编写插件"><span class="nav-number">4.1.</span> <span class="nav-text">编写插件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用插件"><span class="nav-number">4.2.</span> <span class="nav-text">使用插件</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2016 &mdash; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">紫川秀</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+    <script type="text/javascript">
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("51RM6PwqfSuyOFX9MxLeq5yY-gzGzoHsz", "dNQYvnf4KlnN364JVGClL7bp");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
